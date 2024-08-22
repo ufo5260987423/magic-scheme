@@ -199,5 +199,9 @@
     "typescript": "^5.4.5",
     "@vscode/test-cli": "^0.0.9",
     "@vscode/test-electron": "^2.4.0"
+  },
+  "dependencies": {
+    "shell-quote": "^1.8.0",
+    "vscode-languageclient": "^7.0.0"
   }
 }
