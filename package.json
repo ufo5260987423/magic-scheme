@@ -7,11 +7,14 @@
     "vscode": "^1.92.0"
   },
   "categories": [
-    "Other"
+    "Programming Languages"
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
   "publisher": "ufo5260987423",
+  "author": {
+    "name": "WANG Zheng"
+  },
   "bugs": {
     "url": "https://github.com/ufo5260987423/magic-scheme/issues"
   },
@@ -84,6 +87,12 @@
     "configuration": {
       "title":"Magic Scheme Configuration",
       "properties":{
+        "scheme-langserver.enable":{
+          "type": "boolean",
+          "default": "true",
+          "markdownDescription": "Enable scheme-langserver."
+        },
+
         "scheme-langserver.serverPath":{
           "type": "string",
           "default": "scheme-langserver",
@@ -104,12 +113,45 @@
           "default": "disable",
           "markdownDescription": "Enable/disable type inference for scheme-langserver. Default: `disable`. NOTE: this feature haven't been fully test, be careful!"
         },
-        "chezScheme.schemePath": {
+        "scheme.path": {
           "type": "string",
           "default": "scheme",
-          "markdownDescription": "Path to the Chez Scheme executable `scheme`. Can be either an absolute path or relative to the workspace root. Default: `scheme`, which works if `scheme` is in your `PATH`."
+          "markdownDescription": "Path to the Scheme executable `scheme`. Can be either an absolute path or relative to the workspace root. Default: `scheme`, which works if `scheme` is in your `PATH`. Personally, I recommend you with Chez Scheme."
         },
-        "akku.akkuPath": {
+        "scheme.arguments": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "markdownDescription": "Arguments passed to the scheme executable "
+        },
+        "scheme.REPL.title": {
+          "type": "string",
+          "default": "REPL ($name)",
+          "markdownDescription": "Template string for the title of REPLs. Variable `$name` will get replaced by the file name."
+        },
+        "scheme.outputTerminal.numberOfOutputTerminals": {
+          "type": "string",
+          "enum": [
+            "one",
+            "many"
+          ],
+          "default": "one",
+          "enumDescriptions": [
+            "Runs every file in the same output terminal",
+            "Runs each file in its own output terminal"
+          ]
+        },
+        "scheme.outputTerminal.sharedOutputTerminalTitle": {
+          "type": "string",
+          "default": "Scheme Output",
+          "markdownDescription": "Specifies the title of the the shared output terminal."
+        },
+        "scheme.outputTerminal.outputTerminalTitle": {
+          "type": "string",
+          "default": "Output ($name)",
+          "markdownDescription": "Specifies the template string for the title of the file-specific output terminal. Substring `$name` will get replaced by the file name."
+        },
+        "akku.path": {
           "type": "string",
           "default": "akku",
           "markdownDescription": "Path to the AKKU executable `akku`. Can be either an absolute path or relative to the workspace root. Default: `akku`, which works if `akku` is in your `PATH`."
@@ -120,6 +162,10 @@
       {
         "command": "magic-scheme.runSchemeScript",
         "title": "`scheme --script {currentFile}` with Current AKKU Environment"
+      },
+      {
+        "command": "magic-scheme.openSchemeREPL",
+        "title": "`scheme` with Current AKKU Environment"
       },
       {
         "command": "magic-scheme.runSchemeREPL",
