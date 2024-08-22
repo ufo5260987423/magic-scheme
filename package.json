@@ -84,6 +84,26 @@
     "configuration": {
       "title":"Magic Scheme Configuration",
       "properties":{
+        "scheme-langserver.serverPath":{
+          "type": "string",
+          "default": "scheme-langserver",
+          "markdownDescription": "Path to the scheme-langserver executable `scheme-langserver` (for nixos akkupackages.scheme-langserver) or `run`. Can be either an absolute path or relative to the workspace root. Default: `scheme-langserver`, which works if `scheme-langserver` is in your `PATH`."
+        },
+        "scheme-langserver.logPath":{
+          "type": "string",
+          "default": "~/.scheme-langserver.log",
+          "markdownDescription": "Path to the scheme-langserver's log. Can be either an absolute path or relative to the workspace root. Default: `~/.scheme-langserver.log`, which is located on your `$HOME`."
+        },
+        "scheme-langserver.multiThread":{
+          "type": "string",
+          "default": "enable",
+          "markdownDescription": "Enable/disable multithreads for scheme-langserver. Default: `enable`."
+        },
+        "scheme-langserver.typeInference":{
+          "type": "string",
+          "default": "disable",
+          "markdownDescription": "Enable/disable type inference for scheme-langserver. Default: `disable`. NOTE: this feature haven't been fully test, be careful!"
+        },
         "chezScheme.schemePath": {
           "type": "string",
           "default": "scheme",
