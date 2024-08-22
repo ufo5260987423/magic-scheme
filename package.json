@@ -100,7 +100,7 @@
         },
         "scheme-langserver.logPath":{
           "type": "string",
-          "default": "~/.scheme-langserver.log",
+          "default": "~/scheme-langserver.log",
           "markdownDescription": "Path to the scheme-langserver's log. Can be either an absolute path or relative to the workspace root. Default: `~/.scheme-langserver.log`, which is located on your `$HOME`."
         },
         "scheme-langserver.multiThread":{
