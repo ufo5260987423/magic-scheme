@@ -77,7 +77,7 @@ function reg(name: string, func: (...args: any[]) => any) {
 
 function configurationChanged() {
   const enableLSP: boolean = vscode.workspace
-    .getConfiguration("scheme-langserver").get("enabled", true);
+    .getConfiguration("scheme-langserver").get("enable", true);
 
   if (langClient) {
     if (enableLSP && !isLangClientRunning) {
