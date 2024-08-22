@@ -13,13 +13,19 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('magic-scheme.helloWorld', () => {
+	const repl= vscode.commands.registerCommand('magic-scheme.runSchemeRepl', () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Magic Scheme!');
+		vscode.window.showInformationMessage('script!');
+	});
+	const script= vscode.commands.registerCommand('magic-scheme.runSchemeScript', () => {
+		// The code you place here will be executed every time your command is executed
+		// Display a message box to the user
+		vscode.window.showInformationMessage('repl!');
 	});
 
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(repl);
+	context.subscriptions.push(script);
 }
 
 // This method is called when your extension is deactivated
