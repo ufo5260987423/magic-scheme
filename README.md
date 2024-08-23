@@ -6,11 +6,45 @@ This extension adds support for Scheme(r6rs standard) to VS Code. With the help 
 
 Magic Scheme **does**
 
-- Support Scheme LSP through [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver), which brings jump to definition, auto complete, type inference(early stage) and more. Especially, Magic Scheme can handle local identifiers and identifiers importing and exporting, which are not provided by many counterparts.
+- Support Scheme LSP through [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver), which brings jump to definition, auto complete, type inference(early stage) and more. Especially, Magic Scheme can handle local identifiers and partial evaluation technique, which are not provided by many counterparts.
 - Support Scheme project with through [AKKU](https://akkuscm.org/), which make you possible to load project depdendencies in REPL or directly run scheme script in terminal.
 - Support highlighting of nearly all of the r6rs standard functions and Chez Scheme functions.
 
-## Setting Up
+### LSP
+Magic Scheme now supports [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver). The current features are:
+
+- Jump to definition
+- Auto complete
+
+Especially, I must first recommend you with [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver)'s magic local identifier handling. Because in many other counterparts, you can never goto local binding's definition like the `a` in following:
+
+```scheme
+(let ([a 1])
+ a
+)
+```
+
+In further, thorough [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver), Magic Scheme can auto complete `a` with `a-full-name-identifier` in such cases:
+
+```scheme
+(let ([a-full-name-identifier 1])
+ a
+)
+```
+
+I'm working on providing more details in this section: stay tuned!
+
+### Scheme Project
+
+You can directly load project environment REPL.
+
+You can directly run scheme with project environment REPL.
+
+### Syntax Highlighting
+
+![Syntax Highlight](images/syntax_highlight.png)
+
+## Setting Up & Configuration
 
 The followings are mainly focus on x64-based linux operating system. As for other OSs, you may notice the following tips:
 1. If you're using nixos, you may directly search scheme-langserver [here](https://search.nixos.org/packages?channel=unstable&show=akkuPackages.scheme-langserver&from=0&size=50&sort=relevance&type=packages&query=akkuPackages.scheme-langserver). it will directly install an executable binary file. And this file is softly linked in bash $PATH as `scheme-langserver`.
