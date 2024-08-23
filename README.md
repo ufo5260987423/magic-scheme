@@ -1,16 +1,53 @@
-# magic-scheme README
+# Magic Scheme 
 
-This is the README for your extension "magic-scheme". After writing up a brief description, we recommend including the following sections.
+This extension adds support for Scheme(r6rs standard) to VS Code. With the help of [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver), we're proud to say that Magic Scheme is **much better** than many counterparts, which includes even Racket extensions.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+Magic Scheme **does**
 
-For example if there is an image subfolder under your extension project workspace:
+- Support Scheme LSP through [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver), which brings jump to definition, auto complete, type inference(early stage) and more. Especially, Magic Scheme can handle local identifiers and identifiers importing and exporting, which are not provided by many counterparts.
+- Support Scheme project with through [AKKU](https://akkuscm.org/), which make you possible to load project depdendencies in REPL or directly run scheme script in terminal.
+- Support highlighting of nearly all of the r6rs standard functions and Chez Scheme functions.
 
-\!\[feature X\]\(images/feature-x.png\)
+## Setting Up
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+The followings are mainly focus on x64-based linux operating system. As for other OSs, you may notice the following tips:
+1. If you're using nixos, you may directly search scheme-langserver [here](https://search.nixos.org/packages?channel=unstable&show=akkuPackages.scheme-langserver&from=0&size=50&sort=relevance&type=packages&query=akkuPackages.scheme-langserver). it will directly install an executable binary file. And this file is softly linked in bash $PATH as `scheme-langserver`.
+2. If you're using MacOS, Windows or any other related environments, I suppose you're an advanced user and you may refer [scheme-langserver's documentation](https://github.com/ufo5260987423/scheme-langserver) in order to compile scheme-langserver manually.
+3. Chez Scheme has Windows and MacOS version, but I've never tested them. So, I mean for Windows, you'd better use WSL/WSL2; for MacOS, it seems not very different from Linux.
+4. AKKU is not native on Windows.
+5. For nixos, you may be able to directly install all your needs.
+6. Any other corner cases, you may refer softwares' documentations.
+
+### Disable Conflict Plugins
+
+I'm so sorry Magic Scheme has some conficts with [Chez-Scheme-VsCode](https://github.com/abhi18av/Chez-Scheme-VsCode) plugin. So, maybe you need to disable it.
+
+### Get Scheme-langserver
+
+You may directly download latest executable file [here](https://github.com/ufo5260987423/scheme-langserver/releases/latest/download/run). This file you may memory its path as `{path-to-run}`.
+
+### Get Scheme
+Magic Scheme supports [r6rs](http://r6rs.org/) standard scheme. But apparently I can't fully tests all implementations. As myself, I recommend with [Chez Scheme](https://cisco.github.io/ChezScheme/), and you may install it as following:
+
+```bash
+wget https://github.com/cisco/ChezScheme/releases/download/v10.0.0/csv10.0.0.tar.gz
+tar -xf csv10.0.0.tar.gz && cd csv10.0.0
+# Install dependencies: `libncurses5-dev`
+./configure --threads --kernelobj --disable-x11
+make && sudo make install
+```
+
+### Get AKKU
+
+[AKKU](https://akkuscm.org/) is a package manager for Scheme. It grabs hold of code and shakes it vigorously until it behaves properly. Magic Scheme facilitates AKKU to manage scheme projects. To install AKKU, you may follow:
+
+```bash
+wget https://gitlab.com/-/project/6808260/uploads/094ce726ce3c6cf8c14560f1e31aaea0/akku-1.1.0.amd64-linux.tar.xz
+tar -xf akku-1.1.0.amd64-linux.tar.xz && cd akku-1.1.0.amd64-linux
+bash install
+```
 
 ## Requirements
 
