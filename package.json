@@ -31,6 +31,18 @@
         "path": "./package_files/snippets.json"
       }
     ],
+    "keybindings": [
+      {
+        "command": "magic-scheme.runSchemeScript",
+        "key": "Alt+Enter",
+        "when": "resourceLangId == racket && editorTextFocus"
+      },
+      {
+        "key": "Alt+Shift+Engter",
+        "command": "editor.action.runSchemeREPL",
+        "when": "resourceLangId == racket && editorTextFocus",
+      }
+    ],
     "menus": {
       "editor/title/context": [
         {
@@ -158,6 +170,7 @@
         }
       }
     }, 
+    
     "commands": [
       {
         "command": "magic-scheme.runSchemeScript",
