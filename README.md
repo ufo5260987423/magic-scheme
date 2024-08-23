@@ -18,7 +18,6 @@ Magic Scheme **does**
 Magic Scheme now supports [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver). The current features are:
 
 - Jump to definition
-- Auto complete
 
 Especially, I must first recommend you with [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver)'s magic local identifier handling. Because in many other counterparts, you can never goto local binding's definition like the `a` in following:
 
@@ -28,6 +27,8 @@ Especially, I must first recommend you with [scheme-langserver](https://github.c
 )
 ```
 
+- Auto complete
+
 In further, thorough [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver), Magic Scheme can auto complete `a` with `a-full-name-identifier` in such cases:
 
 ```scheme
@@ -35,6 +36,10 @@ In further, thorough [scheme-langserver](https://github.com/ufo5260987423/scheme
  a
 )
 ```
+
+- Find references
+![Find References](images/find-references.png)
+
 
 I'm working on providing more details in this section: stay tuned!
 
