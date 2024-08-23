@@ -87,49 +87,49 @@
     "configuration": {
       "title":"Magic Scheme Configuration",
       "properties":{
-        "scheme-langserver.enable":{
+        "magicScheme.scheme-langserver.enable":{
           "type": "boolean",
           "default": "true",
           "markdownDescription": "Enable scheme-langserver."
         },
 
-        "scheme-langserver.serverPath":{
+        "magicScheme.scheme-langserver.serverPath":{
           "type": "string",
           "default": "/home/ufo/Documents/workspace/scheme-langserver/run",
           "markdownDescription": "Path to the scheme-langserver executable `scheme-langserver` (for nixos akkupackages.scheme-langserver) or `run`. Can be either an absolute path or relative to the workspace root. Default: `scheme-langserver`, which works if `scheme-langserver` is in your `PATH`."
         },
-        "scheme-langserver.logPath":{
+        "magicScheme.scheme-langserver.logPath":{
           "type": "string",
           "default": "~/scheme-langserver.log",
           "markdownDescription": "Path to the scheme-langserver's log. Can be either an absolute path or relative to the workspace root. Default: `~/.scheme-langserver.log`, which is located on your `$HOME`."
         },
-        "scheme-langserver.multiThread":{
+        "magicScheme.scheme-langserver.multiThread":{
           "type": "string",
           "default": "enable",
           "markdownDescription": "Enable/disable multithreads for scheme-langserver. Default: `enable`."
         },
-        "scheme-langserver.typeInference":{
+        "magicScheme.scheme-langserver.typeInference":{
           "type": "string",
           "default": "disable",
           "markdownDescription": "Enable/disable type inference for scheme-langserver. Default: `disable`. NOTE: this feature haven't been fully test, be careful!"
         },
-        "scheme.path": {
+        "magicScheme.scheme.path": {
           "type": "string",
           "default": "scheme",
           "markdownDescription": "Path to the Scheme executable `scheme`. Can be either an absolute path or relative to the workspace root. Default: `scheme`, which works if `scheme` is in your `PATH`. Personally, I recommend you with Chez Scheme."
         },
-        "scheme.arguments": {
+        "magicScheme.scheme.arguments": {
           "type": "array",
           "items": { "type": "string" },
           "default": [],
           "markdownDescription": "Arguments passed to the scheme executable "
         },
-        "scheme.REPL.title": {
+        "magicScheme.scheme.REPL.title": {
           "type": "string",
           "default": "REPL ($name)",
           "markdownDescription": "Template string for the title of REPLs. Variable `$name` will get replaced by the file name."
         },
-        "scheme.outputTerminal.numberOfOutputTerminals": {
+        "magicScheme.scheme.outputTerminal.numberOfOutputTerminals": {
           "type": "string",
           "enum": [
             "one",
@@ -141,17 +141,17 @@
             "Runs each file in its own output terminal"
           ]
         },
-        "scheme.outputTerminal.sharedOutputTerminalTitle": {
+        "magicScheme.scheme.outputTerminal.sharedOutputTerminalTitle": {
           "type": "string",
           "default": "Scheme Output",
           "markdownDescription": "Specifies the title of the the shared output terminal."
         },
-        "scheme.outputTerminal.outputTerminalTitle": {
+        "magicScheme.scheme.outputTerminal.outputTerminalTitle": {
           "type": "string",
           "default": "Output ($name)",
           "markdownDescription": "Specifies the template string for the title of the file-specific output terminal. Substring `$name` will get replaced by the file name."
         },
-        "akku.path": {
+        "magicScheme.akku.path": {
           "type": "string",
           "default": "akku",
           "markdownDescription": "Path to the AKKU executable `akku`. Can be either an absolute path or relative to the workspace root. Default: `akku`, which works if `akku` is in your `PATH`."

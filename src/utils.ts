@@ -28,16 +28,16 @@ function normalizeFilePath(filePath: string): string {
 
 export function withLanguageServer(func: (command: string, args: string[]) => void): void {
   const command = vscode.workspace
-    .getConfiguration("scheme-langserver")
+    .getConfiguration("magicScheme.scheme-langserver")
     .get<string>("serverPath");
   const log= vscode.workspace
-    .getConfiguration("scheme-langserver")
+    .getConfiguration("magicScheme.scheme-langserver")
     .get<string>("logPath");
   const multiThread= vscode.workspace
-    .getConfiguration("scheme-langserver")
+    .getConfiguration("magicScheme.scheme-langserver")
     .get<string>("multiThread");
   const typeInference= vscode.workspace
-    .getConfiguration("scheme-langserver")
+    .getConfiguration("magicScheme.scheme-langserver")
     .get<string>("typeInference");
   const args:string[] = [log, multiThread,typeInference];
 
@@ -51,7 +51,7 @@ export function withLanguageServer(func: (command: string, args: string[]) => vo
 }
 
 export function withScheme(func: (command: string[]) => void): void {
-  const scheme= vscode.workspace.getConfiguration("scheme").get<string>("path");
+  const scheme= vscode.workspace.getConfiguration("magicScheme.scheme").get<string>("path");
   if (scheme!== undefined && scheme!== "") {
     func([scheme]);
   } else {
@@ -62,8 +62,8 @@ export function withScheme(func: (command: string[]) => void): void {
 }
 
 export function withREPL(func: (command: string[]) => void): void {
-  const scheme= vscode.workspace.getConfiguration("scheme").get<string>("path");
-  const args = vscode.workspace.getConfiguration("scheme").get<string[]>("arguments");
+  const scheme= vscode.workspace.getConfiguration("magicScheme.scheme").get<string>("path");
+  const args = vscode.workspace.getConfiguration("magicScheme.scheme").get<string[]>("arguments");
   if (scheme!== undefined && scheme!== "" && args !== undefined) {
     func([scheme, ...args]);
   } else {

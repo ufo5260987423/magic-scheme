@@ -27,7 +27,7 @@ export function runInTerminal(terminals: Map<string, vscode.Terminal>): void {
       let terminal: vscode.Terminal;
       if (
         vscode.workspace
-          .getConfiguration("scheme.outputTerminal")
+          .getConfiguration("magicScheme.scheme.outputTerminal")
           .get("numberOfOutputTerminals") === "one"
       ) {
         terminal = getOrDefault(terminals, "one", () => createTerminal(null));

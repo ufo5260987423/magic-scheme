@@ -28,7 +28,7 @@ export function runFileInTerminal(
     terminal.sendText(`clear`);
     withWorkspacePath((workspacePath:string) =>
       {
-        const akku= vscode.workspace.getConfiguration("akku").get<string>("path");
+        const akku= vscode.workspace.getConfiguration("magicScheme.akku").get<string>("path");
         if (! existsSync(workspacePath+"/.akku")){
           terminal.sendText(akku +  " install");
         }});
@@ -46,13 +46,13 @@ export function createTerminal(filePath: string | null): vscode.Terminal {
   let terminal;
   if (filePath) {
     const templateSetting: string | undefined = vscode.workspace
-      .getConfiguration("scheme.outputTerminal")
+      .getConfiguration("magicScheme.scheme.outputTerminal")
       .get("outputTerminalTitle");
     const template = templateSetting && templateSetting !== "" ? templateSetting : "Output ($name)";
     terminal = vscode.window.createTerminal(template.replace("$name", fileName(filePath)));
   } else {
     const templateSetting: string | undefined = vscode.workspace
-      .getConfiguration("scheme.outputTerminal")
+      .getConfiguration("magicScheme.scheme.outputTerminal")
       .get("sharedOutputTerminalTitle");
     const template = templateSetting && templateSetting !== "" ? templateSetting : "Scheme Output";
     terminal = vscode.window.createTerminal(template);
@@ -63,7 +63,7 @@ export function createTerminal(filePath: string | null): vscode.Terminal {
 
 export function createRepl(filePath:string, command: string[]): vscode.Terminal {
   const templateSetting: string | undefined = vscode.workspace
-    .getConfiguration("scheme.REPL")
+    .getConfiguration("magicScheme.scheme.REPL")
     .get("title");
   const template = templateSetting && templateSetting !== "" ? templateSetting : "REPL ($name)";
   const repl = vscode.window.createTerminal(template.replace("$name", fileName(filePath)));
@@ -83,7 +83,7 @@ export function createRepl(filePath:string, command: string[]): vscode.Terminal 
   } else {
     withWorkspacePath((workspacePath:string) =>
       {
-        const akku= vscode.workspace.getConfiguration("akku").get<string>("path");
+        const akku= vscode.workspace.getConfiguration("magicScheme.akku").get<string>("path");
         if (! existsSync(workspacePath+"/.akku")){
           repl.sendText(akku +  " install");
         }});

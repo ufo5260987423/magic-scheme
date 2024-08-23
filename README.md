@@ -48,7 +48,7 @@ You can directly load scheme project environment in REPL after typing <kbd>Alt+S
 
 ![Syntax Highlight](images/syntax_highlight.png)
 
-## Setting Up & Configuration
+## Setting Up
 
 The followings are mainly focus on x64-based linux operating system. As for other OSs, you may notice the following tips:
 1. If you're using nixos, you may directly search scheme-langserver [here](https://search.nixos.org/packages?channel=unstable&show=akkuPackages.scheme-langserver&from=0&size=50&sort=relevance&type=packages&query=akkuPackages.scheme-langserver). it will directly install an executable binary file. And this file is softly linked in bash $PATH as `scheme-langserver`.
@@ -87,11 +87,7 @@ tar -xf akku-1.1.0.amd64-linux.tar.xz && cd akku-1.1.0.amd64-linux
 bash install
 ```
 
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
+## Configurations
 
 Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
 
