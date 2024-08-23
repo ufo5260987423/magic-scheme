@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { existsSync } from 'fs';
 
 export const isWindowsOS: () => boolean = () => process.platform === "win32";
 export const isCmdExeShell: () => boolean = () => vscode.env.shell.endsWith("cmd.exe");
@@ -62,13 +63,8 @@ export function withScheme(func: (command: string[]) => void): void {
 
 export function withREPL(func: (command: string[]) => void): void {
   const scheme= vscode.workspace.getConfiguration("scheme").get<string>("path");
-  const akku= vscode.workspace.getConfiguration("akku").get<string>("path");
   const args = vscode.workspace.getConfiguration("scheme").get<string[]>("arguments");
   if (scheme!== undefined && scheme!== "" && args !== undefined) {
-    if (akku!== undefined && akku!== "") {
-      func([akku, ...args]);
-      func(["bash .akku/env"]);
-    }
     func([scheme, ...args]);
   } else {
     vscode.window.showErrorMessage(
@@ -88,4 +84,15 @@ export function withEditor(func: (vscodeEditor: vscode.TextEditor) => void): voi
 
 export function withFilePath(func: (filePath: string) => void): void {
   withEditor((editor: vscode.TextEditor) => func(normalizeFilePath(editor.document.fileName)));
+}
+
+export function withWorkspacePath(func: (workspacePath: string) => void): void {
+  withFilePath(
+    (filePath:string) => 
+      {
+        const workspaceFolder=vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(filePath));
+        if (workspaceFolder){
+          return func(workspaceFolder.uri.path);
+        }
+      });
 }

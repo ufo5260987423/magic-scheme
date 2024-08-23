@@ -5,7 +5,7 @@ import {
   createRepl,
   loadFileInRepl,
 } from "./repl";
-import { withFilePath, withScheme, withEditor, withREPL } from "./utils";
+import { withWorkspacePath, withFilePath, withScheme, withREPL } from "./utils";
 
 function getOrDefault<K, V>(map: Map<K, V>, key: K, getDefault: () => V): V {
   const value = map.get(key);
@@ -57,7 +57,8 @@ export function loadInRepl(repls: Map<string, vscode.Terminal>): void {
 export function openRepl(repls: Map<string, vscode.Terminal>): void {
   withFilePath((filePath: string) => {
     withREPL((command: string[]) => {
-      const repl = getOrDefault(repls, filePath, () => createRepl(filePath, command));
+      const repl = getOrDefault(repls, filePath, 
+        () => createRepl(filePath, command));
       repl.show();
     });
   });

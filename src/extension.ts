@@ -103,8 +103,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.workspace.onDidChangeConfiguration(configurationChanged);
 
-  const repl  = vscode.commands.registerCommand('magic-scheme.openSchemeRepl', () => com.openRepl(repls)); 
   const script= vscode.commands.registerCommand('magic-scheme.runSchemeScript', () => com.runInTerminal(terminals));
-  const runRepl= vscode.commands.registerCommand('magic-scheme.runSchemeRepl', () => com.loadInRepl(terminals));
-  context.subscriptions.push(repl,script,runRepl);
+  const repl= vscode.commands.registerCommand('magic-scheme.runSchemeREPL', () => com.openRepl(repls));
+  context.subscriptions.push(repl,script);
 }

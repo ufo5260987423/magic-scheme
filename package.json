@@ -31,18 +31,6 @@
         "path": "./package_files/snippets.json"
       }
     ],
-    "keybindings": [
-      {
-        "command": "magic-scheme.runSchemeScript",
-        "key": "Alt+Enter",
-        "when": "resourceLangId == racket && editorTextFocus"
-      },
-      {
-        "key": "Alt+Shift+Engter",
-        "command": "editor.action.runSchemeREPL",
-        "when": "resourceLangId == racket && editorTextFocus",
-      }
-    ],
     "menus": {
       "editor/title/context": [
         {
@@ -107,7 +95,7 @@
 
         "scheme-langserver.serverPath":{
           "type": "string",
-          "default": "scheme-langserver",
+          "default": "/home/ufo/Documents/workspace/scheme-langserver/run",
           "markdownDescription": "Path to the scheme-langserver executable `scheme-langserver` (for nixos akkupackages.scheme-langserver) or `run`. Can be either an absolute path or relative to the workspace root. Default: `scheme-langserver`, which works if `scheme-langserver` is in your `PATH`."
         },
         "scheme-langserver.logPath":{
@@ -170,15 +158,21 @@
         }
       }
     }, 
-    
+    "keybindings": [
+      {
+        "command": "magic-scheme.runSchemeScript",
+        "key": "Alt+Enter",
+        "when": "resourceLangId == scheme && editorTextFocus"
+      },
+      {
+        "key": "Alt+Shift+Enter",
+        "command": "magic-scheme.runSchemeREPL"
+      }
+    ],
     "commands": [
       {
         "command": "magic-scheme.runSchemeScript",
         "title": "`scheme --script {currentFile}` with Current AKKU Environment"
-      },
-      {
-        "command": "magic-scheme.openSchemeREPL",
-        "title": "`scheme` with Current AKKU Environment"
       },
       {
         "command": "magic-scheme.runSchemeREPL",

@@ -36,9 +36,13 @@ I'm working on providing more details in this section: stay tuned!
 
 ### Scheme Project
 
-You can directly load project environment REPL.
+You can directly run scheme script with project environment after typing <kbd>Alt+Shift+Enter</kbd>, or you may <kbd>Ctrl+Shift+P</kbd> and input command `magic-scheme.runSchemeScript`; The result shows `scheme --script ${currentFile}`:
 
-You can directly run scheme with project environment REPL.
+![Run Scheme Script](images/runSchemeScript.png)
+
+You can directly load scheme project environment in REPL after typing <kbd>Alt+Shift+Enter</kbd>, or you may <kbd>Ctrl+Shift+P</kbd>  and input command `magic-scheme.runSchemeRepl`; The result shows an REPL and you may import AKKU managed environemnts without further configurations.
+
+![Run Scheme Script](images/runSchemeRepl.png)
 
 ### Syntax Highlighting
 

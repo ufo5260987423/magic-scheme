@@ -1,6 +1,7 @@
 import { quote } from "shell-quote";
 import * as vscode from "vscode";
-import { isCmdExeShell, isPowershellShell, isWindowsOS, quoteWindowsPath } from "./utils";
+import { withWorkspacePath, isCmdExeShell, isPowershellShell, isWindowsOS, quoteWindowsPath } from "./utils";
+import { existsSync } from 'fs';
 
 function fileName(filePath: string) {
   const match = filePath.match(/^.*\/([^/]+\.[^/]+)$/);
@@ -25,6 +26,13 @@ export function runFileInTerminal(
     terminal.sendText(`${schemeExePath} ${command.slice(1).join(' ')} ${filePath}`);
   } else {
     terminal.sendText(`clear`);
+    withWorkspacePath((workspacePath:string) =>
+      {
+        const akku= vscode.workspace.getConfiguration("akku").get<string>("path");
+        if (! existsSync(workspacePath+"/.akku")){
+          terminal.sendText(akku +  " install");
+        }});
+    withWorkspacePath((workspacePath:string)=> terminal.sendText(`bash ${workspacePath}/.akku/env`));
     terminal.sendText(quote([...command, filePath]));
   }
 }
@@ -53,7 +61,7 @@ export function createTerminal(filePath: string | null): vscode.Terminal {
   return terminal;
 }
 
-export function createRepl(filePath: string, command: string[]): vscode.Terminal {
+export function createRepl(filePath:string, command: string[]): vscode.Terminal {
   const templateSetting: string | undefined = vscode.workspace
     .getConfiguration("scheme.REPL")
     .get("title");
@@ -73,7 +81,14 @@ export function createRepl(filePath: string, command: string[]): vscode.Terminal
     }
     repl.sendText(fullCommand);
   } else {
-    repl.sendText(quote([...command, filePath]));
+    withWorkspacePath((workspacePath:string) =>
+      {
+        const akku= vscode.workspace.getConfiguration("akku").get<string>("path");
+        if (! existsSync(workspacePath+"/.akku")){
+          repl.sendText(akku +  " install");
+        }});
+    withWorkspacePath((workspacePath:string)=> repl.sendText(`bash ${workspacePath}/.akku/env`));
+    repl.sendText(quote([...command]));
   }
 
   return repl;
