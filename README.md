@@ -2,6 +2,8 @@
 
 This extension adds support for Scheme(r6rs standard) to VS Code. With the help of [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver), we're proud to say that Magic Scheme is **much better** than many counterparts, which includes even Racket extensions.
 
+Please make sure: before you start this extension, you **have to** do fully setting up and configurations [here](#setting-up--some-configuration).
+
 You can click [this patreon page](https://www.patreon.com/PoorProgrammer/membership) or [爱发电](https://afdian.net/a/ufo5260987423) to donate monthly, or just donate 10 USD just once time with the following paypal link. 
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/paypalme/ufo5260987423/10)
@@ -99,7 +101,7 @@ tar -xf akku-1.1.0.amd64-linux.tar.xz && cd akku-1.1.0.amd64-linux
 bash install
 ```
 
-## Developing NOTE
+## For Developeer
 1. For Nixos, after install yo and generator-code, should 
 ```bash 
 export PATH=$PATH:./node_modules/.bin/
