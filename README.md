@@ -40,6 +40,9 @@ In further, thorough [scheme-langserver](https://github.com/ufo5260987423/scheme
 - Find references
 ![Find References](images/find-references.png)
 
+- Hover
+
+Scheme-langserver truely responses results, however, I have no idea that VScode doesn't display.
 
 I'm working on providing more details in this section: stay tuned!
 
