@@ -29,7 +29,7 @@ export function runFileInTerminal(
     withWorkspacePath((workspacePath:string) =>
       {
         const akku= vscode.workspace.getConfiguration("magicScheme.akku").get<string>("path");
-        if (! existsSync(workspacePath+"/.akku")){
+        if (existsSync(workspacePath+"/AKKU.manifest") && ! existsSync(workspacePath+"/.akku/akku")){
           terminal.sendText(akku +  " install");
         }});
     withWorkspacePath((workspacePath:string)=> terminal.sendText(`bash ${workspacePath}/.akku/env`));
@@ -84,7 +84,7 @@ export function createRepl(filePath:string, command: string[]): vscode.Terminal 
     withWorkspacePath((workspacePath:string) =>
       {
         const akku= vscode.workspace.getConfiguration("magicScheme.akku").get<string>("path");
-        if (! existsSync(workspacePath+"/.akku")){
+        if (existsSync(workspacePath+"/AKKU.manifest") && ! existsSync(workspacePath+"/.akku/akku")){
           repl.sendText(akku +  " install");
         }});
     withWorkspacePath((workspacePath:string)=> repl.sendText(`bash ${workspacePath}/.akku/env`));

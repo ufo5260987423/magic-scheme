@@ -95,7 +95,7 @@
 
         "magicScheme.scheme-langserver.serverPath":{
           "type": "string",
-          "default": "/home/ufo/Documents/workspace/scheme-langserver/run",
+          "default": "scheme-langserver",
           "markdownDescription": "Path to the scheme-langserver executable `scheme-langserver` (for nixos akkupackages.scheme-langserver) or `run`. Can be either an absolute path or relative to the workspace root. Default: `scheme-langserver`, which works if `scheme-langserver` is in your `PATH`."
         },
         "magicScheme.scheme-langserver.logPath":{
