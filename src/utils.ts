@@ -39,14 +39,17 @@ export function withLanguageServer(func: (command: string, args: string[]) => vo
   const typeInference= vscode.workspace
     .getConfiguration("magicScheme.scheme-langserver")
     .get<string>("typeInference");
-  const args:string[] = [log, multiThread,typeInference];
-
-  if (command !== undefined && command !== "" && args !== undefined) {
-    func(command, args);
-  } else {
-    vscode.window.showErrorMessage(
-      `Invalid command for launching the language server. Please set the command in settings.`,
-    );
+  if (log!==undefined && log!=="" 
+      && multiThread!==undefined &&multiThread!==""
+      && typeInference!==undefined &&typeInference!==""){
+    const args:string[] = [log, multiThread,typeInference];
+    if (command !== undefined && command !== "" && args !== undefined) {
+      func(command, args);
+    } else {
+      vscode.window.showErrorMessage(
+        `Invalid command for launching the language server. Please set the command in settings.`,
+      );
+    }
   }
 }
 
