@@ -1,5 +1,7 @@
 # Magic Scheme 
 
+MORE DETAIL PLEASE REFER [GITHUB PAGE](https://github.com/ufo5260987423/magic-scheme).
+
 This extension adds support for Scheme(r6rs standard) to VS Code. With the help of [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver), we're proud to say that Magic Scheme is **much better** than many counterparts, which includes even Racket extensions.
 
 >NOTE: PLEASE ALWAYS USE LATEST VERSION SCHEME-LANGSERVER.
