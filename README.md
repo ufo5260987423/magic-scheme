@@ -2,11 +2,17 @@
 
 This extension adds support for Scheme(r6rs standard) to VS Code. With the help of [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver), we're proud to say that Magic Scheme is **much better** than many counterparts, which includes even Racket extensions.
 
+>NOTE: PLEASE ALWAYS USE LATEST VERSION SCHEME-LANGSERVER.
+
 Please make sure: before you start this extension, you **have to** do fully setting up and configurations [here](#setting-up--some-configuration).
 
 You can click [this patreon page](https://www.patreon.com/PoorProgrammer/membership) or [爱发电](https://afdian.com/a/ufo5260987423) to donate monthly, or just donate 10 USD just once time with the following paypal link. 
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/paypalme/ufo5260987423/10)
+
+## Release
+0.0.2 Fix: comment.
+0.0.1 Start!
 
 ## Features
 

@@ -26,12 +26,7 @@
   "homepage": "https://github.com/ufo5260987423/magic-scheme/blob/main/README.md",
   "pricing": "Free",
   "contributes": {
-    "snippets": [
-      {
-        "language": "scheme",
-        "path": "./package_files/snippets.json"
-      }
-    ],
+    "snippets": [],
     "menus": {
       "editor/title/context": [
         {
