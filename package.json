@@ -55,7 +55,7 @@
           ".sch",
           ".sls"
         ],
-        "configuration": "./package_files/language-configuration.json",
+        "configuration": "./package_files/scheme.configuration.json",
         "icon": {
           "dark": "./images/file_dark.svg",
           "light": "./images/file_light.svg"
@@ -66,7 +66,7 @@
       {
         "language": "scheme",
         "scopeName": "source.scheme",
-        "path": "./package_files/scheme.tmGrammar.json",
+        "path": "./package_files/scheme.tmLanguage",
         "embeddedLanguages": {
           "meta.embedded.block.scheme": "scheme"
         }
