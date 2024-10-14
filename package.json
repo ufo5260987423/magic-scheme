@@ -2,7 +2,7 @@
   "name": "magic-scheme",
   "displayName": "Magic Scheme",
   "description": "Scheme language server plugin.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "icon": "images/icon_blue.png",
   "engines": {
     "vscode": "^1.92.0"
