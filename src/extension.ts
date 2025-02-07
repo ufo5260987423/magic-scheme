@@ -76,12 +76,20 @@ function reg(name: string, func: (...args: any[]) => any) {
 }
 
 function configurationChanged() {
+  const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+  statusBarItem.text = '$(sync~spin) Initializing LSP...';
+  statusBarItem.show();
   const enableLSP: boolean = vscode.workspace
     .getConfiguration("magicScheme.scheme-langserver").get("enable", true);
 
   if (langClient) {
     if (enableLSP && !isLangClientRunning) {
       langClient.start();
+      // 监听 LSP 初始化完成事件
+      langClient.onReady().then(() => {
+          statusBarItem.text = '$(check) LSP Initialized';
+          setTimeout(() => statusBarItem.hide(), 3000); // 3 秒后隐藏
+      });
       isLangClientRunning = true;
     } else if (!enableLSP && isLangClientRunning) {
       langClient.stop();
