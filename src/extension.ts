@@ -6,7 +6,7 @@ import { TaskProvider } from "./tasks";
 import { withLanguageServer } from "./utils";
 
 let langClient: LanguageClient;
-let statusBarItem: vscode.StatusBarItem;
+export const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
 let isLangClientRunning = false;
 
 let taskProvider: vscode.Disposable | undefined;
@@ -92,10 +92,10 @@ function configurationChanged() {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-  printEnvironmentInfo();
-  setupLSP();
-  statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+  const ch=printEnvironmentInfo();
   statusBarItem.show();
+  setupLSP();
+  configurationChanged();
   langClient.onDidChangeState((event)=>{
     switch(event.newState){
       case State.Starting:
@@ -115,9 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
         break;
       default:
         break;
-    }
-  configurationChanged();
-  });
+    }});
 
   // Each file has one output terminal and one repl
   // Those two are saved in terminals and repls, respectively
