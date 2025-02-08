@@ -94,10 +94,9 @@ function configurationChanged() {
 export function activate(context: vscode.ExtensionContext) {
   printEnvironmentInfo();
   setupLSP();
-  configurationChanged();
-  statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   statusBarItem.show();
-  langClient.onDidChangeState(((event)=>{
+  langClient.onDidChangeState((event)=>{
     switch(event.newState){
       case State.Starting:
         statusBarItem.text = "$(sync~spin) Initializing LSP...";
@@ -117,7 +116,8 @@ export function activate(context: vscode.ExtensionContext) {
       default:
         break;
     }
-  }));
+  configurationChanged();
+  });
 
   // Each file has one output terminal and one repl
   // Those two are saved in terminals and repls, respectively
