@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
-import { LanguageClient, LanguageClientOptions } from "vscode-languageclient/node";
+import { LanguageClient, LanguageClientOptions,State } from "vscode-languageclient/node";
 import * as os from "os";
 import * as com from "./commands";
 import { TaskProvider } from "./tasks";
 import { withLanguageServer } from "./utils";
 
 let langClient: LanguageClient;
+let statusBarItem: vscode.StatusBarItem;
 let isLangClientRunning = false;
 
 let taskProvider: vscode.Disposable | undefined;
@@ -76,20 +77,12 @@ function reg(name: string, func: (...args: any[]) => any) {
 }
 
 function configurationChanged() {
-  const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-  statusBarItem.text = '$(sync~spin) Initializing LSP...';
-  statusBarItem.show();
-  const enableLSP: boolean = vscode.workspace
-    .getConfiguration("magicScheme.scheme-langserver").get("enable", true);
+  const enableLSP: boolean = vscode.workspace.getConfiguration("magicScheme.scheme-langserver").get("enable", true);
 
   if (langClient) {
     if (enableLSP && !isLangClientRunning) {
       langClient.start();
       // 监听 LSP 初始化完成事件
-      langClient.onReady().then(() => {
-          statusBarItem.text = '$(check) LSP Initialized';
-          setTimeout(() => statusBarItem.hide(), 3000); // 3 秒后隐藏
-      });
       isLangClientRunning = true;
     } else if (!enableLSP && isLangClientRunning) {
       langClient.stop();
@@ -102,6 +95,29 @@ export function activate(context: vscode.ExtensionContext) {
   printEnvironmentInfo();
   setupLSP();
   configurationChanged();
+  statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  statusBarItem.show();
+  langClient.onDidChangeState(((event)=>{
+    switch(event.newState){
+      case State.Starting:
+        statusBarItem.text = "$(sync~spin) Initializing LSP...";
+        statusBarItem.tooltip = "Language Server is initializing...";
+        statusBarItem.show();
+        break;
+      case State.Running:
+        statusBarItem.text = "$(check) LSP Ready";
+        statusBarItem.tooltip = "Language Server is ready";
+        statusBarItem.show();
+        break;
+      case State.Stopped:
+        statusBarItem.text = "$(error) LSP Error";
+        statusBarItem.tooltip = "Language Server failed to initialize";
+        statusBarItem.show();
+        break;
+      default:
+        break;
+    }
+  }));
 
   // Each file has one output terminal and one repl
   // Those two are saved in terminals and repls, respectively
