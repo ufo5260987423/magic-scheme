@@ -96,20 +96,23 @@ export function activate(context: vscode.ExtensionContext) {
   statusBarItem.show();
   setupLSP();
   configurationChanged();
+  statusBarItem.text = "$(sync~spin) Initializing Scheme-langserver...";
+  statusBarItem.tooltip = "Language Server is initializing...";
+  statusBarItem.show();
   langClient.onDidChangeState((event)=>{
     switch(event.newState){
       case State.Starting:
-        statusBarItem.text = "$(sync~spin) Initializing LSP...";
+        statusBarItem.text = "$(sync~spin) Initializing Scheme-langserver...";
         statusBarItem.tooltip = "Language Server is initializing...";
         statusBarItem.show();
         break;
       case State.Running:
-        statusBarItem.text = "$(check) LSP Ready";
+        statusBarItem.text = "$(check) Scheme-langserver Ready";
         statusBarItem.tooltip = "Language Server is ready";
         statusBarItem.show();
         break;
       case State.Stopped:
-        statusBarItem.text = "$(error) LSP Error";
+        statusBarItem.text = "$(error) Scheme-langserver Error";
         statusBarItem.tooltip = "Language Server failed to initialize";
         statusBarItem.show();
         break;
