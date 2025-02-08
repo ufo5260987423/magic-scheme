@@ -13,7 +13,7 @@ You can click [this patreon page](https://www.patreon.com/PoorProgrammer/members
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/paypalme/ufo5260987423/10)
 
 ## Release
-0.0.5 OK, at least I removed the annoying surrounding pair with "'".
+0.0.5 OK, at least I removed the annoying surrounding pair with "'" and also, 0.0.4 works now!
 0.0.4 Try to notice programmers when LSP is initializing.
 0.0.3 Replace grammer configuration.
 0.0.2 Fix: comment.
