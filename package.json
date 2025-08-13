@@ -108,6 +108,11 @@
           "default": "disable",
           "markdownDescription": "Enable/disable type inference for scheme-langserver. Default: `disable`. NOTE: this feature haven't been fully test, be careful!"
         },
+        "magicScheme.scheme-langserver.topEnvironment": {
+          "type": "string",
+          "default": "r6rs",
+          "markdownDescription": "Switch top environment for scheme-langserver. Default: `r6rs`. More options please refere scheme-langserver."
+        },
         "magicScheme.scheme.path": {
           "type": "string",
           "default": "scheme",

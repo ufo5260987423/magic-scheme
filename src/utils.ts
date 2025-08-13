@@ -39,10 +39,13 @@ export function withLanguageServer(func: (command: string, args: string[]) => vo
   const typeInference= vscode.workspace
     .getConfiguration("magicScheme.scheme-langserver")
     .get<string>("typeInference");
-  if (log!==undefined && log!=="" 
+  const topEnvironment= vscode.workspace
+    .getConfiguration("magicScheme.scheme-langserver")
+    .get<string>("topEnviroment");
+  if (log!==undefined && log!=="" && topEnvironment!==""
       && multiThread!==undefined &&multiThread!==""
       && typeInference!==undefined &&typeInference!==""){
-    const args:string[] = [log, multiThread,typeInference];
+    const args:string[] = ["-l",log, "-m",multiThread,"-t",typeInference, "-e", topEnvironment];
     if (command !== undefined && command !== "" && args !== undefined) {
       func(command, args);
     } else {
