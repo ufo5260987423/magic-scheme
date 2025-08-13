@@ -41,7 +41,7 @@ export function withLanguageServer(func: (command: string, args: string[]) => vo
     .get<string>("typeInference");
   const topEnvironment= vscode.workspace
     .getConfiguration("magicScheme.scheme-langserver")
-    .get<string>("topEnviroment");
+    .get<string>("topEnvironment");
   if (log!==undefined && log!=="" 
       && multiThread!==undefined &&multiThread!==""
       && typeInference!==undefined &&typeInference!==""
