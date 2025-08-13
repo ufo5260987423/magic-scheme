@@ -2,7 +2,7 @@
   "name": "magic-scheme",
   "displayName": "Magic Scheme",
   "description": "Scheme language server plugin.",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "icon": "images/icon_blue.png",
   "engines": {
     "vscode": "^1.92.0"
@@ -110,8 +110,8 @@
         },
         "magicScheme.scheme-langserver.topEnvironment": {
           "type": "string",
-          "default": "r6rs",
-          "markdownDescription": "Switch top environment for scheme-langserver. Default: `r6rs`. More options please refere scheme-langserver."
+          "default": "R6RS",
+          "markdownDescription": "Switch top environment for scheme-langserver. Default: `R6RS`. More options please refere scheme-langserver."
         },
         "magicScheme.scheme.path": {
           "type": "string",
