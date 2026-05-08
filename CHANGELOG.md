@@ -14,8 +14,8 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 
 ### Added
 - **Auto-install scheme-langserver**: Extension now automatically detects, downloads, and configures `scheme-langserver` on first activation.
-  - Linux x64 (non-NixOS): Downloads latest release to VS Code global storage automatically.
-  - macOS / Windows / Linux ARM / NixOS: Shows platform-specific install guidance instead of a generic error.
+  - Linux x64: Downloads latest release to VS Code global storage automatically.
+  - macOS / Windows / Linux ARM: Shows platform-specific install guidance instead of a generic error.
   - New setting `magicScheme.scheme-langserver.autoDownload` (default `true`).
   - Fallback chain: configured `serverPath` → `$PATH` → workspace `./run` → previously downloaded binary → auto-download.
 - **3-layer test suite**:

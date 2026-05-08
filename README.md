@@ -99,7 +99,7 @@ I'm so sorry Magic Scheme has some conflicts with [Chez-Scheme-VsCode](https://g
 #### Automatic Installation (Recommended for Linux x64)
 
 Magic Scheme will automatically download and install `scheme-langserver` on first activation if:
-- You are on **Linux x64** (not NixOS)
+- You are on **Linux x64**
 - `scheme-langserver` is not already on your `$PATH`
 - `magicScheme.scheme-langserver.autoDownload` is enabled (default: `true`)
 
@@ -112,7 +112,7 @@ If automatic installation is not available for your platform, you can manually d
 | Platform | Support | Notes |
 |----------|---------|-------|
 | Linux x64 | ✅ Auto-download | Automatically downloaded on first use. |
-| NixOS | ✅ PATH fallback | Install via `nix-shell -p akkuPackages.scheme-langserver`. Auto-download is skipped. |
+| NixOS | ✅ Auto-download | Generic Linux binary; if it fails, install via `nix-shell -p akkuPackages.scheme-langserver`. |
 | macOS | ❌ Manual only | No prebuilt binary. Install via Nix or [build from source](https://github.com/ufo5260987423/scheme-langserver). |
 | Windows | ❌ Manual only | No prebuilt binary. Use WSL2 or build from source. |
 | Linux ARM | ❌ Manual only | No prebuilt binary. Build from source. |

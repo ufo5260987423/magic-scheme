@@ -56,7 +56,7 @@ export function isNixOS(): boolean {
 }
 
 export function canAutoDownload(): boolean {
-  return process.platform === 'linux' && process.arch === 'x64' && !isNixOS();
+  return process.platform === 'linux' && process.arch === 'x64';
 }
 
 export async function downloadLangserver(
@@ -169,7 +169,7 @@ export async function ensureLangserver(context: vscode.ExtensionContext): Promis
     );
   } else if (isNixOS()) {
     vscode.window.showWarningMessage(
-      'scheme-langserver not found. NixOS users should install it via nixpkgs (e.g., nix-shell -p akkuPackages.scheme-langserver).'
+      'scheme-langserver not found. NixOS users may install it via nixpkgs (nix-shell -p akkuPackages.scheme-langserver) or set "serverPath" manually.'
     );
   } else if (process.platform === 'darwin') {
     vscode.window.showWarningMessage(

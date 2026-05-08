@@ -14,7 +14,7 @@ suite('Download Unit Tests', () => {
   suite('canAutoDownload', () => {
     test('returns correct value for current platform', () => {
       const result = canAutoDownload();
-      const expected = process.platform === 'linux' && process.arch === 'x64' && !fs.existsSync('/etc/NIXOS');
+      const expected = process.platform === 'linux' && process.arch === 'x64';
       assert.strictEqual(result, expected);
     });
   });
