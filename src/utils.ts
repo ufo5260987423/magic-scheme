@@ -9,7 +9,7 @@ export function quoteWindowsPath(filePath: string, isExecutable: boolean): strin
   // Escape cmd.exe special characters: & | < > ^ % and whitespace
   if (isCmdExeShell()) {
     if (/[\s&|<>^%]/.test(filePath)) {
-      return `"${filePath.replace(/"/g, '""')}"`;
+      return `"${filePath.replace(/"/g, '""').replace(/%/g, '%%')}"`;
     }
     return filePath;
   }
@@ -111,13 +111,16 @@ export function withFilePath(func: (filePath: string) => void): void {
   withEditor((editor: vscode.TextEditor) => func(normalizeFilePath(editor.document.fileName)));
 }
 
-export function withWorkspacePath(func: (workspacePath: string) => void): void {
+export function withWorkspacePath(func: (workspacePath: string) => void): boolean {
+  let found = false;
   withFilePath(
     (filePath: string) => {
       const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath));
       if (workspaceFolder) {
+        found = true;
         return func(workspaceFolder.uri.fsPath);
       }
       vscode.window.showErrorMessage("The current file is not inside a workspace folder.");
     });
+  return found;
 }

@@ -66,7 +66,7 @@ async function configurationChanged() {
 
   if (enableLSP && !isLangClientRunning) {
     await langClient.start();
-    isLangClientRunning = true;
+    // isLangClientRunning will be set by onDidChangeState when it reaches Running
   } else if (!enableLSP && isLangClientRunning) {
     await langClient.stop();
     isLangClientRunning = false;
