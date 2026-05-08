@@ -198,7 +198,8 @@
     "test": "npm run test:unit && npm run test:mock && npm run test:e2e",
     "test:unit": "vscode-test --config ./.vscode-test.mjs --label unit",
     "test:mock": "vscode-test --config ./.vscode-test.mjs --label mock-lifecycle",
-    "test:e2e": "vscode-test --config ./.vscode-test.mjs --label e2e"
+    "test:e2e": "npm run download-langserver && vscode-test --config ./.vscode-test.mjs --label e2e",
+    "download-langserver": "bash scripts/download-langserver.sh"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.7",

@@ -3,20 +3,39 @@ import * as vscode from 'vscode';
 import { suite, test } from 'mocha';
 import * as path from 'path';
 import * as fs from 'fs';
+import { spawnSync } from 'child_process';
 import { activate, getDocUri } from './helper';
 
-function findLangserver(): string | undefined {
-    // 1. Check for bundled run file in project root
-    const bundled = path.join(__dirname, '../../../run');
-    if (fs.existsSync(bundled)) {
-        return bundled;
-    }
-    // 2. Check PATH for scheme-langserver
+function isExecutable(filePath: string): boolean {
     try {
-        const { spawnSync } = require('child_process');
+        const result = spawnSync(filePath, ['--help'], { encoding: 'utf8', timeout: 5000 });
+        // --help may exit with code 0 or 1, but as long as it doesn't crash it's fine
+        return result.status !== null && result.error === undefined;
+    } catch {
+        return false;
+    }
+}
+
+function findLangserver(): string | undefined {
+    const candidates = [
+        // 1. Auto-downloaded binary
+        path.join(__dirname, '../../.vscode-test/scheme-langserver'),
+        // 2. Manually bundled run file in project root
+        path.join(__dirname, '../../../run'),
+    ];
+    for (const candidate of candidates) {
+        if (fs.existsSync(candidate) && isExecutable(candidate)) {
+            return candidate;
+        }
+    }
+    // 3. Check PATH for scheme-langserver
+    try {
         const result = spawnSync('which', ['scheme-langserver'], { encoding: 'utf8' });
         if (result.status === 0) {
-            return result.stdout.trim();
+            const p = result.stdout.trim();
+            if (p && isExecutable(p)) {
+                return p;
+            }
         }
     } catch {
         // ignore
