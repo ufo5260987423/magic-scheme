@@ -1,5 +1,6 @@
 import { quote } from "shell-quote";
 import * as vscode from "vscode";
+import * as path from "path";
 import { withWorkspacePath, isCmdExeShell, isPowershellShell, isWindowsOS, quoteWindowsPath } from "./utils";
 import { existsSync } from 'fs';
 
@@ -28,11 +29,12 @@ export function runFileInTerminal(
     terminal.sendText(`clear`);
     withWorkspacePath((workspacePath:string) =>
       {
-        const akku= vscode.workspace.getConfiguration("magicScheme.akku").get<string>("path");
-        if (existsSync(workspacePath+"/AKKU.manifest") && ! existsSync(workspacePath+"/.akku/akku")){
-          terminal.sendText(akku +  " install");
-        }});
-    withWorkspacePath((workspacePath:string)=> terminal.sendText(`bash ${workspacePath}/.akku/env`));
+        const akku = vscode.workspace.getConfiguration("magicScheme.akku").get<string>("path");
+        if (existsSync(path.join(workspacePath, "AKKU.manifest")) && !existsSync(path.join(workspacePath, ".akku", "akku"))) {
+          terminal.sendText(akku + " install");
+        }
+      });
+    withWorkspacePath((workspacePath: string) => terminal.sendText(`bash ${path.join(workspacePath, ".akku", "env")}`));
     terminal.sendText(quote([...command, filePath]));
   }
 }
@@ -83,11 +85,12 @@ export function createRepl(filePath:string, command: string[]): vscode.Terminal 
   } else {
     withWorkspacePath((workspacePath:string) =>
       {
-        const akku= vscode.workspace.getConfiguration("magicScheme.akku").get<string>("path");
-        if (existsSync(workspacePath+"/AKKU.manifest") && ! existsSync(workspacePath+"/.akku/akku")){
-          repl.sendText(akku +  " install");
-        }});
-    withWorkspacePath((workspacePath:string)=> repl.sendText(`bash ${workspacePath}/.akku/env`));
+        const akku = vscode.workspace.getConfiguration("magicScheme.akku").get<string>("path");
+        if (existsSync(path.join(workspacePath, "AKKU.manifest")) && !existsSync(path.join(workspacePath, ".akku", "akku"))) {
+          repl.sendText(akku + " install");
+        }
+      });
+    withWorkspacePath((workspacePath: string) => repl.sendText(`bash ${path.join(workspacePath, ".akku", "env")}`));
     repl.sendText(quote([...command]));
   }
 

@@ -9,13 +9,7 @@ let langClient: LanguageClient;
 export const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
 let isLangClientRunning = false;
 
-let taskProvider: vscode.Disposable | undefined;
-
 export function deactivate(): Promise<void> {
-  if (taskProvider) {
-    taskProvider.dispose();
-  }
-
   if (!langClient) {
     return Promise.reject(new Error("There is no language server client to be deactivated"));
   }
@@ -92,7 +86,7 @@ function configurationChanged() {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-  const ch=printEnvironmentInfo();
+  printEnvironmentInfo();
   statusBarItem.show();
   setupLSP();
   configurationChanged();
@@ -128,7 +122,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.workspace.onDidChangeConfiguration(configurationChanged);
 
-  const script= vscode.commands.registerCommand('magic-scheme.runSchemeScript', () => com.runInTerminal(terminals));
-  const repl= vscode.commands.registerCommand('magic-scheme.runSchemeREPL', () => com.openRepl(repls));
-  context.subscriptions.push(repl,script);
+  const script = vscode.commands.registerCommand('magic-scheme.runSchemeScript', () => com.runInTerminal(terminals));
+  const repl = vscode.commands.registerCommand('magic-scheme.runSchemeREPL', () => com.openRepl(repls));
+  const taskProvider = vscode.tasks.registerTaskProvider(TaskProvider.taskType, new TaskProvider());
+  context.subscriptions.push(repl, script, taskProvider);
 }

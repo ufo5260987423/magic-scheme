@@ -10,7 +10,9 @@
   "categories": [
     "Programming Languages"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:scheme"
+  ],
   "main": "./dist/extension.js",
   "publisher": "ufo5260987423",
   "author": {
@@ -85,7 +87,7 @@
       "properties": {
         "magicScheme.scheme-langserver.enable": {
           "type": "boolean",
-          "default": "true",
+          "default": true,
           "markdownDescription": "Enable scheme-langserver."
         },
         "magicScheme.scheme-langserver.serverPath": {
@@ -183,15 +185,20 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run build-base -- --minify",
-    "package": "vsce package -o magic-racket.vsix",
-    "build-base": "esbuild ./src/extension.ts --bundle --outdir=dist --external:vscode --format=cjs --platform=node --target=node16",
-    "build": "npm run build-base -- --sourcemap",
-    "watch": "npm run build-base -- --sourcemap --watch",
+    "vscode:prepublish": "node esbuild.js --production",
+    "package": "vsce package -o magic-scheme.vsix",
+    "build-base": "node esbuild.js",
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --watch -p ./",
     "compile": "tsc -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "npm run test:unit && npm run test:mock && npm run test:e2e",
+    "test:unit": "vscode-test --config ./.vscode-test.mjs --label unit",
+    "test:mock": "vscode-test --config ./.vscode-test.mjs --label mock-lifecycle",
+    "test:e2e": "vscode-test --config ./.vscode-test.mjs --label e2e"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.7",

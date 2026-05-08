@@ -56,7 +56,7 @@ In further, thorough [scheme-langserver](https://github.com/ufo5260987423/scheme
 
 - Hover
 
-Scheme-langserver truely responses results, however, I have no idea that VScode doesn't display.
+Scheme-langserver truly responds with results, however, VS Code doesn't always display them.
 
 I'm working on providing more details in this section: stay tuned!
 
@@ -86,7 +86,7 @@ The followings are mainly focus on x64-based linux operating system. As for othe
 
 ### Disable Conflict Plugins
 
-I'm so sorry Magic Scheme has some conficts with [Chez-Scheme-VsCode](https://github.com/abhi18av/Chez-Scheme-VsCode) plugin. So, maybe you need to disable it.
+I'm so sorry Magic Scheme has some conflicts with [Chez-Scheme-VsCode](https://github.com/abhi18av/Chez-Scheme-VsCode) plugin. So, maybe you need to disable it.
 
 ### Get Scheme-langserver
 
@@ -113,7 +113,7 @@ tar -xf akku-1.1.0.amd64-linux.tar.xz && cd akku-1.1.0.amd64-linux
 bash install
 ```
 
-## For Developeer
+## For Developer
 1. For Nixos, after install yo and generator-code, should 
 ```bash 
 export PATH=$PATH:./node_modules/.bin/

@@ -7,9 +7,9 @@ import {
 } from "./repl";
 import { withWorkspacePath, withFilePath, withScheme, withREPL } from "./utils";
 
-function getOrDefault<K, V>(map: Map<K, V>, key: K, getDefault: () => V): V {
+export function getOrDefault<K, V>(map: Map<K, V>, key: K, getDefault: () => V): V {
   const value = map.get(key);
-  if (value) {
+  if (value !== undefined) {
     return value;
   }
   const def = getDefault();

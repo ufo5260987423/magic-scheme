@@ -6,11 +6,11 @@ export const isCmdExeShell: () => boolean = () => vscode.env.shell.endsWith("cmd
 export const isPowershellShell: () => boolean =
   () => ["powershell.exe", "pwsh.exe", "pwsh"].some(p => vscode.env.shell.endsWith(p));
 
-export function quoteWindowsPath(path: string, isRacketExe: boolean): string {
+export function quoteWindowsPath(path: string, isExecutable: boolean): string {
   if (/\s/.test(path)) { // quote the path only if it contains whitespaces
     if (isCmdExeShell()) {
       path = `"${path}"`;
-    } else if (isPowershellShell() && isRacketExe) {
+    } else if (isPowershellShell() && isExecutable) {
       path = `& '${path}'`;
     } else {
       path = `'${path}'`;
@@ -42,19 +42,22 @@ export function withLanguageServer(func: (command: string, args: string[]) => vo
   const topEnvironment= vscode.workspace
     .getConfiguration("magicScheme.scheme-langserver")
     .get<string>("topEnvironment");
-  if (log!==undefined && log!=="" 
-      && multiThread!==undefined &&multiThread!==""
-      && typeInference!==undefined &&typeInference!==""
-      && topEnvironment !==undefined && topEnvironment!==""){
-    const args:string[] = ["-l",log, "-m",multiThread,"-t",typeInference, "-e", topEnvironment];
-    if (command !== undefined && command !== "" && args !== undefined) {
-      func(command, args);
-    } else {
-      vscode.window.showErrorMessage(
-        `Invalid command for launching the language server. Please set the command in settings.`,
-      );
-    }
+  const missing: string[] = [];
+  if (!command) { missing.push("serverPath"); }
+  if (!log) { missing.push("logPath"); }
+  if (!multiThread) { missing.push("multiThread"); }
+  if (!typeInference) { missing.push("typeInference"); }
+  if (!topEnvironment) { missing.push("topEnvironment"); }
+
+  if (missing.length > 0) {
+    vscode.window.showErrorMessage(
+      `Missing scheme-langserver configuration: ${missing.join(", ")}. Please check Magic Scheme settings.`
+    );
+    return;
   }
+
+  const args: string[] = ["-l", log!, "-m", multiThread!, "-t", typeInference!, "-e", topEnvironment!];
+  func(command!, args);
 }
 
 export function withScheme(func: (command: string[]) => void): void {
@@ -95,11 +98,10 @@ export function withFilePath(func: (filePath: string) => void): void {
 
 export function withWorkspacePath(func: (workspacePath: string) => void): void {
   withFilePath(
-    (filePath:string) => 
-      {
-        const workspaceFolder=vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(filePath));
-        if (workspaceFolder){
-          return func(workspaceFolder.uri.path);
-        }
-      });
+    (filePath: string) => {
+      const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath));
+      if (workspaceFolder) {
+        return func(workspaceFolder.uri.fsPath);
+      }
+    });
 }
