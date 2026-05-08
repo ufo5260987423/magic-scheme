@@ -2,7 +2,6 @@
 import * as process from 'process';
 
 let buffer = Buffer.alloc(0);
-let shuttingDown = false;
 
 process.stdin.on('data', (chunk: Buffer) => {
     buffer = Buffer.concat([buffer, chunk]);
@@ -10,7 +9,7 @@ process.stdin.on('data', (chunk: Buffer) => {
 });
 
 function processMessages(): void {
-    while (true) {
+    for (;;) {
         const headerEnd = buffer.indexOf('\r\n\r\n');
         if (headerEnd === -1) { return; }
 
@@ -35,6 +34,7 @@ function processMessages(): void {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function handleMessage(msg: any): void {
     if (msg.method === 'initialize') {
         sendResponse(msg.id, {
@@ -50,7 +50,6 @@ function handleMessage(msg: any): void {
     } else if (msg.method === 'initialized') {
         // no response required
     } else if (msg.method === 'shutdown') {
-        shuttingDown = true;
         sendResponse(msg.id, null);
     } else if (msg.method === 'exit') {
         process.exit(0);
@@ -74,6 +73,7 @@ function handleMessage(msg: any): void {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function sendResponse(id: number | string, result: any): void {
     const msg = { jsonrpc: '2.0', id, result };
     const json = JSON.stringify(msg);

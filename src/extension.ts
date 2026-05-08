@@ -1,33 +1,31 @@
 import * as vscode from 'vscode';
-import { LanguageClient, LanguageClientOptions,State } from "vscode-languageclient/node";
+import { LanguageClient, LanguageClientOptions, State } from "vscode-languageclient/node";
 import * as os from "os";
 import * as com from "./commands";
 import { TaskProvider } from "./tasks";
 import { withLanguageServer } from "./utils";
 
-let langClient: LanguageClient;
-export const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+let langClient: LanguageClient | undefined;
+let statusBarItem: vscode.StatusBarItem;
 let isLangClientRunning = false;
 
 export function deactivate(): Promise<void> {
-  if (!langClient) {
-    return Promise.reject(new Error("There is no language server client to be deactivated"));
-  }
-  return langClient.stop();
+  return langClient?.stop() ?? Promise.resolve();
 }
 
-function printEnvironmentInfo() {
+function printEnvironmentInfo(): vscode.OutputChannel {
   const channel = vscode.window.createOutputChannel("Scheme");
   channel.appendLine("Magic Scheme environment info");
   channel.appendLine("");
-  channel.appendLine(`os.arch:            ${os.arch}`);
-  channel.appendLine(`os.platform:        ${os.platform}`);
-  channel.appendLine(`os.release:         ${os.release}`);
-  channel.appendLine(`os.version:         ${os.version}`);
+  channel.appendLine(`os.arch:            ${os.arch()}`);
+  channel.appendLine(`os.platform:        ${os.platform()}`);
+  channel.appendLine(`os.release:         ${os.release()}`);
+  channel.appendLine(`os.version:         ${os.version()}`);
   channel.appendLine(`process.version:    ${process.version}`);
   channel.appendLine(`vscode.env.appHost: ${vscode.env.appHost}`);
   channel.appendLine(`vscode.env.appName: ${vscode.env.appName}`);
   channel.appendLine(`vscode.env.shell:   ${vscode.env.shell}`);
+  return channel;
 }
 
 function setupLSP() {
@@ -37,25 +35,19 @@ function setupLSP() {
       args: args,
     };
 
-    // If the extension is launched in debug mode then the debug server options are used
-    // Otherwise the run options are used
     const serverOptions = {
       run: executable,
       debug: executable,
     };
 
-    // Options to control the language client
     const clientOptions: LanguageClientOptions = {
-      // Register the server for Racket documents
       documentSelector: [{ language: "scheme" }],
-      // Fix URI encoding on Windows (#13)
       uriConverters: {
         code2Protocol: (uri) => uri.toString(true),
         protocol2Code: (str) => vscode.Uri.parse(str),
       },
     };
 
-    // Create the language client and start the client.
     langClient = new LanguageClient(
       "Magic Scheme",
       "Scheme Language Client",
@@ -65,65 +57,91 @@ function setupLSP() {
   });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function reg(name: string, func: (...args: any[]) => any) {
-  return vscode.commands.registerCommand(`magic-scheme.${name}`, func);
-}
-
-function configurationChanged() {
+async function configurationChanged() {
   const enableLSP: boolean = vscode.workspace.getConfiguration("magicScheme.scheme-langserver").get("enable", true);
 
-  if (langClient) {
-    if (enableLSP && !isLangClientRunning) {
-      langClient.start();
-      // 监听 LSP 初始化完成事件
-      isLangClientRunning = true;
-    } else if (!enableLSP && isLangClientRunning) {
-      langClient.stop();
-      isLangClientRunning = false;
-    }
+  if (!langClient) {
+    return;
+  }
+
+  if (enableLSP && !isLangClientRunning) {
+    await langClient.start();
+    isLangClientRunning = true;
+  } else if (!enableLSP && isLangClientRunning) {
+    await langClient.stop();
+    isLangClientRunning = false;
   }
 }
 
 export function activate(context: vscode.ExtensionContext) {
-  printEnvironmentInfo();
-  statusBarItem.show();
-  setupLSP();
-  configurationChanged();
-  statusBarItem.text = "$(sync~spin) Initializing Scheme-langserver...";
-  statusBarItem.tooltip = "Language Server is initializing...";
-  statusBarItem.show();
-  langClient.onDidChangeState((event)=>{
-    switch(event.newState){
-      case State.Starting:
-        statusBarItem.text = "$(sync~spin) Initializing Scheme-langserver...";
-        statusBarItem.tooltip = "Language Server is initializing...";
-        statusBarItem.show();
-        break;
-      case State.Running:
-        statusBarItem.text = "$(check) Scheme-langserver Ready";
-        statusBarItem.tooltip = "Language Server is ready";
-        statusBarItem.show();
-        break;
-      case State.Stopped:
-        statusBarItem.text = "$(error) Scheme-langserver Error";
-        statusBarItem.tooltip = "Language Server failed to initialize";
-        statusBarItem.show();
-        break;
-      default:
-        break;
-    }});
+  const infoChannel = printEnvironmentInfo();
+  context.subscriptions.push(infoChannel);
 
-  // Each file has one output terminal and one repl
-  // Those two are saved in terminals and repls, respectively
-  // The file is _ran_ in the terminal and _loaded_ into a repl
+  statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+  context.subscriptions.push(statusBarItem);
+  statusBarItem.show();
+
+  setupLSP();
+
+  if (langClient) {
+    langClient.onDidChangeState((event) => {
+      switch (event.newState) {
+        case State.Starting:
+          statusBarItem.text = "$(sync~spin) Initializing Scheme-langserver...";
+          statusBarItem.tooltip = "Language Server is initializing...";
+          statusBarItem.show();
+          break;
+        case State.Running:
+          statusBarItem.text = "$(check) Scheme-langserver Ready";
+          statusBarItem.tooltip = "Language Server is ready";
+          statusBarItem.show();
+          break;
+        case State.Stopped:
+          statusBarItem.text = "$(error) Scheme-langserver Error";
+          statusBarItem.tooltip = "Language Server failed to initialize";
+          statusBarItem.show();
+          break;
+        default:
+          break;
+      }
+    });
+
+    void configurationChanged();
+  } else {
+    statusBarItem.text = "$(error) Scheme-langserver Not Configured";
+    statusBarItem.tooltip = "Check Magic Scheme settings";
+    statusBarItem.show();
+  }
+
   const terminals: Map<string, vscode.Terminal> = new Map();
   const repls: Map<string, vscode.Terminal> = new Map();
 
-  vscode.workspace.onDidChangeConfiguration(configurationChanged);
+  context.subscriptions.push(
+    vscode.window.onDidCloseTerminal((terminal) => {
+      terminals.forEach((value, key) => {
+        if (value === terminal) {
+          terminals.delete(key);
+        }
+      });
+      repls.forEach((value, key) => {
+        if (value === terminal) {
+          repls.delete(key);
+        }
+      });
+    })
+  );
+
+  const configChangeDisposable = vscode.workspace.onDidChangeConfiguration((e) => {
+    if (e.affectsConfiguration("magicScheme")) {
+      void configurationChanged();
+    }
+  });
+  context.subscriptions.push(configChangeDisposable);
 
   const script = vscode.commands.registerCommand('magic-scheme.runSchemeScript', () => com.runInTerminal(terminals));
-  const repl = vscode.commands.registerCommand('magic-scheme.runSchemeREPL', () => com.openRepl(repls));
+  const replCmd = vscode.commands.registerCommand('magic-scheme.runSchemeREPL', () => com.openRepl(repls));
+  const loadRepl = vscode.commands.registerCommand('magic-scheme.loadInRepl', () => com.loadInRepl(repls));
+  const showOutput = vscode.commands.registerCommand('magic-scheme.showOutput', () => com.showOutput(terminals));
   const taskProvider = vscode.tasks.registerTaskProvider(TaskProvider.taskType, new TaskProvider());
-  context.subscriptions.push(repl, script, taskProvider);
+  context.subscriptions.push(replCmd, script, loadRepl, showOutput, taskProvider);
 }

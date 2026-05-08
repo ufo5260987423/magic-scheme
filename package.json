@@ -10,6 +10,24 @@
   "categories": [
     "Programming Languages"
   ],
+  "keywords": [
+    "scheme",
+    "lisp",
+    "r6rs",
+    "chez",
+    "language-server",
+    "akku"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "capabilities": {
+    "virtualWorkspaces": false,
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Scheme scripts and REPL require trust to execute arbitrary code."
+    }
+  },
   "activationEvents": [
     "onLanguage:scheme"
   ],
@@ -26,7 +44,7 @@
     "url": "https://github.com/ufo5260987423/magic-scheme.git"
   },
   "homepage": "https://github.com/ufo5260987423/magic-scheme/blob/main/README.md",
-  "pricing": "Free",
+
   "contributes": {
     "snippets": [],
     "menus": {
@@ -82,6 +100,13 @@
         "editor.wordSeparators": "`()[];'\","
       }
     },
+    "taskDefinitions": [
+      {
+        "type": "scheme",
+        "required": [],
+        "properties": {}
+      }
+    ],
     "configuration": {
       "title": "Magic Scheme Configuration",
       "properties": {
@@ -187,7 +212,6 @@
   "scripts": {
     "vscode:prepublish": "node esbuild.js --production",
     "package": "vsce package -o magic-scheme.vsix",
-    "build-base": "node esbuild.js",
     "build": "node esbuild.js",
     "watch": "node esbuild.js --watch",
     "watch:esbuild": "node esbuild.js --watch",
@@ -212,7 +236,7 @@
     "@vscode/test-electron": "^2.4.0",
     "esbuild": "^0.21.5",
     "eslint": "^8.57.0",
-    "npm-run-all": "^4.1.5",
+
     "typescript": "^5.4.5"
   },
   "dependencies": {

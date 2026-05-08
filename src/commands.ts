@@ -5,7 +5,7 @@ import {
   createRepl,
   loadFileInRepl,
 } from "./repl";
-import { withWorkspacePath, withFilePath, withScheme, withREPL } from "./utils";
+import { withFilePath, withScheme, withREPL } from "./utils";
 
 export function getOrDefault<K, V>(map: Map<K, V>, key: K, getDefault: () => V): V {
   const value = map.get(key);

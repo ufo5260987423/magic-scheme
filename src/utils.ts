@@ -1,22 +1,37 @@
 import * as vscode from "vscode";
-import { existsSync } from 'fs';
 
 export const isWindowsOS: () => boolean = () => process.platform === "win32";
-export const isCmdExeShell: () => boolean = () => vscode.env.shell.endsWith("cmd.exe");
+export const isCmdExeShell: () => boolean = () => vscode.env.shell?.endsWith("cmd.exe") ?? false;
 export const isPowershellShell: () => boolean =
-  () => ["powershell.exe", "pwsh.exe", "pwsh"].some(p => vscode.env.shell.endsWith(p));
+  () => ["powershell.exe", "pwsh.exe", "pwsh"].some(p => vscode.env.shell?.endsWith(p) ?? false);
 
-export function quoteWindowsPath(path: string, isExecutable: boolean): string {
-  if (/\s/.test(path)) { // quote the path only if it contains whitespaces
-    if (isCmdExeShell()) {
-      path = `"${path}"`;
-    } else if (isPowershellShell() && isExecutable) {
-      path = `& '${path}'`;
-    } else {
-      path = `'${path}'`;
+export function quoteWindowsPath(filePath: string, isExecutable: boolean): string {
+  // Escape cmd.exe special characters: & | < > ^ % and whitespace
+  if (isCmdExeShell()) {
+    if (/[\s&|<>^%]/.test(filePath)) {
+      return `"${filePath.replace(/"/g, '""')}"`;
     }
+    return filePath;
   }
-  return path;
+  // Escape PowerShell special characters: $ ` " ' and whitespace
+  if (isPowershellShell()) {
+    if (/[\s$`"']/.test(filePath)) {
+      const escaped = filePath.replace(/'/g, "''");
+      if (isExecutable) {
+        return `& '${escaped}'`;
+      }
+      return `'${escaped}'`;
+    }
+    if (isExecutable) {
+      return `& '${filePath}'`;
+    }
+    return filePath;
+  }
+  // Generic shell (bash, zsh, etc.) on Windows (Git Bash, MSYS2, etc.)
+  if (/\s/.test(filePath)) {
+    return `'${filePath}'`;
+  }
+  return filePath;
 }
 
 function normalizeFilePath(filePath: string): string {
@@ -30,16 +45,16 @@ export function withLanguageServer(func: (command: string, args: string[]) => vo
   const command = vscode.workspace
     .getConfiguration("magicScheme.scheme-langserver")
     .get<string>("serverPath");
-  const log= vscode.workspace
+  const log = vscode.workspace
     .getConfiguration("magicScheme.scheme-langserver")
     .get<string>("logPath");
-  const multiThread= vscode.workspace
+  const multiThread = vscode.workspace
     .getConfiguration("magicScheme.scheme-langserver")
     .get<string>("multiThread");
-  const typeInference= vscode.workspace
+  const typeInference = vscode.workspace
     .getConfiguration("magicScheme.scheme-langserver")
     .get<string>("typeInference");
-  const topEnvironment= vscode.workspace
+  const topEnvironment = vscode.workspace
     .getConfiguration("magicScheme.scheme-langserver")
     .get<string>("topEnvironment");
   const missing: string[] = [];
@@ -61,8 +76,8 @@ export function withLanguageServer(func: (command: string, args: string[]) => vo
 }
 
 export function withScheme(func: (command: string[]) => void): void {
-  const scheme= vscode.workspace.getConfiguration("magicScheme.scheme").get<string>("path");
-  if (scheme!== undefined && scheme!== "") {
+  const scheme = vscode.workspace.getConfiguration("magicScheme.scheme").get<string>("path");
+  if (scheme !== undefined && scheme !== "") {
     func([scheme]);
   } else {
     vscode.window.showErrorMessage(
@@ -72,9 +87,9 @@ export function withScheme(func: (command: string[]) => void): void {
 }
 
 export function withREPL(func: (command: string[]) => void): void {
-  const scheme= vscode.workspace.getConfiguration("magicScheme.scheme").get<string>("path");
+  const scheme = vscode.workspace.getConfiguration("magicScheme.scheme").get<string>("path");
   const args = vscode.workspace.getConfiguration("magicScheme.scheme").get<string[]>("arguments");
-  if (scheme!== undefined && scheme!== "" && args !== undefined) {
+  if (scheme !== undefined && scheme !== "" && args !== undefined) {
     func([scheme, ...args]);
   } else {
     vscode.window.showErrorMessage(
@@ -103,5 +118,6 @@ export function withWorkspacePath(func: (workspacePath: string) => void): void {
       if (workspaceFolder) {
         return func(workspaceFolder.uri.fsPath);
       }
+      vscode.window.showErrorMessage("The current file is not inside a workspace folder.");
     });
 }

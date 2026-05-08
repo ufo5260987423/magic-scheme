@@ -62,11 +62,11 @@ I'm working on providing more details in this section: stay tuned!
 
 ### Scheme Project
 
-You can directly run scheme script with project environment after typing <kbd>Alt+Shift+Enter</kbd>, or you may <kbd>Ctrl+Shift+P</kbd> and input command `magic-scheme.runSchemeScript`; The result shows `scheme --script ${currentFile}`:
+You can directly run scheme script with project environment after typing <kbd>Alt+Enter</kbd>, or you may <kbd>Ctrl+Shift+P</kbd> and input command `magic-scheme.runSchemeScript`; The result shows `scheme --script ${currentFile}`:
 
 ![Run Scheme Script](images/runSchemeScript.png)
 
-You can directly load scheme project environment in REPL after typing <kbd>Alt+Shift+Enter</kbd>, or you may <kbd>Ctrl+Shift+P</kbd>  and input command `magic-scheme.runSchemeRepl`; The result shows an REPL and you may import AKKU managed environemnts without further configurations.
+You can directly load scheme project environment in REPL after typing <kbd>Alt+Shift+Enter</kbd>, or you may <kbd>Ctrl+Shift+P</kbd> and input command `magic-scheme.runSchemeREPL`; The result shows an REPL and you may import AKKU managed environemnts without further configurations.
 
 ![Run Scheme REPL](images/runSchemeRepl.png)
 
@@ -90,7 +90,7 @@ I'm so sorry Magic Scheme has some conflicts with [Chez-Scheme-VsCode](https://g
 
 ### Get Scheme-langserver
 
-You may directly download latest executable file [here](https://github.com/ufo5260987423/scheme-langserver/releases/latest/download/run). This file you may memory its path as `{path-to-run}`, and you **must** set configuration `magic-scheme.scheme-langserver.path` as it.
+You may directly download latest executable file from the [scheme-langserver releases page](https://github.com/ufo5260987423/scheme-langserver/releases/latest). After downloading, set `magicScheme.scheme-langserver.serverPath` to the path of the downloaded binary.
 
 ### Get Scheme
 Magic Scheme supports [r6rs](http://r6rs.org/) standard scheme. But apparently I can't fully tests all implementations. As myself, I recommend with [Chez Scheme](https://cisco.github.io/ChezScheme/), and you may install it as following:
