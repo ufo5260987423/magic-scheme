@@ -1,25 +1,55 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { suite, test } from 'mocha';
-import { spawnSync } from 'child_process';
+import * as path from 'path';
+import * as fs from 'fs';
 import { activate, getDocUri } from './helper';
 
-function hasSchemeLangserver(): boolean {
-    try {
-        const result = spawnSync('which', ['scheme-langserver'], { encoding: 'utf8' });
-        return result.status === 0 && result.stdout.trim().length > 0;
-    } catch {
-        return false;
+function findLangserver(): string | undefined {
+    // 1. Check for bundled run file in project root
+    const bundled = path.join(__dirname, '../../../run');
+    if (fs.existsSync(bundled)) {
+        return bundled;
     }
+    // 2. Check PATH for scheme-langserver
+    try {
+        const { spawnSync } = require('child_process');
+        const result = spawnSync('which', ['scheme-langserver'], { encoding: 'utf8' });
+        if (result.status === 0) {
+            return result.stdout.trim();
+        }
+    } catch {
+        // ignore
+    }
+    return undefined;
 }
 
 suite('E2E Tests (Real scheme-langserver)', () => {
-    const serverAvailable = hasSchemeLangserver();
+    const langserverPath = findLangserver();
 
     suiteSetup(async function () {
-        if (!serverAvailable) {
+        if (!langserverPath) {
             this.skip();
+            return;
         }
+        // Point config to the local langserver
+        const config = vscode.workspace.getConfiguration('magicScheme.scheme-langserver');
+        await config.update('serverPath', langserverPath, false);
+        await config.update('enable', true, false);
+        await config.update('logPath', '/tmp/scheme-langserver-e2e.log', false);
+        await config.update('multiThread', 'enable', false);
+        await config.update('typeInference', 'disable', false);
+        await config.update('topEnvironment', 'R6RS', false);
+    });
+
+    suiteTeardown(async function () {
+        const config = vscode.workspace.getConfiguration('magicScheme.scheme-langserver');
+        await config.update('serverPath', undefined, false);
+        await config.update('enable', undefined, false);
+        await config.update('logPath', undefined, false);
+        await config.update('multiThread', undefined, false);
+        await config.update('typeInference', undefined, false);
+        await config.update('topEnvironment', undefined, false);
     });
 
     test('extension activates with real scheme-langserver', async function () {
@@ -56,8 +86,6 @@ suite('E2E Tests (Real scheme-langserver)', () => {
             ? result.items
             : result;
 
-        // We cannot assert exact items without knowing scheme-langserver's behavior,
-        // but we can assert the request succeeded and returned an array.
         assert.ok(Array.isArray(items), 'Should return an array of items');
     });
 
