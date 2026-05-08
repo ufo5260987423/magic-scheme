@@ -22,22 +22,20 @@ export function runFileInTerminal(
     terminal.sendText(`${schemeExePath} ${command.slice(1).join(' ')} ${quotedFilePath}`);
   } else {
     terminal.sendText(`clear`);
-    const hasWorkspace = withWorkspacePath((workspacePath: string) => {
+    withWorkspacePath((workspacePath: string) => {
       const akku = vscode.workspace.getConfiguration("magicScheme.akku").get<string>("path");
       if (akku && existsSync(path.join(workspacePath, "AKKU.manifest")) && !existsSync(path.join(workspacePath, ".akku", "akku"))) {
         terminal.sendText(quote([akku, "install"]));
       }
+      terminal.sendText(quote(["bash", path.join(workspacePath, ".akku", "env")]));
     });
-    if (hasWorkspace) {
-      withWorkspacePath((workspacePath: string) => terminal.sendText(quote(["bash", path.join(workspacePath, ".akku", "env")])));
-    }
     terminal.sendText(quote([...command, filePath]));
   }
 }
 
 export function loadFileInRepl(filePath: string, repl: vscode.Terminal): void {
   repl.show();
-  repl.sendText(quote([filePath]));
+  repl.sendText(`(load ${quote([filePath])})`);
 }
 
 export function createTerminal(filePath: string | null): vscode.Terminal {
@@ -71,25 +69,20 @@ export function createRepl(filePath: string, command: string[]): vscode.Terminal
     const schemeExePath = quoteWindowsPath(command[0], true);
     const quotedFilePath = quoteWindowsPath(filePath, false);
     let fullCommand = `${schemeExePath} ${command.slice(1).join(' ')}`;
-    if (isCmdExeShell()) {
-      fullCommand += `${quotedFilePath}`;
-    } else if (isPowershellShell()) {
-      fullCommand += quotedFilePath;
-    } else {
-      fullCommand += quotedFilePath;
+    if (command.slice(1).length > 0 && !fullCommand.endsWith(' ')) {
+      fullCommand += ' ';
     }
+    fullCommand += quotedFilePath;
     repl.sendText(fullCommand);
   } else {
-    const hasWorkspace = withWorkspacePath((workspacePath: string) => {
+    withWorkspacePath((workspacePath: string) => {
       const akku = vscode.workspace.getConfiguration("magicScheme.akku").get<string>("path");
       if (akku && existsSync(path.join(workspacePath, "AKKU.manifest")) && !existsSync(path.join(workspacePath, ".akku", "akku"))) {
         repl.sendText(quote([akku, "install"]));
       }
+      repl.sendText(quote(["bash", path.join(workspacePath, ".akku", "env")]));
     });
-    if (hasWorkspace) {
-      withWorkspacePath((workspacePath: string) => repl.sendText(quote(["bash", path.join(workspacePath, ".akku", "env")])));
-    }
-    repl.sendText(quote([...command]));
+    repl.sendText(quote([...command, filePath]));
   }
 
   return repl;

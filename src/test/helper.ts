@@ -9,13 +9,9 @@ export async function activate(docUri: vscode.Uri): Promise<void> {
     if (!ext.isActive) {
         await ext.activate();
     }
-    try {
-        doc = await vscode.workspace.openTextDocument(docUri);
-        editor = await vscode.window.showTextDocument(doc);
-        await sleep(2000);
-    } catch (e) {
-        console.error(e);
-    }
+    doc = await vscode.workspace.openTextDocument(docUri);
+    editor = await vscode.window.showTextDocument(doc);
+    await sleep(2000);
 }
 
 export async function sleep(ms: number): Promise<void> {

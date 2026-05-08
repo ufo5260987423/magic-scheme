@@ -18,7 +18,11 @@ export function getOrDefault<K, V>(map: Map<K, V>, key: K, getDefault: () => V):
 }
 
 function saveActiveTextEditorAndRun(f: () => void) {
-  vscode.window.activeTextEditor?.document?.save().then(() => f());
+  vscode.window.activeTextEditor?.document?.save().then((saved) => {
+    if (saved) {
+      f();
+    }
+  });
 }
 
 export function runInTerminal(terminals: Map<string, vscode.Terminal>): void {
@@ -57,9 +61,11 @@ export function loadInRepl(repls: Map<string, vscode.Terminal>): void {
 export function openRepl(repls: Map<string, vscode.Terminal>): void {
   withFilePath((filePath: string) => {
     withREPL((command: string[]) => {
-      const repl = getOrDefault(repls, filePath, 
-        () => createRepl(filePath, command));
-      repl.show();
+      saveActiveTextEditorAndRun(() => {
+        const repl = getOrDefault(repls, filePath,
+          () => createRepl(filePath, command));
+        repl.show();
+      });
     });
   });
 }

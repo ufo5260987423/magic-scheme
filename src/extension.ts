@@ -64,12 +64,20 @@ async function configurationChanged() {
     return;
   }
 
-  if (enableLSP && !isLangClientRunning) {
-    await langClient.start();
-    // isLangClientRunning will be set by onDidChangeState when it reaches Running
-  } else if (!enableLSP && isLangClientRunning) {
-    await langClient.stop();
+  try {
+    if (enableLSP && !isLangClientRunning) {
+      await langClient.start();
+      // isLangClientRunning will be set by onDidChangeState when it reaches Running
+    } else if (!enableLSP && isLangClientRunning) {
+      await langClient.stop();
+      isLangClientRunning = false;
+    }
+  } catch (err) {
+    console.error("Magic Scheme: LSP operation failed", err);
     isLangClientRunning = false;
+    statusBarItem.text = "$(error) Scheme-langserver Error";
+    statusBarItem.tooltip = "Language Server operation failed";
+    statusBarItem.show();
   }
 }
 
@@ -84,7 +92,7 @@ export function activate(context: vscode.ExtensionContext) {
   setupLSP();
 
   if (langClient) {
-    langClient.onDidChangeState((event) => {
+    const stateDisposable = langClient.onDidChangeState((event) => {
       switch (event.newState) {
         case State.Starting:
           statusBarItem.text = "$(sync~spin) Initializing Scheme-langserver...";
@@ -92,11 +100,13 @@ export function activate(context: vscode.ExtensionContext) {
           statusBarItem.show();
           break;
         case State.Running:
+          isLangClientRunning = true;
           statusBarItem.text = "$(check) Scheme-langserver Ready";
           statusBarItem.tooltip = "Language Server is ready";
           statusBarItem.show();
           break;
         case State.Stopped:
+          isLangClientRunning = false;
           statusBarItem.text = "$(error) Scheme-langserver Error";
           statusBarItem.tooltip = "Language Server failed to initialize";
           statusBarItem.show();
@@ -105,6 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
           break;
       }
     });
+    context.subscriptions.push(stateDisposable);
 
     void configurationChanged();
   } else {

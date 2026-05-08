@@ -123,7 +123,7 @@
         "magicScheme.scheme-langserver.logPath": {
           "type": "string",
           "default": "~/scheme-langserver.log",
-          "markdownDescription": "Path to the scheme-langserver's log. Can be either an absolute path or relative to the workspace root. Default: `~/.scheme-langserver.log`, which is located on your `$HOME`."
+          "markdownDescription": "Path to the scheme-langserver's log. Can be either an absolute path or relative to the workspace root. Default: `~/scheme-langserver.log`, which is located on your `$HOME`."
         },
         "magicScheme.scheme-langserver.multiThread": {
           "type": "string",
@@ -195,17 +195,26 @@
       },
       {
         "key": "Alt+Shift+Enter",
-        "command": "magic-scheme.runSchemeREPL"
+        "command": "magic-scheme.runSchemeREPL",
+        "when": "resourceLangId == scheme && editorTextFocus"
       }
     ],
     "commands": [
       {
         "command": "magic-scheme.runSchemeScript",
-        "title": "`scheme --script {currentFile}` with Current AKKU Environment"
+        "title": "Run Scheme Script"
       },
       {
         "command": "magic-scheme.runSchemeREPL",
-        "title": "`scheme {currentFile}` with Current AKKU Environment"
+        "title": "Open Scheme REPL"
+      },
+      {
+        "command": "magic-scheme.loadInRepl",
+        "title": "Load File in REPL"
+      },
+      {
+        "command": "magic-scheme.showOutput",
+        "title": "Show Output Terminal"
       }
     ]
   },

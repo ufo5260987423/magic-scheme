@@ -9,10 +9,10 @@ export class TaskProvider implements vscode.TaskProvider {
     "Script",
     "scheme",
     // eslint-disable-next-line no-template-curly-in-string
-    new vscode.ShellExecution("${config:magicScheme.scheme.path}", [
-      "--script",
-      { value: "${file}", quoting: vscode.ShellQuoting.Strong },
-    ]),
+    new vscode.ShellExecution(
+      { value: "${config:magicScheme.scheme.path}", quoting: vscode.ShellQuoting.Strong },
+      ["--script", { value: "${file}", quoting: vscode.ShellQuoting.Strong }]
+    ),
   );
 
   static replTask = new vscode.Task(
@@ -21,9 +21,10 @@ export class TaskProvider implements vscode.TaskProvider {
     "Repl",
     "scheme",
     // eslint-disable-next-line no-template-curly-in-string
-    new vscode.ShellExecution("${config:magicScheme.scheme.path}", [
-      { value: "${file}", quoting: vscode.ShellQuoting.Strong },
-    ]),
+    new vscode.ShellExecution(
+      { value: "${config:magicScheme.scheme.path}", quoting: vscode.ShellQuoting.Strong },
+      [{ value: "${file}", quoting: vscode.ShellQuoting.Strong }]
+    ),
   );
 
   public async provideTasks(): Promise<vscode.Task[]> {

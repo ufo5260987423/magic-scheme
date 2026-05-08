@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { quote } from "shell-quote";
 
 export const isWindowsOS: () => boolean = () => process.platform === "win32";
 export const isCmdExeShell: () => boolean = () => vscode.env.shell?.endsWith("cmd.exe") ?? false;
@@ -27,9 +28,9 @@ export function quoteWindowsPath(filePath: string, isExecutable: boolean): strin
     }
     return filePath;
   }
-  // Generic shell (bash, zsh, etc.) on Windows (Git Bash, MSYS2, etc.)
-  if (/\s/.test(filePath)) {
-    return `'${filePath}'`;
+  // Generic shell (Git Bash, MSYS2, etc.)
+  if (/[\s'"]/.test(filePath)) {
+    return quote([filePath]);
   }
   return filePath;
 }
