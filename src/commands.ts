@@ -71,6 +71,18 @@ export function openRepl(repls: Map<string, vscode.Terminal>): void {
 }
 
 export function showOutput(terminals: Map<string, vscode.Terminal>): void {
+  const mode = vscode.workspace
+    .getConfiguration("magicScheme.scheme.outputTerminal")
+    .get("numberOfOutputTerminals");
+
+  if (mode === "one") {
+    const terminal = terminals.get("one");
+    if (terminal) {
+      terminal.show();
+      return;
+    }
+  }
+
   withFilePath((filePath: string) => {
     const terminal = terminals.get(filePath);
     if (terminal) {

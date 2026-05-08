@@ -47,15 +47,38 @@ function main() {
 function handleResponse(response, file) {
   if (response.statusCode !== 200) {
     console.error(`Download failed: HTTP ${response.statusCode}`);
-    process.exit(1);
+    cleanupAndExit(1);
+    return;
   }
 
   response.pipe(file);
+
+  response.on('error', (err) => {
+    console.error(`Download stream error: ${err.message}`);
+    cleanupAndExit(1);
+  });
+
+  file.on('error', (err) => {
+    console.error(`File write error: ${err.message}`);
+    cleanupAndExit(1);
+  });
+
   file.on('finish', () => {
     file.close();
     fs.chmodSync(DEST_FILE, 0o755);
     console.log(`scheme-langserver downloaded to ${DEST_FILE}`);
   });
+}
+
+function cleanupAndExit(code) {
+  try {
+    if (fs.existsSync(DEST_FILE)) {
+      fs.unlinkSync(DEST_FILE);
+    }
+  } catch {
+    // ignore cleanup errors
+  }
+  process.exit(code);
 }
 
 main();

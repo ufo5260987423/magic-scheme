@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 import { quote } from "shell-quote";
+import * as path from "path";
+import * as os from "os";
 
 export const isWindowsOS: () => boolean = () => process.platform === "win32";
 export const isCmdExeShell: () => boolean = () => vscode.env.shell?.endsWith("cmd.exe") ?? false;
@@ -35,6 +37,13 @@ export function quoteWindowsPath(filePath: string, isExecutable: boolean): strin
   return filePath;
 }
 
+function resolveTilde(filePath: string): string {
+  if (filePath.startsWith('~/') || filePath.startsWith('~\\')) {
+    return path.join(os.homedir(), filePath.slice(2));
+  }
+  return filePath;
+}
+
 function normalizeFilePath(filePath: string): string {
   if (isWindowsOS()) {
     return filePath.replace(/\\/g, "/");
@@ -66,7 +75,7 @@ export function withLanguageServer(func: (command: string, args: string[]) => vo
     return;
   }
 
-  const resolvedLog = log || "~/scheme-langserver.log";
+  const resolvedLog = resolveTilde(log || "~/scheme-langserver.log");
   const resolvedMultiThread = multiThread || "enable";
   const resolvedTypeInference = typeInference || "disable";
   const resolvedTopEnvironment = topEnvironment || "R6RS";

@@ -15,6 +15,10 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 - **Windows args quoting**: `command.slice(1)` arguments are now individually quoted instead of naively `join(' ')`.
 - **Partial download cleanup**: Failed downloads now delete incomplete files to avoid stale/corrupt binaries.
 - **Progress bar**: Download progress notification now updates the actual progress bar (not just text).
+- **showOutput "one" mode**: Fixed bug where `showOutput` command could not find the terminal when `numberOfOutputTerminals` is set to `"one"`.
+- **Tilde expansion**: `~/scheme-langserver.log` is now correctly expanded to the user's home directory (previously `~` was treated as a literal folder name).
+- **Deactivation safety**: `deactivate()` now catches `langClient.stop()` errors gracefully.
+- **Environment info visibility**: The Scheme output channel is now shown on activation so users can see environment diagnostics.
 
 ### Added
 - **Auto-install scheme-langserver**: Extension now automatically detects, downloads, and configures `scheme-langserver` on first activation.

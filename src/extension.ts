@@ -11,7 +11,7 @@ let statusBarItem: vscode.StatusBarItem;
 let isLangClientRunning = false;
 
 export function deactivate(): Promise<void> {
-  return langClient?.stop() ?? Promise.resolve();
+  return langClient?.stop().catch(() => {}) ?? Promise.resolve();
 }
 
 function printEnvironmentInfo(): vscode.OutputChannel {
@@ -26,6 +26,7 @@ function printEnvironmentInfo(): vscode.OutputChannel {
   channel.appendLine(`vscode.env.appHost: ${vscode.env.appHost}`);
   channel.appendLine(`vscode.env.appName: ${vscode.env.appName}`);
   channel.appendLine(`vscode.env.shell:   ${vscode.env.shell}`);
+  channel.show(true);
   return channel;
 }
 
