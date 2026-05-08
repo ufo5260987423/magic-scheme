@@ -7,8 +7,8 @@ import { withLanguageServer } from "./utils";
 import { ensureLangserver, isExecutable } from "./download";
 
 let langClient: LanguageClient | undefined;
+let stateListenerDisposable: vscode.Disposable | undefined;
 let statusBarItem: vscode.StatusBarItem;
-let isLangClientRunning = false;
 
 export function deactivate(): Promise<void> {
   return langClient?.stop().catch(() => {}) ?? Promise.resolve();
@@ -59,11 +59,27 @@ function setupLSP() {
   });
 }
 
-function registerStateListener(context: vscode.ExtensionContext): void {
+function disposeLangClient(): void {
+  if (stateListenerDisposable) {
+    stateListenerDisposable.dispose();
+    stateListenerDisposable = undefined;
+  }
+  if (langClient) {
+    langClient.stop().catch(() => {});
+    langClient = undefined;
+  }
+}
+
+function registerStateListener(): void {
   if (!langClient) {
     return;
   }
-  const stateDisposable = langClient.onDidChangeState((event) => {
+  // Dispose any previous listener to avoid duplicates on re-creation.
+  if (stateListenerDisposable) {
+    stateListenerDisposable.dispose();
+    stateListenerDisposable = undefined;
+  }
+  stateListenerDisposable = langClient.onDidChangeState((event) => {
     switch (event.newState) {
       case State.Starting:
         statusBarItem.text = "$(sync~spin) Initializing Scheme-langserver...";
@@ -71,13 +87,11 @@ function registerStateListener(context: vscode.ExtensionContext): void {
         statusBarItem.show();
         break;
       case State.Running:
-        isLangClientRunning = true;
         statusBarItem.text = "$(check) Scheme-langserver Ready";
         statusBarItem.tooltip = "Language Server is ready";
         statusBarItem.show();
         break;
       case State.Stopped:
-        isLangClientRunning = false;
         statusBarItem.text = "$(error) Scheme-langserver Error";
         statusBarItem.tooltip = "Language Server failed to initialize";
         statusBarItem.show();
@@ -86,16 +100,15 @@ function registerStateListener(context: vscode.ExtensionContext): void {
         break;
     }
   });
-  context.subscriptions.push(stateDisposable);
 }
 
-function trySetupAndStartLSP(context: vscode.ExtensionContext): void {
+function trySetupAndStartLSP(): void {
   if (langClient) {
     return;
   }
   setupLSP();
   if (langClient) {
-    registerStateListener(context);
+    registerStateListener();
     void configurationChanged();
   }
 }
@@ -108,16 +121,15 @@ async function configurationChanged() {
   }
 
   try {
-    if (enableLSP && !isLangClientRunning) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const currentState = (langClient as any).state as State;
+    if (enableLSP && currentState === State.Stopped) {
       await langClient.start();
-      // isLangClientRunning will be set by onDidChangeState when it reaches Running
-    } else if (!enableLSP && isLangClientRunning) {
+    } else if (!enableLSP && currentState === State.Running) {
       await langClient.stop();
-      isLangClientRunning = false;
     }
   } catch (err) {
     console.error("Magic Scheme: LSP operation failed", err);
-    isLangClientRunning = false;
     statusBarItem.text = "$(error) Scheme-langserver Error";
     statusBarItem.tooltip = "Language Server operation failed";
     statusBarItem.show();
@@ -133,8 +145,7 @@ export async function activate(context: vscode.ExtensionContext) {
   statusBarItem.show();
 
   // Try to start LSP immediately with the current user configuration.
-  // If the user has already configured a valid serverPath, this works right away.
-  trySetupAndStartLSP(context);
+  trySetupAndStartLSP();
 
   if (!langClient) {
     statusBarItem.text = "$(sync~spin) Looking for scheme-langserver...";
@@ -164,9 +175,12 @@ export async function activate(context: vscode.ExtensionContext) {
       await config.update('serverPath', serverPath, false);
     }
 
-    // If LSP was not started earlier (because no valid serverPath existed), start it now.
-    if (!langClient) {
-      trySetupAndStartLSP(context);
+    // If LSP was never started, or the old client uses an invalid path, recreate it.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const currentState = langClient ? (langClient as any).state as State : undefined;
+    if (!langClient || currentState === State.Stopped) {
+      disposeLangClient();
+      trySetupAndStartLSP();
     }
   });
 
@@ -189,6 +203,12 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   const configChangeDisposable = vscode.workspace.onDidChangeConfiguration((e) => {
+    if (e.affectsConfiguration("magicScheme.scheme-langserver.serverPath")) {
+      // The user (or auto-download) changed the server path. Dispose the old
+      // client and recreate so the new path is picked up immediately.
+      disposeLangClient();
+      trySetupAndStartLSP();
+    }
     if (e.affectsConfiguration("magicScheme")) {
       void configurationChanged();
     }

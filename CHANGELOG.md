@@ -19,6 +19,9 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 - **Tilde expansion**: `~/scheme-langserver.log` is now correctly expanded to the user's home directory (previously `~` was treated as a literal folder name).
 - **Deactivation safety**: `deactivate()` now catches `langClient.stop()` errors gracefully.
 - **Environment info visibility**: The Scheme output channel is now shown on activation so users can see environment diagnostics.
+- **LSP client recreation**: Changing `serverPath` (manually or via auto-download) now disposes the old `langClient` and recreates it with the new path immediately. Previously the old path was cached forever.
+- **Auto-download restart**: After downloading scheme-langserver in the background, the extension now correctly restarts the LSP with the newly downloaded binary instead of leaving a dead client.
+- **State-machine safety**: `configurationChanged()` now checks `langClient.state` (instead of a boolean flag) to avoid duplicate `start()` calls during rapid config toggles.
 
 ### Added
 - **Auto-install scheme-langserver**: Extension now automatically detects, downloads, and configures `scheme-langserver` on first activation.
