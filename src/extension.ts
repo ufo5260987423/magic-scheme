@@ -4,6 +4,7 @@ import * as os from "os";
 import * as com from "./commands";
 import { TaskProvider } from "./tasks";
 import { withLanguageServer } from "./utils";
+import { ensureLangserver } from "./download";
 
 let langClient: LanguageClient | undefined;
 let statusBarItem: vscode.StatusBarItem;
@@ -81,13 +82,22 @@ async function configurationChanged() {
   }
 }
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   const infoChannel = printEnvironmentInfo();
   context.subscriptions.push(infoChannel);
 
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   context.subscriptions.push(statusBarItem);
   statusBarItem.show();
+
+  const serverPath = await ensureLangserver(context);
+  if (serverPath) {
+    const config = vscode.workspace.getConfiguration('magicScheme.scheme-langserver');
+    const configuredPath = config.get<string>('serverPath');
+    if (configuredPath !== serverPath) {
+      await config.update('serverPath', serverPath, true);
+    }
+  }
 
   setupLSP();
 

@@ -58,22 +58,26 @@ export function withLanguageServer(func: (command: string, args: string[]) => vo
   const topEnvironment = vscode.workspace
     .getConfiguration("magicScheme.scheme-langserver")
     .get<string>("topEnvironment");
-  const missing: string[] = [];
-  if (!command) { missing.push("serverPath"); }
-  if (!log) { missing.push("logPath"); }
-  if (!multiThread) { missing.push("multiThread"); }
-  if (!typeInference) { missing.push("typeInference"); }
-  if (!topEnvironment) { missing.push("topEnvironment"); }
 
-  if (missing.length > 0) {
+  if (!command) {
     vscode.window.showErrorMessage(
-      `Missing scheme-langserver configuration: ${missing.join(", ")}. Please check Magic Scheme settings.`
+      'scheme-langserver not found. Please install it or set "magicScheme.scheme-langserver.serverPath".'
     );
     return;
   }
 
-  const args: string[] = ["-l", log!, "-m", multiThread!, "-t", typeInference!, "-e", topEnvironment!];
-  func(command!, args);
+  const resolvedLog = log || "~/scheme-langserver.log";
+  const resolvedMultiThread = multiThread || "enable";
+  const resolvedTypeInference = typeInference || "disable";
+  const resolvedTopEnvironment = topEnvironment || "R6RS";
+
+  const args: string[] = [
+    "-l", resolvedLog,
+    "-m", resolvedMultiThread,
+    "-t", resolvedTypeInference,
+    "-e", resolvedTopEnvironment,
+  ];
+  func(command, args);
 }
 
 export function withScheme(func: (command: string[]) => void): void {

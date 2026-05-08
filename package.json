@@ -115,6 +115,11 @@
           "default": true,
           "markdownDescription": "Enable scheme-langserver."
         },
+        "magicScheme.scheme-langserver.autoDownload": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Automatically download scheme-langserver if not found on the system. Only supported on Linux x64 (not NixOS)."
+        },
         "magicScheme.scheme-langserver.serverPath": {
           "type": "string",
           "default": "scheme-langserver",

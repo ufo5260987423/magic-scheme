@@ -6,7 +6,9 @@ This extension adds support for Scheme(r6rs standard) to VS Code. With the help 
 
 >NOTE: PLEASE ALWAYS USE LATEST VERSION SCHEME-LANGSERVER.
 
-Please make sure: before you start this extension, you **have to** do fully setting up and configurations [here](#setting-up--some-configuration).
+> **Zero-config for Linux x64**: Magic Scheme can now **automatically download and install** `scheme-langserver` on first activation. No manual setup required for most Linux users.
+>
+> For macOS, Windows, ARM Linux, and NixOS users, please see [platform-specific notes](#setting-up--some-configuration) below.
 
 You can click [this patreon page](https://www.patreon.com/PoorProgrammer/membership) or [爱发电](https://afdian.com/a/ufo5260987423) to donate monthly, or just donate 10 USD just once time with the following paypal link. 
 
@@ -94,7 +96,26 @@ I'm so sorry Magic Scheme has some conflicts with [Chez-Scheme-VsCode](https://g
 
 ### Get Scheme-langserver
 
-You may directly download latest executable file from the [scheme-langserver releases page](https://github.com/ufo5260987423/scheme-langserver/releases/latest). After downloading, set `magicScheme.scheme-langserver.serverPath` to the path of the downloaded binary.
+#### Automatic Installation (Recommended for Linux x64)
+
+Magic Scheme will automatically download and install `scheme-langserver` on first activation if:
+- You are on **Linux x64** (not NixOS)
+- `scheme-langserver` is not already on your `$PATH`
+- `magicScheme.scheme-langserver.autoDownload` is enabled (default: `true`)
+
+The binary is downloaded to VS Code's global storage (`~/.config/Code/User/globalStorage/...`) and is reused across workspaces.
+
+#### Manual Installation
+
+If automatic installation is not available for your platform, you can manually download the latest executable from the [scheme-langserver releases page](https://github.com/ufo5260987423/scheme-langserver/releases/latest) and set `magicScheme.scheme-langserver.serverPath` to its path.
+
+| Platform | Support | Notes |
+|----------|---------|-------|
+| Linux x64 | ✅ Auto-download | Automatically downloaded on first use. |
+| NixOS | ✅ PATH fallback | Install via `nix-shell -p akkuPackages.scheme-langserver`. Auto-download is skipped. |
+| macOS | ❌ Manual only | No prebuilt binary. Install via Nix or [build from source](https://github.com/ufo5260987423/scheme-langserver). |
+| Windows | ❌ Manual only | No prebuilt binary. Use WSL2 or build from source. |
+| Linux ARM | ❌ Manual only | No prebuilt binary. Build from source. |
 
 ### Get Scheme
 Magic Scheme supports [r6rs](http://r6rs.org/) standard scheme. But apparently I can't fully tests all implementations. As myself, I recommend with [Chez Scheme](https://cisco.github.io/ChezScheme/), and you may install it as following:
@@ -132,7 +153,7 @@ The project has a 3-layer test suite:
 
 | Suite | File | Description |
 |-------|------|-------------|
-| Unit | `src/test/utils.test.ts` | Tests `getOrDefault`, `quoteWindowsPath`, and config defaults. Runs fast without VS Code. |
+| Unit | `src/test/utils.test.ts`, `src/test/download.test.ts` | Tests pure logic: `getOrDefault`, `quoteWindowsPath`, config defaults, download progress, and platform detection. |
 | Mock LSP | `src/test/lifecycle.test.ts` | Uses a mock Node.js LSP server (`src/test/mock-server/server.ts`) to test extension activation, completions, and hover without a real scheme-langserver. |
 | E2E | `src/test/e2e.test.ts` | Tests against a real `scheme-langserver` binary. Auto-detects the binary from `.vscode-test/scheme-langserver`, `./run`, or `$PATH`. |
 

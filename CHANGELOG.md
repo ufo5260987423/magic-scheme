@@ -13,8 +13,13 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 - **Resource Disposal**: `statusBarItem`, `infoChannel`, event listeners all added to `context.subscriptions`.
 
 ### Added
+- **Auto-install scheme-langserver**: Extension now automatically detects, downloads, and configures `scheme-langserver` on first activation.
+  - Linux x64 (non-NixOS): Downloads latest release to VS Code global storage automatically.
+  - macOS / Windows / Linux ARM / NixOS: Shows platform-specific install guidance instead of a generic error.
+  - New setting `magicScheme.scheme-langserver.autoDownload` (default `true`).
+  - Fallback chain: configured `serverPath` → `$PATH` → workspace `./run` → previously downloaded binary → auto-download.
 - **3-layer test suite**:
-  - Unit tests (`src/test/utils.test.ts`): `getOrDefault`, `quoteWindowsPath`, config defaults (12 passing).
+  - Unit tests (`src/test/utils.test.ts`, `src/test/download.test.ts`): Pure logic tests including download progress, cancellation, and platform detection (22 passing).
   - Mock LSP tests (`src/test/lifecycle.test.ts`): Mock server tests extension activation + LSP lifecycle (3 passing).
   - E2E tests (`src/test/e2e.test.ts`): Auto-detects scheme-langserver binary; tests real completions/hover (3 passing).
 - **CI/CD**: GitHub Actions workflow (`.github/workflows/ci.yml`) for lint/build/test automation.

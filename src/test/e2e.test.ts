@@ -9,7 +9,7 @@ import { activate, getDocUri } from './helper';
 function isExecutable(filePath: string): boolean {
     try {
         const result = spawnSync(filePath, ['--help'], { encoding: 'utf8', timeout: 5000 });
-        return result.status !== null && result.error === undefined;
+        return result.status === 0 && result.error === undefined;
     } catch {
         return false;
     }
