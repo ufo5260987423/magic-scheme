@@ -4,7 +4,7 @@ import * as os from "os";
 import * as com from "./commands";
 import { TaskProvider } from "./tasks";
 import { withLanguageServer } from "./utils";
-import { ensureLangserver } from "./download";
+import { ensureLangserver, isExecutable } from "./download";
 
 let langClient: LanguageClient | undefined;
 let statusBarItem: vscode.StatusBarItem;
@@ -58,6 +58,47 @@ function setupLSP() {
   });
 }
 
+function registerStateListener(context: vscode.ExtensionContext): void {
+  if (!langClient) {
+    return;
+  }
+  const stateDisposable = langClient.onDidChangeState((event) => {
+    switch (event.newState) {
+      case State.Starting:
+        statusBarItem.text = "$(sync~spin) Initializing Scheme-langserver...";
+        statusBarItem.tooltip = "Language Server is initializing...";
+        statusBarItem.show();
+        break;
+      case State.Running:
+        isLangClientRunning = true;
+        statusBarItem.text = "$(check) Scheme-langserver Ready";
+        statusBarItem.tooltip = "Language Server is ready";
+        statusBarItem.show();
+        break;
+      case State.Stopped:
+        isLangClientRunning = false;
+        statusBarItem.text = "$(error) Scheme-langserver Error";
+        statusBarItem.tooltip = "Language Server failed to initialize";
+        statusBarItem.show();
+        break;
+      default:
+        break;
+    }
+  });
+  context.subscriptions.push(stateDisposable);
+}
+
+function trySetupAndStartLSP(context: vscode.ExtensionContext): void {
+  if (langClient) {
+    return;
+  }
+  setupLSP();
+  if (langClient) {
+    registerStateListener(context);
+    void configurationChanged();
+  }
+}
+
 async function configurationChanged() {
   const enableLSP: boolean = vscode.workspace.getConfiguration("magicScheme.scheme-langserver").get("enable", true);
 
@@ -90,49 +131,43 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(statusBarItem);
   statusBarItem.show();
 
-  const serverPath = await ensureLangserver(context);
-  if (serverPath) {
-    const config = vscode.workspace.getConfiguration('magicScheme.scheme-langserver');
-    const configuredPath = config.get<string>('serverPath');
-    if (configuredPath !== serverPath) {
-      await config.update('serverPath', serverPath, true);
-    }
-  }
+  // Try to start LSP immediately with the current user configuration.
+  // If the user has already configured a valid serverPath, this works right away.
+  trySetupAndStartLSP(context);
 
-  setupLSP();
-
-  if (langClient) {
-    const stateDisposable = langClient.onDidChangeState((event) => {
-      switch (event.newState) {
-        case State.Starting:
-          statusBarItem.text = "$(sync~spin) Initializing Scheme-langserver...";
-          statusBarItem.tooltip = "Language Server is initializing...";
-          statusBarItem.show();
-          break;
-        case State.Running:
-          isLangClientRunning = true;
-          statusBarItem.text = "$(check) Scheme-langserver Ready";
-          statusBarItem.tooltip = "Language Server is ready";
-          statusBarItem.show();
-          break;
-        case State.Stopped:
-          isLangClientRunning = false;
-          statusBarItem.text = "$(error) Scheme-langserver Error";
-          statusBarItem.tooltip = "Language Server failed to initialize";
-          statusBarItem.show();
-          break;
-        default:
-          break;
-      }
-    });
-    context.subscriptions.push(stateDisposable);
-
-    void configurationChanged();
-  } else {
-    statusBarItem.text = "$(error) Scheme-langserver Not Configured";
-    statusBarItem.tooltip = "Check Magic Scheme settings";
+  if (!langClient) {
+    statusBarItem.text = "$(sync~spin) Looking for scheme-langserver...";
+    statusBarItem.tooltip = "Auto-detecting or downloading scheme-langserver";
     statusBarItem.show();
   }
+
+  // Background: auto-detect / download / install.
+  // We do NOT await this so that extension activation never blocks on network I/O.
+  void ensureLangserver(context).then(async (serverPath) => {
+    if (!serverPath) {
+      if (!langClient) {
+        statusBarItem.text = "$(error) Scheme-langserver Not Found";
+        statusBarItem.tooltip = "Install scheme-langserver or set serverPath in settings";
+        statusBarItem.show();
+      }
+      return;
+    }
+
+    const config = vscode.workspace.getConfiguration('magicScheme.scheme-langserver');
+    const configuredPath = config.get<string>('serverPath');
+
+    // Update workspace-level config only when the current value is missing or invalid.
+    // Using workspace scope (false) avoids syncing machine-specific paths via Settings Sync.
+    const needsConfigUpdate = !configuredPath || !isExecutable(configuredPath);
+    if (needsConfigUpdate) {
+      await config.update('serverPath', serverPath, false);
+    }
+
+    // If LSP was not started earlier (because no valid serverPath existed), start it now.
+    if (!langClient) {
+      trySetupAndStartLSP(context);
+    }
+  });
 
   const terminals: Map<string, vscode.Terminal> = new Map();
   const repls: Map<string, vscode.Terminal> = new Map();

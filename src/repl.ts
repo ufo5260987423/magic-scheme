@@ -8,6 +8,25 @@ function fileName(filePath: string): string {
   return path.basename(filePath);
 }
 
+function sendAkkuSetup(terminal: vscode.Terminal, workspacePath: string): void {
+  const akku = vscode.workspace.getConfiguration("magicScheme.akku").get<string>("path");
+  const manifestPath = path.join(workspacePath, "AKKU.manifest");
+  const akkuBinPath = path.join(workspacePath, ".akku", "akku");
+  const envPath = path.join(workspacePath, ".akku", "env");
+
+  if (!existsSync(manifestPath)) {
+    return; // No AKKU project, nothing to do
+  }
+
+  if (akku && !existsSync(akkuBinPath)) {
+    terminal.sendText(quote([akku, "install"]));
+  }
+
+  if (existsSync(envPath)) {
+    terminal.sendText(quote(["bash", envPath]));
+  }
+}
+
 export function runFileInTerminal(
   command: string[],
   filePath: string,
@@ -18,16 +37,14 @@ export function runFileInTerminal(
   if (isWindowsOS()) {
     terminal.sendText(isPowershellShell() || isCmdExeShell() ? `cls` : `clear`);
     const schemeExePath = quoteWindowsPath(command[0], true);
+    const args = command.slice(1).map((a) => quoteWindowsPath(a, false));
     const quotedFilePath = quoteWindowsPath(filePath, false);
-    terminal.sendText(`${schemeExePath} ${command.slice(1).join(' ')} ${quotedFilePath}`);
+    const allParts = [schemeExePath, ...args, quotedFilePath].filter((p) => p !== "");
+    terminal.sendText(allParts.join(" "));
   } else {
     terminal.sendText(`clear`);
     withWorkspacePath((workspacePath: string) => {
-      const akku = vscode.workspace.getConfiguration("magicScheme.akku").get<string>("path");
-      if (akku && existsSync(path.join(workspacePath, "AKKU.manifest")) && !existsSync(path.join(workspacePath, ".akku", "akku"))) {
-        terminal.sendText(quote([akku, "install"]));
-      }
-      terminal.sendText(quote(["bash", path.join(workspacePath, ".akku", "env")]));
+      sendAkkuSetup(terminal, workspacePath);
     });
     terminal.sendText(quote([...command, filePath]));
   }
@@ -67,20 +84,13 @@ export function createRepl(filePath: string, command: string[]): vscode.Terminal
 
   if (isWindowsOS()) {
     const schemeExePath = quoteWindowsPath(command[0], true);
+    const args = command.slice(1).map((a) => quoteWindowsPath(a, false));
     const quotedFilePath = quoteWindowsPath(filePath, false);
-    let fullCommand = `${schemeExePath} ${command.slice(1).join(' ')}`;
-    if (command.slice(1).length > 0 && !fullCommand.endsWith(' ')) {
-      fullCommand += ' ';
-    }
-    fullCommand += quotedFilePath;
-    repl.sendText(fullCommand);
+    const allParts = [schemeExePath, ...args, quotedFilePath].filter((p) => p !== "");
+    repl.sendText(allParts.join(" "));
   } else {
     withWorkspacePath((workspacePath: string) => {
-      const akku = vscode.workspace.getConfiguration("magicScheme.akku").get<string>("path");
-      if (akku && existsSync(path.join(workspacePath, "AKKU.manifest")) && !existsSync(path.join(workspacePath, ".akku", "akku"))) {
-        repl.sendText(quote([akku, "install"]));
-      }
-      repl.sendText(quote(["bash", path.join(workspacePath, ".akku", "env")]));
+      sendAkkuSetup(repl, workspacePath);
     });
     repl.sendText(quote([...command, filePath]));
   }

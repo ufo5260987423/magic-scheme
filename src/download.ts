@@ -77,11 +77,12 @@ export async function downloadLangserver(
   const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];
   let downloaded = 0;
+  let lastPct = 0;
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
     if (token?.isCancellationRequested) {
-      reader.cancel();
+      await reader.cancel();
       throw new Error('Download cancelled');
     }
     const { done, value } = await reader.read();
@@ -93,7 +94,8 @@ export async function downloadLangserver(
       downloaded += value.length;
       if (progress && totalSize > 0) {
         const pct = Math.round((downloaded / totalSize) * 100);
-        progress.report({ message: `${pct}%` });
+        progress.report({ message: `${pct}%`, increment: pct - lastPct });
+        lastPct = pct;
       }
     }
   }
@@ -139,10 +141,10 @@ export async function ensureLangserver(context: vscode.ExtensionContext): Promis
     return downloaded;
   }
 
-  // 5. Auto-download (Linux x64 non-NixOS only)
+  // 5. Auto-download (Linux x64 only)
   if (autoDownload && canAutoDownload()) {
+    const destPath = path.join(globalStoragePath, 'scheme-langserver');
     try {
-      const destPath = path.join(globalStoragePath, 'scheme-langserver');
       await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
@@ -156,6 +158,14 @@ export async function ensureLangserver(context: vscode.ExtensionContext): Promis
       vscode.window.showInformationMessage('scheme-langserver installed successfully.');
       return destPath;
     } catch (err) {
+      // Clean up partial download so it doesn't look like a valid binary next time
+      try {
+        if (fs.existsSync(destPath)) {
+          fs.unlinkSync(destPath);
+        }
+      } catch {
+        // ignore cleanup errors
+      }
       vscode.window.showWarningMessage(
         `Failed to download scheme-langserver: ${err instanceof Error ? err.message : String(err)}`
       );

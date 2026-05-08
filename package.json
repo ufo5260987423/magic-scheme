@@ -118,7 +118,7 @@
         "magicScheme.scheme-langserver.autoDownload": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Automatically download scheme-langserver if not found on the system. Only supported on Linux x64 (not NixOS)."
+          "markdownDescription": "Automatically download scheme-langserver if not found on the system. Only supported on Linux x64."
         },
         "magicScheme.scheme-langserver.serverPath": {
           "type": "string",
@@ -237,7 +237,7 @@
     "test:unit": "vscode-test --config ./.vscode-test.mjs --label unit",
     "test:mock": "vscode-test --config ./.vscode-test.mjs --label mock-lifecycle",
     "test:e2e": "npm run download-langserver && vscode-test --config ./.vscode-test.mjs --label e2e",
-    "download-langserver": "bash scripts/download-langserver.sh"
+    "download-langserver": "node scripts/download-langserver.js"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.7",

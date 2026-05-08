@@ -105,6 +105,8 @@ Magic Scheme will automatically download and install `scheme-langserver` on firs
 
 The binary is downloaded to VS Code's global storage (`~/.config/Code/User/globalStorage/...`) and is reused across workspaces.
 
+> **Note on Settings Sync**: The auto-discovered path is written to your **workspace** settings, not global settings. This prevents machine-specific paths from being synced to other computers via VS Code Settings Sync.
+
 #### Manual Installation
 
 If automatic installation is not available for your platform, you can manually download the latest executable from the [scheme-langserver releases page](https://github.com/ufo5260987423/scheme-langserver/releases/latest) and set `magicScheme.scheme-langserver.serverPath` to its path.
@@ -172,6 +174,6 @@ npx @vscode/test-cli --label e2e
 ### Known Issues / Technical Notes
 
 - **`$/setTrace` warning**: VS Code's LSP client sends `$/setTrace` (a standard LSP 3.16+ notification to adjust server trace verbosity). `scheme-langserver` does not implement this and returns `invalid request`. This is harmless and does not affect completions, hover, or any other LSP feature.
-- **NixOS `scheme-langserver` binary**: The generic Linux glibc-linked release binary crashes on NixOS. Use the `nixpkgs` build instead.
+- **NixOS `scheme-langserver` binary**: The generic Linux glibc-linked release binary may crash on NixOS. If this happens, install via `nixpkgs` (`nix-shell -p akkuPackages.scheme-langserver`) instead.
 - **Test `sleep(2000)`**: `src/test/helper.ts` uses a fixed 2-second delay after opening a document to wait for LSP initialization. This is stable but could be improved by listening for `State.Running`.
 - **Mock server edge cases**: The mock LSP server does not handle `stdin` `end`/`error` events. This is acceptable for current test scenarios.

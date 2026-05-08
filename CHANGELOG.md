@@ -11,6 +11,10 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 - **Security**: All `terminal.sendText()` calls now use `shell-quote` or `quoteWindowsPath` with `%` escaping.
 - **Task Provider**: Fixed config key (`magicScheme.scheme.path`) and added `ShellQuoting.Strong`.
 - **Resource Disposal**: `statusBarItem`, `infoChannel`, event listeners all added to `context.subscriptions`.
+- **AKKU setup**: `.akku/env` is now only sourced when `AKKU.manifest` actually exists, preventing "No such file" spam.
+- **Windows args quoting**: `command.slice(1)` arguments are now individually quoted instead of naively `join(' ')`.
+- **Partial download cleanup**: Failed downloads now delete incomplete files to avoid stale/corrupt binaries.
+- **Progress bar**: Download progress notification now updates the actual progress bar (not just text).
 
 ### Added
 - **Auto-install scheme-langserver**: Extension now automatically detects, downloads, and configures `scheme-langserver` on first activation.
@@ -18,6 +22,8 @@ All notable changes to the "magic-scheme" extension will be documented in this f
   - macOS / Windows / Linux ARM: Shows platform-specific install guidance instead of a generic error.
   - New setting `magicScheme.scheme-langserver.autoDownload` (default `true`).
   - Fallback chain: configured `serverPath` → `$PATH` → workspace `./run` → previously downloaded binary → auto-download.
+  - **Non-blocking activation**: `ensureLangserver()` runs in the background so extension activation is never blocked by slow network.
+  - **Workspace-level config updates**: Auto-discovered paths are written to workspace settings (not global), avoiding Settings Sync issues with machine-specific paths.
 - **3-layer test suite**:
   - Unit tests (`src/test/utils.test.ts`, `src/test/download.test.ts`): Pure logic tests including download progress, cancellation, and platform detection (22 passing).
   - Mock LSP tests (`src/test/lifecycle.test.ts`): Mock server tests extension activation + LSP lifecycle (3 passing).
