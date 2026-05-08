@@ -13,22 +13,10 @@ if [[ -x "${DEST_FILE}" ]]; then
     exit 0
 fi
 
-echo "Fetching latest scheme-langserver release..."
+echo "Downloading latest scheme-langserver..."
 
-# Get the download URL from GitHub API
-DOWNLOAD_URL=$(curl -fsSL \
-    -H "Accept: application/vnd.github+json" \
-    "https://api.github.com/repos/ufo5260987423/scheme-langserver/releases/latest" \
-    | grep '"browser_download_url"' \
-    | head -1 \
-    | sed -E 's/.*"browser_download_url": *"([^"]+)".*/\1/')
+DOWNLOAD_URL="https://github.com/ufo5260987423/scheme-langserver/releases/latest/download/scheme-langserver-x86_64-linux-glibc"
 
-if [[ -z "${DOWNLOAD_URL}" ]]; then
-    echo "Failed to get download URL from GitHub API"
-    exit 1
-fi
-
-echo "Downloading from ${DOWNLOAD_URL}..."
 curl -fsSL -o "${DEST_FILE}" "${DOWNLOAD_URL}"
 chmod +x "${DEST_FILE}"
 
