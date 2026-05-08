@@ -84,6 +84,10 @@ The followings are mainly focus on x64-based linux operating system. As for othe
 5. For nixos, you may be able to directly install all your needs.
 6. Any other corner cases, you may refer softwares' documentations.
 
+### NixOS Note
+
+NixOS users should install `scheme-langserver` via `nixpkgs` (e.g., `akkuPackages.scheme-langserver`) rather than downloading the generic Linux release binary from GitHub. The generic glibc-linked binary crashes on NixOS with a SIGSEGV. The extension will automatically fall back to `scheme-langserver` in `$PATH` or a local `./run` file.
+
 ### Disable Conflict Plugins
 
 I'm so sorry Magic Scheme has some conflicts with [Chez-Scheme-VsCode](https://github.com/abhi18av/Chez-Scheme-VsCode) plugin. So, maybe you need to disable it.
@@ -114,7 +118,39 @@ bash install
 ```
 
 ## For Developer
+
+### Setup (NixOS)
+
 1. For Nixos, after install yo and generator-code, should 
 ```bash 
 export PATH=$PATH:./node_modules/.bin/
 ```
+
+### Testing
+
+The project has a 3-layer test suite:
+
+| Suite | File | Description |
+|-------|------|-------------|
+| Unit | `src/test/utils.test.ts` | Tests `getOrDefault`, `quoteWindowsPath`, and config defaults. Runs fast without VS Code. |
+| Mock LSP | `src/test/lifecycle.test.ts` | Uses a mock Node.js LSP server (`src/test/mock-server/server.ts`) to test extension activation, completions, and hover without a real scheme-langserver. |
+| E2E | `src/test/e2e.test.ts` | Tests against a real `scheme-langserver` binary. Auto-detects the binary from `.vscode-test/scheme-langserver`, `./run`, or `$PATH`. |
+
+Run all tests:
+```bash
+npm run test
+```
+
+Run a specific label:
+```bash
+npx @vscode/test-cli --label unit
+npx @vscode/test-cli --label mock-lifecycle
+npx @vscode/test-cli --label e2e
+```
+
+### Known Issues / Technical Notes
+
+- **`$/setTrace` warning**: VS Code's LSP client sends `$/setTrace` (a standard LSP 3.16+ notification to adjust server trace verbosity). `scheme-langserver` does not implement this and returns `invalid request`. This is harmless and does not affect completions, hover, or any other LSP feature.
+- **NixOS `scheme-langserver` binary**: The generic Linux glibc-linked release binary crashes on NixOS. Use the `nixpkgs` build instead.
+- **Test `sleep(2000)`**: `src/test/helper.ts` uses a fixed 2-second delay after opening a document to wait for LSP initialization. This is stable but could be improved by listening for `State.Running`.
+- **Mock server edge cases**: The mock LSP server does not handle `stdin` `end`/`error` events. This is acceptable for current test scenarios.
