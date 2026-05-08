@@ -38,8 +38,8 @@ export function quoteWindowsPath(filePath: string, isExecutable: boolean): strin
 }
 
 function resolveTilde(filePath: string): string {
-  if (filePath.startsWith('~/') || filePath.startsWith('~\\')) {
-    return path.join(os.homedir(), filePath.slice(2));
+  if (filePath === '~' || filePath.startsWith('~/') || filePath.startsWith('~\\')) {
+    return path.join(os.homedir(), filePath.slice(filePath.startsWith('~\\') ? 2 : 1));
   }
   return filePath;
 }
@@ -75,6 +75,13 @@ export function withLanguageServer(func: (command: string, args: string[]) => vo
     return;
   }
 
+  // Resolve relative paths against the workspace root so that LanguageClient
+  // spawns the binary from the correct CWD.
+  let resolvedCommand = command;
+  if (!path.isAbsolute(command) && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+    resolvedCommand = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, command);
+  }
+
   const resolvedLog = resolveTilde(log || "~/scheme-langserver.log");
   const resolvedMultiThread = multiThread || "enable";
   const resolvedTypeInference = typeInference || "disable";
@@ -86,7 +93,7 @@ export function withLanguageServer(func: (command: string, args: string[]) => vo
     "-t", resolvedTypeInference,
     "-e", resolvedTopEnvironment,
   ];
-  func(command, args);
+  func(resolvedCommand, args);
 }
 
 export function withScheme(func: (command: string[]) => void): void {

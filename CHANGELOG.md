@@ -22,6 +22,12 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 - **LSP client recreation**: Changing `serverPath` (manually or via auto-download) now disposes the old `langClient` and recreates it with the new path immediately. Previously the old path was cached forever.
 - **Auto-download restart**: After downloading scheme-langserver in the background, the extension now correctly restarts the LSP with the newly downloaded binary instead of leaving a dead client.
 - **State-machine safety**: `configurationChanged()` now checks `langClient.state` (instead of a boolean flag) to avoid duplicate `start()` calls during rapid config toggles.
+- **Dispose race safety**: `disposeLangClient()` is now async and nulls the reference before awaiting `stop()`, preventing `TypeError` if `configurationChanged()` resumes after disposal.
+- **Deactivate cleanup**: `deactivate()` now properly awaits `disposeLangClient()`, ensuring the state listener is disposed on shutdown.
+- **Relative path resolution**: `withLanguageServer()` now resolves relative `serverPath` values against the workspace root, matching the behavior of `ensureLangserver()`.
+- **Download validation**: After auto-download, `ensureLangserver()` now runs `isExecutable()` on the downloaded file before reporting success.
+- **Tilde expansion edge case**: `resolveTilde()` now also handles bare `~` (without trailing slash).
+- **CI xvfb**: GitHub Actions test job now runs under `xvfb-run` so E2E tests work on headless Linux.
 
 ### Added
 - **Auto-install scheme-langserver**: Extension now automatically detects, downloads, and configures `scheme-langserver` on first activation.

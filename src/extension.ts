@@ -10,8 +10,8 @@ let langClient: LanguageClient | undefined;
 let stateListenerDisposable: vscode.Disposable | undefined;
 let statusBarItem: vscode.StatusBarItem;
 
-export function deactivate(): Promise<void> {
-  return langClient?.stop().catch(() => {}) ?? Promise.resolve();
+export async function deactivate(): Promise<void> {
+  await disposeLangClient();
 }
 
 function printEnvironmentInfo(): vscode.OutputChannel {
@@ -26,7 +26,6 @@ function printEnvironmentInfo(): vscode.OutputChannel {
   channel.appendLine(`vscode.env.appHost: ${vscode.env.appHost}`);
   channel.appendLine(`vscode.env.appName: ${vscode.env.appName}`);
   channel.appendLine(`vscode.env.shell:   ${vscode.env.shell}`);
-  channel.show(true);
   return channel;
 }
 
@@ -59,14 +58,15 @@ function setupLSP() {
   });
 }
 
-function disposeLangClient(): void {
+async function disposeLangClient(): Promise<void> {
   if (stateListenerDisposable) {
     stateListenerDisposable.dispose();
     stateListenerDisposable = undefined;
   }
   if (langClient) {
-    langClient.stop().catch(() => {});
+    const client = langClient;
     langClient = undefined;
+    await client.stop().catch(() => {});
   }
 }
 
@@ -179,7 +179,7 @@ export async function activate(context: vscode.ExtensionContext) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const currentState = langClient ? (langClient as any).state as State : undefined;
     if (!langClient || currentState === State.Stopped) {
-      disposeLangClient();
+      await disposeLangClient();
       trySetupAndStartLSP();
     }
   });
@@ -206,8 +206,7 @@ export async function activate(context: vscode.ExtensionContext) {
     if (e.affectsConfiguration("magicScheme.scheme-langserver.serverPath")) {
       // The user (or auto-download) changed the server path. Dispose the old
       // client and recreate so the new path is picked up immediately.
-      disposeLangClient();
-      trySetupAndStartLSP();
+      void disposeLangClient().then(() => trySetupAndStartLSP());
     }
     if (e.affectsConfiguration("magicScheme")) {
       void configurationChanged();

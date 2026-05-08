@@ -155,6 +155,12 @@ export async function ensureLangserver(context: vscode.ExtensionContext): Promis
           await downloadLangserver(destPath, token, progress);
         }
       );
+      if (!isExecutable(destPath)) {
+        vscode.window.showWarningMessage(
+          'scheme-langserver was downloaded but appears to be corrupt. Please try again or install manually.'
+        );
+        return undefined;
+      }
       vscode.window.showInformationMessage('scheme-langserver installed successfully.');
       return destPath;
     } catch (err) {
