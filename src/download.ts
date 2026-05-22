@@ -65,10 +65,34 @@ export async function downloadLangserver(
   token?: vscode.CancellationToken,
   progress?: vscode.Progress<{ message?: string; increment?: number }>
 ): Promise<void> {
-  const response = await fetch(DOWNLOAD_URL, {
-    redirect: 'follow',
-    headers: { 'User-Agent': 'magic-scheme-vscode-extension' },
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+  let abortedByUser = false;
+  if (token) {
+    token.onCancellationRequested(() => {
+      abortedByUser = true;
+      controller.abort();
+    });
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(DOWNLOAD_URL, {
+      redirect: 'follow',
+      headers: { 'User-Agent': 'magic-scheme-vscode-extension' },
+      signal: controller.signal,
+    });
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (abortedByUser) {
+      throw new Error('Download cancelled');
+    }
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error('Download timed out after 30 seconds');
+    }
+    throw err;
+  }
+  clearTimeout(timeoutId);
 
   if (!response.ok || !response.body) {
     throw new Error(`Download failed: HTTP ${response.status} ${response.statusText}`);
@@ -167,6 +191,14 @@ export async function ensureLangserver(context: vscode.ExtensionContext): Promis
         return undefined;
       }
       vscode.window.showInformationMessage('scheme-langserver installed successfully.');
+      const needsConfigUpdate = !configuredPath || !isExecutable(configuredPath);
+      if (needsConfigUpdate) {
+        try {
+          await config.update('serverPath', destPath, false);
+        } catch {
+          // ignore: settings may be read-only
+        }
+      }
       return destPath;
     } catch (err) {
       // Clean up partial download so it doesn't look like a valid binary next time

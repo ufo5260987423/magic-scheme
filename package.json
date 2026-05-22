@@ -3,6 +3,14 @@
   "displayName": "Magic Scheme",
   "description": "Scheme language server plugin.",
   "version": "0.0.7",
+  "files": [
+    "dist",
+    "images",
+    "package_files",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md"
+  ],
   "icon": "images/icon_blue.png",
   "engines": {
     "vscode": "^1.92.0"
@@ -14,6 +22,7 @@
     "scheme",
     "lisp",
     "r6rs",
+    "r7rs",
     "chez",
     "language-server",
     "akku"
@@ -44,7 +53,6 @@
     "url": "https://github.com/ufo5260987423/magic-scheme.git"
   },
   "homepage": "https://github.com/ufo5260987423/magic-scheme/blob/main/README.md",
-
   "contributes": {
     "snippets": [],
     "menus": {
@@ -236,13 +244,15 @@
     "watch:esbuild": "node esbuild.js --watch",
     "watch:tsc": "tsc --watch -p ./",
     "compile": "tsc -p ./",
-    "pretest": "npm run compile && npm run lint",
+    "pretest": "npm run clean-test-settings && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "npm run test:unit && npm run test:mock && npm run test:e2e",
     "test:unit": "vscode-test --config ./.vscode-test.mjs --label unit",
     "test:mock": "vscode-test --config ./.vscode-test.mjs --label mock-lifecycle",
     "test:e2e": "npm run download-langserver && vscode-test --config ./.vscode-test.mjs --label e2e",
-    "download-langserver": "node scripts/download-langserver.js"
+    "download-langserver": "node scripts/download-langserver.js",
+    "clean-test-settings": "node scripts/clean-test-settings.js",
+    "posttest": "npm run clean-test-settings"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.7",
@@ -255,7 +265,6 @@
     "@vscode/test-electron": "^2.4.0",
     "esbuild": "^0.21.5",
     "eslint": "^8.57.0",
-
     "typescript": "^5.4.5"
   },
   "dependencies": {

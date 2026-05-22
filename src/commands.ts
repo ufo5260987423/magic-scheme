@@ -79,7 +79,7 @@ export function showOutput(terminals: Map<string, vscode.Terminal>): void {
 
   if (mode === "one") {
     const terminal = terminals.get("one");
-    if (terminal) {
+    if (terminal && terminal.exitStatus === undefined) {
       terminal.show();
       return;
     }
@@ -87,7 +87,7 @@ export function showOutput(terminals: Map<string, vscode.Terminal>): void {
 
   withFilePath((filePath: string) => {
     const terminal = terminals.get(filePath);
-    if (terminal) {
+    if (terminal && terminal.exitStatus === undefined) {
       terminal.show();
     } else {
       vscode.window.showErrorMessage("No output terminal exists for this file");

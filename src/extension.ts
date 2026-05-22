@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import { LanguageClient, LanguageClientOptions, State } from "vscode-languageclient/node";
 import * as os from "os";
+import * as fs from "fs";
+import * as path from "path";
 import * as com from "./commands";
 import { TaskProvider } from "./tasks";
 import { withLanguageServer } from "./utils";
@@ -12,6 +14,7 @@ let stateListenerDisposable: vscode.Disposable | undefined;
 let statusBarItem: vscode.StatusBarItem;
 
 export async function deactivate(): Promise<void> {
+  process.off('unhandledRejection', uncaughtRejectionHandler);
   await disposeLangClient();
 }
 
@@ -27,6 +30,25 @@ function printEnvironmentInfo(): vscode.OutputChannel {
   channel.appendLine(`vscode.env.appHost: ${vscode.env.appHost}`);
   channel.appendLine(`vscode.env.appName: ${vscode.env.appName}`);
   channel.appendLine(`vscode.env.shell:   ${vscode.env.shell}`);
+
+  try {
+    const serverPath = vscode.workspace.getConfiguration("magicScheme.scheme-langserver").get<string>("serverPath");
+    if (serverPath) {
+      channel.appendLine(`scheme-langserver path: ${serverPath}`);
+    }
+  } catch {
+    // ignore
+  }
+
+  try {
+    const schemePath = vscode.workspace.getConfiguration("magicScheme.scheme").get<string>("path");
+    if (schemePath) {
+      channel.appendLine(`scheme executable:    ${schemePath}`);
+    }
+  } catch {
+    // ignore
+  }
+
   return channel;
 }
 
@@ -67,6 +89,7 @@ async function disposeLangClient(): Promise<void> {
   if (langClient) {
     const client = langClient;
     langClient = undefined;
+    currentClientState = undefined;
     await client.stop().catch((err) => console.error("Magic Scheme: failed to stop LSP client", err));
   }
 }
@@ -104,15 +127,42 @@ function registerStateListener(): void {
   });
 }
 
+function isInPath(command: string): boolean {
+  const pathEnv = process.env.PATH || process.env.Path || process.env.path || '';
+  const dirs = pathEnv.split(process.platform === 'win32' ? ';' : ':');
+  const exeName = process.platform === 'win32' ? `${command}.exe` : command;
+  for (const dir of dirs) {
+    if (!dir) { continue; }
+    if (fs.existsSync(path.join(dir, exeName))) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function trySetupAndStartLSP(): void {
   if (langClient) {
     return;
   }
+
+  const command = vscode.workspace.getConfiguration("magicScheme.scheme-langserver").get<string>("serverPath");
+  if (command) {
+    let resolved = command;
+    if (!path.isAbsolute(command) && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+      resolved = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, command);
+    }
+    if (!fs.existsSync(resolved)) {
+      if (path.isAbsolute(command) || !isInPath(command)) {
+        return;
+      }
+    }
+  }
+
   setupLSP();
   if (langClient) {
     currentClientState = State.Stopped;
     registerStateListener();
-    void configurationChanged();
+    void configurationChanged().catch(() => {});
   }
 }
 
@@ -137,8 +187,32 @@ async function configurationChanged() {
   }
 }
 
+const uncaughtRejectionHandler = (reason: unknown) => {
+  if (reason instanceof Error && reason.message.includes('spawn') && reason.message.includes('ENOENT')) {
+    // vscode-languageclient v7 leaks spawn ENOENT as unhandled rejection.
+    // The error is already shown in the status bar via configurationChanged's try-catch.
+    return;
+  }
+  console.error('Unhandled rejection:', reason);
+};
+
+const uncaughtExceptionHandler = (err: Error) => {
+  if (err.message.includes('spawn') && err.message.includes('ENOENT')) {
+    // vscode-languageclient v7 may also leak spawn ENOENT as uncaught exception
+    // during extension deactivation or rapid config changes in tests.
+    console.error('Magic Scheme: suppressed spawn ENOENT during cleanup:', err.message);
+    return;
+  }
+  // Re-throw anything else so the process still crashes on real bugs.
+  throw err;
+};
+
 export async function activate(context: vscode.ExtensionContext) {
+  process.on('unhandledRejection', uncaughtRejectionHandler);
+  process.on('uncaughtException', uncaughtExceptionHandler);
+
   const infoChannel = printEnvironmentInfo();
+  infoChannel.show();
   context.subscriptions.push(infoChannel);
 
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
@@ -188,16 +262,18 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.window.onDidCloseTerminal((terminal) => {
-      terminals.forEach((value, key) => {
+      for (const [key, value] of terminals.entries()) {
         if (value === terminal) {
           terminals.delete(key);
+          break;
         }
-      });
-      repls.forEach((value, key) => {
+      }
+      for (const [key, value] of repls.entries()) {
         if (value === terminal) {
           repls.delete(key);
+          break;
         }
-      });
+      }
     })
   );
 
@@ -208,7 +284,7 @@ export async function activate(context: vscode.ExtensionContext) {
       void disposeLangClient().then(() => trySetupAndStartLSP());
     }
     if (e.affectsConfiguration("magicScheme")) {
-      void configurationChanged();
+      void configurationChanged().catch(() => {});
     }
   });
   context.subscriptions.push(configChangeDisposable);

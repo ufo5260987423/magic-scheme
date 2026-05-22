@@ -34,14 +34,12 @@ suite('LSP Lifecycle Tests (Mock Server)', () => {
 
     suiteTeardown(async function () {
         this.timeout(10000);
-        const config = vscode.workspace.getConfiguration('magicScheme.scheme-langserver');
-        // Remove workspace overrides to fall back to package.json defaults
-        await config.update('serverPath', undefined, false);
-        await config.update('enable', undefined, false);
-        await config.update('logPath', undefined, false);
-        await config.update('multiThread', undefined, false);
-        await config.update('typeInference', undefined, false);
-        await config.update('topEnvironment', undefined, false);
+        // Intentionally empty: resetting config in teardown triggers a pre-existing
+        // vscode-languageclient v7 bug that spawns the default executable path
+        // during extension deactivation, causing an uncaught spawn ENOENT.
+        // Each test label runs in a fresh VS Code instance, so leaving workspace
+        // config dirty is harmless.  The `clean-test-settings` script removes
+        // leftover entries from .vscode/settings.json after the full test suite.
     });
 
     test('extension activates with mock server', async function () {
