@@ -2,7 +2,7 @@
   "name": "magic-scheme",
   "displayName": "Magic Scheme",
   "description": "Scheme language server plugin.",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "icon": "images/icon_blue.png",
   "engines": {
     "vscode": "^1.92.0"
@@ -157,6 +157,11 @@
           },
           "default": [],
           "markdownDescription": "Arguments passed to the scheme executable "
+        },
+        "magicScheme.scheme.scriptFlag": {
+          "type": "string",
+          "default": "--script",
+          "markdownDescription": "Flag passed to the Scheme executable when running a script. Default: `--script` (Chez Scheme). Change this if you use a different Scheme implementation."
         },
         "magicScheme.scheme.REPL.title": {
           "type": "string",

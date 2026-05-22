@@ -65,6 +65,13 @@ function handleResponse(response, file) {
 
   file.on('finish', () => {
     file.close();
+    const stats = fs.statSync(DEST_FILE);
+    const expectedSize = parseInt(response.headers['content-length'] || '0', 10);
+    if (expectedSize > 0 && stats.size !== expectedSize) {
+      console.error(`Download size mismatch: expected ${expectedSize}, got ${stats.size}`);
+      cleanupAndExit(1);
+      return;
+    }
     fs.chmodSync(DEST_FILE, 0o755);
     console.log(`scheme-langserver downloaded to ${DEST_FILE}`);
   });

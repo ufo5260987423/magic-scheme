@@ -7,6 +7,7 @@ import { withLanguageServer } from "./utils";
 import { ensureLangserver, isExecutable } from "./download";
 
 let langClient: LanguageClient | undefined;
+let currentClientState: State | undefined;
 let stateListenerDisposable: vscode.Disposable | undefined;
 let statusBarItem: vscode.StatusBarItem;
 
@@ -66,7 +67,7 @@ async function disposeLangClient(): Promise<void> {
   if (langClient) {
     const client = langClient;
     langClient = undefined;
-    await client.stop().catch(() => {});
+    await client.stop().catch((err) => console.error("Magic Scheme: failed to stop LSP client", err));
   }
 }
 
@@ -80,6 +81,7 @@ function registerStateListener(): void {
     stateListenerDisposable = undefined;
   }
   stateListenerDisposable = langClient.onDidChangeState((event) => {
+    currentClientState = event.newState;
     switch (event.newState) {
       case State.Starting:
         statusBarItem.text = "$(sync~spin) Initializing Scheme-langserver...";
@@ -108,6 +110,7 @@ function trySetupAndStartLSP(): void {
   }
   setupLSP();
   if (langClient) {
+    currentClientState = State.Stopped;
     registerStateListener();
     void configurationChanged();
   }
@@ -121,11 +124,9 @@ async function configurationChanged() {
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const currentState = (langClient as any).state as State;
-    if (enableLSP && currentState === State.Stopped) {
+    if (enableLSP && currentClientState === State.Stopped) {
       await langClient.start();
-    } else if (!enableLSP && currentState === State.Running) {
+    } else if (!enableLSP && currentClientState === State.Running) {
       await langClient.stop();
     }
   } catch (err) {
@@ -176,9 +177,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     // If LSP was never started, or the old client uses an invalid path, recreate it.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const currentState = langClient ? (langClient as any).state as State : undefined;
-    if (!langClient || currentState === State.Stopped) {
+    if (!langClient || currentClientState === State.Stopped) {
       await disposeLangClient();
       trySetupAndStartLSP();
     }
@@ -220,4 +219,9 @@ export async function activate(context: vscode.ExtensionContext) {
   const showOutput = vscode.commands.registerCommand('magic-scheme.showOutput', () => com.showOutput(terminals));
   const taskProvider = vscode.tasks.registerTaskProvider(TaskProvider.taskType, new TaskProvider());
   context.subscriptions.push(replCmd, script, loadRepl, showOutput, taskProvider);
+
+  return {
+    getLangClient: () => langClient,
+    getClientState: () => currentClientState,
+  };
 }

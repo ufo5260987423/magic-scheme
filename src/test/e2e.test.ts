@@ -3,17 +3,8 @@ import * as vscode from 'vscode';
 import { suite, test } from 'mocha';
 import * as path from 'path';
 import * as fs from 'fs';
-import { spawnSync } from 'child_process';
+import { isExecutable, findLangserverInPath } from '../download';
 import { activate, getDocUri } from './helper';
-
-function isExecutable(filePath: string): boolean {
-    try {
-        const result = spawnSync(filePath, ['--help'], { encoding: 'utf8', timeout: 5000 });
-        return result.status === 0 && result.error === undefined;
-    } catch {
-        return false;
-    }
-}
 
 function findLangserver(): string | undefined {
     const candidates = [
@@ -26,18 +17,7 @@ function findLangserver(): string | undefined {
             return candidate;
         }
     }
-    try {
-        const result = spawnSync('which', ['scheme-langserver'], { encoding: 'utf8' });
-        if (result.status === 0) {
-            const p = result.stdout.trim();
-            if (p && isExecutable(p)) {
-                return p;
-            }
-        }
-    } catch {
-        // ignore
-    }
-    return undefined;
+    return findLangserverInPath();
 }
 
 suite('E2E Tests (Real scheme-langserver)', () => {

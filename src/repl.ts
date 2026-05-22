@@ -27,13 +27,11 @@ function sendAkkuSetup(terminal: vscode.Terminal, workspacePath: string): void {
   }
 }
 
-export function runFileInTerminal(
-  command: string[],
-  filePath: string,
+function sendSchemeCommand(
   terminal: vscode.Terminal,
+  command: string[],
+  filePath: string
 ): void {
-  terminal.show();
-
   if (isWindowsOS()) {
     terminal.sendText(isPowershellShell() || isCmdExeShell() ? `cls` : `clear`);
     const schemeExePath = quoteWindowsPath(command[0], true);
@@ -48,6 +46,15 @@ export function runFileInTerminal(
     });
     terminal.sendText(quote([...command, filePath]));
   }
+}
+
+export function runFileInTerminal(
+  command: string[],
+  filePath: string,
+  terminal: vscode.Terminal,
+): void {
+  terminal.show();
+  sendSchemeCommand(terminal, command, filePath);
 }
 
 export function loadFileInRepl(filePath: string, repl: vscode.Terminal): void {
@@ -81,19 +88,6 @@ export function createRepl(filePath: string, command: string[]): vscode.Terminal
   const template = templateSetting && templateSetting !== "" ? templateSetting : "REPL ($name)";
   const repl = vscode.window.createTerminal(template.replace("$name", fileName(filePath)));
   repl.show();
-
-  if (isWindowsOS()) {
-    const schemeExePath = quoteWindowsPath(command[0], true);
-    const args = command.slice(1).map((a) => quoteWindowsPath(a, false));
-    const quotedFilePath = quoteWindowsPath(filePath, false);
-    const allParts = [schemeExePath, ...args, quotedFilePath].filter((p) => p !== "");
-    repl.sendText(allParts.join(" "));
-  } else {
-    withWorkspacePath((workspacePath: string) => {
-      sendAkkuSetup(repl, workspacePath);
-    });
-    repl.sendText(quote([...command, filePath]));
-  }
-
+  sendSchemeCommand(repl, command, filePath);
   return repl;
 }

@@ -4,6 +4,8 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 
 ## [Unreleased]
 
+## [0.0.7] - 2026-05-22
+
 ### Fixed
 - **Activation**: Changed `activationEvents` to `["onLanguage:scheme"]` for reliable startup.
 - **Stability**: Fixed `langClient` undefined crash and `deactivate()` returning rejected promise.

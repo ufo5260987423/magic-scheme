@@ -19,16 +19,17 @@ export function isExecutable(filePath: string): boolean {
 }
 
 export function findLangserverInPath(): string | undefined {
-  try {
-    const result = spawnSync('which', ['scheme-langserver'], { encoding: 'utf8' });
-    if (result.status === 0) {
-      const p = result.stdout.trim();
-      if (p && isExecutable(p)) {
-        return p;
-      }
+  const pathEnv = process.env.PATH || process.env.Path || process.env.path || '';
+  const dirs = pathEnv.split(process.platform === 'win32' ? ';' : ':');
+  const exeName = process.platform === 'win32' ? 'scheme-langserver.exe' : 'scheme-langserver';
+  for (const dir of dirs) {
+    if (!dir) {
+      continue;
     }
-  } catch {
-    // ignore
+    const fullPath = path.join(dir, exeName);
+    if (isExecutable(fullPath)) {
+      return fullPath;
+    }
   }
   return undefined;
 }
@@ -75,7 +76,7 @@ export async function downloadLangserver(
 
   const totalSize = parseInt(response.headers.get('content-length') || '0', 10);
   const reader = response.body.getReader();
-  const chunks: Uint8Array[] = [];
+  const fileStream = fs.createWriteStream(destPath);
   let downloaded = 0;
   let lastPct = 0;
 
@@ -83,6 +84,7 @@ export async function downloadLangserver(
   while (true) {
     if (token?.isCancellationRequested) {
       await reader.cancel();
+      fileStream.destroy();
       throw new Error('Download cancelled');
     }
     const { done, value } = await reader.read();
@@ -90,7 +92,7 @@ export async function downloadLangserver(
       break;
     }
     if (value) {
-      chunks.push(value);
+      fileStream.write(Buffer.from(value));
       downloaded += value.length;
       if (progress && totalSize > 0) {
         const pct = Math.round((downloaded / totalSize) * 100);
@@ -100,8 +102,11 @@ export async function downloadLangserver(
     }
   }
 
-  const buffer = Buffer.concat(chunks.map((c) => Buffer.from(c)));
-  fs.writeFileSync(destPath, buffer);
+  fileStream.end();
+  await new Promise<void>((resolve, reject) => {
+    fileStream.on('finish', resolve);
+    fileStream.on('error', reject);
+  });
   fs.chmodSync(destPath, 0o755);
 }
 

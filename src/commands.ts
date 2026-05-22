@@ -38,7 +38,9 @@ export function runInTerminal(terminals: Map<string, vscode.Terminal>): void {
       } else {
         terminal = getOrDefault(terminals, filePath, () => createTerminal(filePath));
       }
-      saveActiveTextEditorAndRun(() => runFileInTerminal([... command, "--script"], filePath, terminal));
+      const scriptFlag = vscode.workspace.getConfiguration("magicScheme.scheme").get<string>("scriptFlag", "--script");
+      const fullCommand = scriptFlag ? [...command, scriptFlag] : [...command];
+      saveActiveTextEditorAndRun(() => runFileInTerminal(fullCommand, filePath, terminal));
     });
   });
 }

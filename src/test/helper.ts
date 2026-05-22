@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { State } from 'vscode-languageclient/node';
 
 export let doc: vscode.TextDocument;
 export let editor: vscode.TextEditor;
@@ -11,6 +12,14 @@ export async function activate(docUri: vscode.Uri): Promise<void> {
     }
     doc = await vscode.workspace.openTextDocument(docUri);
     editor = await vscode.window.showTextDocument(doc);
+
+    // Quick check: if LSP is already running, no need to wait
+    const extExports = ext.exports as {
+        getClientState?: () => State | undefined;
+    };
+    if (extExports?.getClientState?.() === State.Running) {
+        return;
+    }
     await sleep(2000);
 }
 

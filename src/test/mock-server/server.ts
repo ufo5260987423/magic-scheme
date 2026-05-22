@@ -8,6 +8,15 @@ process.stdin.on('data', (chunk: Buffer) => {
     processMessages();
 });
 
+process.stdin.on('end', () => {
+    // stdin closed, no more messages to process
+});
+
+process.stdin.on('error', (err) => {
+    console.error('MockLSP: stdin error', err);
+    process.exit(1);
+});
+
 function processMessages(): void {
     for (;;) {
         const headerEnd = buffer.indexOf('\r\n\r\n');
