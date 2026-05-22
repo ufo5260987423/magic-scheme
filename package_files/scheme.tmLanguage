@@ -26,8 +26,9 @@
 	<array>
 		<string>scm</string>
 		<string>ss</string>
+		<string>sps</string>
+		<string>sls</string>
 		<string>sch</string>
-		<string>rkt</string>
 	</array>
 	<key>keyEquivalent</key>
 	<string>^~S</string>
@@ -45,11 +46,27 @@
 		</dict>
 		<dict>
 			<key>include</key>
+			<string>#sexp-comment</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#vector</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#bytevector</string>
+		</dict>
+		<dict>
+			<key>include</key>
 			<string>#sexp</string>
 		</dict>
 		<dict>
 			<key>include</key>
 			<string>#string</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#here-string</string>
 		</dict>
 		<dict>
 			<key>include</key>
@@ -120,13 +137,49 @@
 				</dict>
 			</array>
 		</dict>
+		<key>sexp-comment</key>
+		<dict>
+			<key>begin</key>
+			<string>#;</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.comment.scheme</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(?=[\s\)\]\}"]|$)</string>
+			<key>name</key>
+			<string>comment.block.sexp.scheme</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#quoted</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#sexp</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#string</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#constants</string>
+				</dict>
+			</array>
+		</dict>
 		<key>constants</key>
 		<dict>
 			<key>patterns</key>
 			<array>
 				<dict>
 					<key>match</key>
-					<string>#[t|f]</string>
+					<string>#[tf]|#true|#false</string>
 					<key>name</key>
 					<string>constant.language.boolean.scheme</string>
 				</dict>
@@ -155,7 +208,12 @@
 						(?&lt;=(\s|\(|\[)) # preceded by space or ( 
 						( do|or|and|else|quasiquote|begin|if|case|set!|
 						  cond|let|unquote|define|let\*|unquote-splicing|delay|
-						  letrec)
+						  letrec|when|unless|guard|dynamic-wind|raise|
+						  with-exception-handler|library|import|export|
+						  define-record-type|let-values|let\*-values|
+						  define-values|call-with-values|parameterize|
+						  fluid-let|syntax-case|with-syntax|
+						  identifier-syntax|and-let\*|time)
 						(?=(\s|\())</string>
 					<key>name</key>
 					<string>keyword.control.scheme</string>
@@ -176,7 +234,13 @@
 						  identifier|integer|symbol|free-identifier=|inexact|
 						  eof-object|exact|list|(?:input|output)-port|pair|
 						  real|rational|zero|vector|negative|odd|null|string|
-						  eq|equal|eqv|even|number|positive|procedure
+						  eq|equal|eqv|even|number|positive|procedure|
+						  bytevector|hashtable|eq-hashtable|eqv-hashtable|
+						  record|record-type-descriptor|record-constructor-descriptor|
+						  time|date|enum-set|fixnum|flonum|exact-integer|
+						  finite|infinite|nan|port|input-port|output-port|
+						  binary-port|textual-port|socket|thread|mutex|condition-variable|
+						  eof-object
 						)
 						(\?)		# name ends with ? sign
 						(?=(\s|\()) # followed by space or (
@@ -214,7 +278,9 @@
 					<string>(?x)
 						(?&lt;=(\s|\()) # preceded by space or (
 						( set-(?:car|cdr)|				 # set car/cdr
-						  (?:vector|string)-(?:fill|set) # fill/set string/vector
+						  (?:vector|string)-(?:fill|set)| # fill/set string/vector
+						  hashtable-(?:clear|delete|set|update)|
+						  bytevector-(?:fill|copy)
 						)
 						(!)			# name ends with ! sign
 						(?=(\s|\()) # followed by space or (
@@ -242,7 +308,7 @@
 						(?&lt;=(\s|\()) # preceded by space or (
 						( append|apply|approximate|
 						  call-with-current-continuation|call/cc|catch|
-						  construct-identifier|define-syntax|display|foo|
+						  construct-identifier|define-syntax|display|
 						  for-each|force|format|cd|gen-counter|gen-loser|
 						  generate-identifier|last-pair|length|let-syntax|
 						  letrec-syntax|list|list-ref|list-tail|load|log|
@@ -277,7 +343,37 @@
 						  
 						  # string-«foo», vector-«foo»
 						  string(?:-(?:append|copy|length|ref))?|
-						  vector(?:-length|-ref)
+						  vector(?:-length|-ref)|
+						  
+						  # R6RS / modern additions
+						  bytevector(?:-copy|copy!|fill!|length|u8-ref|u8-set!)?|
+						  make-bytevector|bytevector->string|string->bytevector|
+						  utf8->string|string->utf8|utf16->string|string->utf16|
+						  make-eq-hashtable|make-eqv-hashtable|make-hashtable|
+						  hashtable-entries|hashtable-keys|hashtable-size|
+						  make-record-type-descriptor|make-record-constructor-descriptor|
+						  record-constructor|record-predicate|record-accessor|record-mutator|
+						  record-rtd|record-type-name|record-type-parent|record-type-uid|
+						  record-type-equal-procedure|record-type-hash-procedure|
+						  make-enumeration|enum-set->list|enum-set-constructor|enum-set-indexer|
+						  enum-set-union|enum-set-intersection|enum-set-difference|
+						  enum-set-complement|enum-set-projection|enum-set-universe|
+						  current-time|time-second|time-nanosecond|
+						  date->time-utc|time-utc->date|
+						  # Chez Scheme
+						  collect|compile|compile-file|compile-library|compile-program|
+						  expand|sc-expand|interpret|eval|foreign-procedure|foreign-entry|
+						  foreign-sizeof|foreign-set!|foreign-ref|foreign-free|foreign-alloc|
+						  load-shared-object|make-parameter|make-thread-parameter|
+						  cpu-time|real-time|statistics|
+						  syntax->datum|datum->syntax|bound-identifier=|free-identifier=|
+						  generate-temporaries|make-variable-transformer|
+						  quasisyntax|unsyntax|unsyntax-splicing|meta-cond|
+						  get-u8|get-char|get-string-n|get-line|get-datum|
+						  put-u8|put-char|put-string|put-datum|
+						  pretty-print|printf|fprintf|
+						  print-gensym|print-length|print-level|print-precision|
+						  print-radix|print-record|print-unicode
 						)
 						(?=(\s|\()) # followed by space or (
 					</string>
@@ -347,7 +443,7 @@
 						((\()\s*(\)))
 					</string>
 					<key>name</key>
-					<string>constant.other.empty-list.schem</string>
+					<string>constant.other.empty-list.scheme</string>
 				</dict>
 				<dict>
 					<key>begin</key>
@@ -362,6 +458,29 @@
 					</dict>
 					<key>comment</key>
 					<string>quoted double-quoted string or s-expression</string>
+					<key>end</key>
+					<string>(?=[\s()])|(?&lt;=\n)</string>
+					<key>name</key>
+					<string>string.other.quoted-object.scheme</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#quoted</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>(#['`,]|#,@)\s*</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.section.quoted.scheme</string>
+						</dict>
+					</dict>
 					<key>end</key>
 					<string>(?=[\s()])|(?&lt;=\n)</string>
 					<key>name</key>
@@ -447,6 +566,14 @@
 				<dict>
 					<key>include</key>
 					<string>#quote</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#bytevector</string>
 				</dict>
 				<dict>
 					<key>include</key>
@@ -676,7 +803,7 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\s])(#\\)x[0-9A-F]{2,4}(?=[\s\)])</string>
+					<string>(?&lt;=[\(\s])(#\\)x[0-9A-F]{1,6}(?=[\s\)])</string>
 					<key>name</key>
 					<string>constant.character.hex-literal.scheme</string>
 				</dict>
@@ -700,6 +827,110 @@
 				<dict>
 					<key>include</key>
 					<string>#sexp</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#bytevector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#illegal</string>
+				</dict>
+			</array>
+		</dict>
+		<key>vector</key>
+		<dict>
+			<key>begin</key>
+			<string>(#\()</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.vector.begin.scheme</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(\))</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.vector.end.scheme</string>
+				</dict>
+			</dict>
+			<key>name</key>
+			<string>meta.vector.scheme</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#comment</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#sexp</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#string</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#constants</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#quote</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#illegal</string>
+				</dict>
+			</array>
+		</dict>
+		<key>bytevector</key>
+		<dict>
+			<key>begin</key>
+			<string>(#vu8\()</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.bytevector.begin.scheme</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(\))</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.bytevector.end.scheme</string>
+				</dict>
+			</dict>
+			<key>name</key>
+			<string>meta.bytevector.scheme</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#comment</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#constants</string>
 				</dict>
 				<dict>
 					<key>include</key>
@@ -741,6 +972,23 @@
 				</dict>
 			</array>
 		</dict>
+			<key>here-string</key>
+			<dict>
+				<key>begin</key>
+				<string>#&lt;&lt;([A-Za-z0-9!$%&amp;*+-./:&lt;=&gt;?@^_~]+)\n</string>
+				<key>beginCaptures</key>
+				<dict>
+					<key>1</key>
+					<dict>
+						<key>name</key>
+						<string>punctuation.definition.here-string.scheme</string>
+					</dict>
+				</dict>
+				<key>end</key>
+				<string>^\1$</string>
+				<key>name</key>
+				<string>string.quoted.other.here-string.scheme</string>
+			</dict>
 	</dict>
 	<key>scopeName</key>
 	<string>source.scheme</string>
