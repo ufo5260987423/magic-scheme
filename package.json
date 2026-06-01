@@ -81,7 +81,8 @@
           ".sps",
           ".scm",
           ".sch",
-          ".sls"
+          ".sls",
+          ".sld"
         ],
         "configuration": "./package_files/scheme.configuration.json",
         "icon": {

@@ -4,6 +4,12 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 
 ## [Unreleased]
 
+### Added
+- Added `.sld` (R7RS library) to registered Scheme file extensions, enabling syntax highlighting and LSP for R7RS library files.
+
+### Changed
+- Declared compatibility with scheme-langserver 2.1.0.
+
 ## [0.0.7] - 2026-05-22
 
 ### Fixed
