@@ -6,7 +6,7 @@ import * as path from "path";
 import * as com from "./commands";
 import { TaskProvider } from "./tasks";
 import { withLanguageServer } from "./utils";
-import { ensureLangserver, isExecutable } from "./download";
+import { ensureLangserver, isExecutable, checkForUpdate, getLatestRemoteVersion, readLocalVersion, updateLangserver } from "./download";
 
 let langClient: LanguageClient | undefined;
 let currentClientState: State | undefined;
@@ -255,6 +255,15 @@ export async function activate(context: vscode.ExtensionContext) {
       await disposeLangClient();
       trySetupAndStartLSP();
     }
+
+    // Check for updates if using a Magic Scheme-managed binary.
+    const isManagedBinary = serverPath.startsWith(context.globalStorageUri.fsPath);
+    if (isManagedBinary) {
+      const restartLsp = () => {
+        void disposeLangClient().then(() => trySetupAndStartLSP());
+      };
+      void checkForUpdate(context, statusBarItem, restartLsp);
+    }
   });
 
   const terminals: Map<string, vscode.Terminal> = new Map();
@@ -303,8 +312,23 @@ export async function activate(context: vscode.ExtensionContext) {
   const replCmd = vscode.commands.registerCommand('magic-scheme.runSchemeREPL', () => com.openRepl(repls));
   const loadRepl = vscode.commands.registerCommand('magic-scheme.loadInRepl', () => com.loadInRepl(repls));
   const showOutput = vscode.commands.registerCommand('magic-scheme.showOutput', () => com.showOutput(terminals));
+  const updateLangserverCmd = vscode.commands.registerCommand('magic-scheme.updateLangserver', async () => {
+    const globalStoragePath = context.globalStorageUri.fsPath;
+    const localVersion = readLocalVersion(globalStoragePath);
+    const remoteVersion = await getLatestRemoteVersion();
+    if (remoteVersion && (!localVersion || localVersion !== remoteVersion)) {
+      const restartLsp = () => {
+        void disposeLangClient().then(() => trySetupAndStartLSP());
+      };
+      await updateLangserver(context, statusBarItem, restartLsp, remoteVersion);
+    } else if (remoteVersion && localVersion === remoteVersion) {
+      vscode.window.showInformationMessage(`scheme-langserver is already up to date (${localVersion}).`);
+    } else {
+      vscode.window.showWarningMessage('Could not check for scheme-langserver updates. Please try again later.');
+    }
+  });
   const taskProvider = vscode.tasks.registerTaskProvider(TaskProvider.taskType, new TaskProvider());
-  context.subscriptions.push(replCmd, script, loadRepl, showOutput, taskProvider);
+  context.subscriptions.push(replCmd, script, loadRepl, showOutput, updateLangserverCmd, taskProvider);
 
   return {
     getLangClient: () => langClient,

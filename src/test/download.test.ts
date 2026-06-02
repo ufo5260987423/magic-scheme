@@ -8,6 +8,10 @@ import {
   canAutoDownload,
   findPreviouslyDownloaded,
   downloadLangserver,
+  readLocalVersion,
+  writeLocalVersion,
+  shouldCheckForUpdate,
+  getLatestRemoteVersion,
 } from '../download';
 
 suite('Download Unit Tests', () => {
@@ -200,6 +204,77 @@ suite('Download Unit Tests', () => {
         if (fs.existsSync(tmpFile)) {
           fs.unlinkSync(tmpFile);
         }
+      }
+    });
+  });
+
+  suite('Version Management', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'magic-scheme-version-test-'));
+
+    suiteTeardown(() => {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    test('readLocalVersion returns undefined when file does not exist', () => {
+      const result = readLocalVersion(tmpDir);
+      assert.strictEqual(result, undefined);
+    });
+
+    test('writeLocalVersion and readLocalVersion roundtrip', () => {
+      writeLocalVersion(tmpDir, '2.1.0');
+      const result = readLocalVersion(tmpDir);
+      assert.strictEqual(result, '2.1.0');
+    });
+
+    test('shouldCheckForUpdate returns true when no lastCheck file', () => {
+      const result = shouldCheckForUpdate(tmpDir);
+      assert.strictEqual(result, true);
+    });
+
+    test('shouldCheckForUpdate returns false within 24h', () => {
+      const lastCheckPath = path.join(tmpDir, 'scheme-langserver.lastCheck');
+      fs.writeFileSync(lastCheckPath, new Date().toISOString(), 'utf8');
+      const result = shouldCheckForUpdate(tmpDir);
+      assert.strictEqual(result, false);
+    });
+
+    test('shouldCheckForUpdate returns true after 24h', () => {
+      const lastCheckPath = path.join(tmpDir, 'scheme-langserver.lastCheck');
+      const oldDate = new Date(Date.now() - 25 * 60 * 60 * 1000);
+      fs.writeFileSync(lastCheckPath, oldDate.toISOString(), 'utf8');
+      const result = shouldCheckForUpdate(tmpDir);
+      assert.strictEqual(result, true);
+    });
+  });
+
+  suite('getLatestRemoteVersion', () => {
+    test('extracts version from redirect URL', async () => {
+      const originalFetch = global.fetch;
+      global.fetch = async () =>
+        ({
+          url: 'https://github.com/ufo5260987423/scheme-langserver/releases/tag/2.1.0',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any);
+
+      try {
+        const result = await getLatestRemoteVersion();
+        assert.strictEqual(result, '2.1.0');
+      } finally {
+        global.fetch = originalFetch;
+      }
+    });
+
+    test('returns undefined when fetch fails', async () => {
+      const originalFetch = global.fetch;
+      global.fetch = async () => {
+        throw new Error('network error');
+      };
+
+      try {
+        const result = await getLatestRemoteVersion();
+        assert.strictEqual(result, undefined);
+      } finally {
+        global.fetch = originalFetch;
       }
     });
   });

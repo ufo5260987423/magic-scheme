@@ -145,6 +145,20 @@ tar -xf akku-1.1.0.amd64-linux.tar.xz && cd akku-1.1.0.amd64-linux
 bash install
 ```
 
+### Automatic Updates
+
+If Magic Scheme automatically downloaded `scheme-langserver` for you, it will periodically check for newer releases and offer to update.
+
+| Setting | Behavior |
+|---------|----------|
+| `notify` (default) | Status bar shows `scheme-langserver X.Y.Z available`; click it or use the notification to update |
+| `auto` | Downloads and installs updates silently in the background, then restarts the language server |
+| `off` | Never checks for updates |
+
+> **Only applies to auto-downloaded binaries.** If you installed `scheme-langserver` manually (via PATH, Nix, or a local `./run` file), Magic Scheme will **never** touch it.
+
+The check runs at most once every 24 hours and uses GitHub's release redirect (not the API), so it is **not affected by GitHub API rate limits**.
+
 ### Project-Level Configuration
 
 You can place a `.scheme-langserver.json` file in your project root to override VS Code settings on a per-project basis. This is useful when different projects use different Scheme standards (e.g., R6RS vs R7RS).

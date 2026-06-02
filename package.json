@@ -154,6 +154,21 @@
           "default": "R6RS",
           "markdownDescription": "Switch top environment for scheme-langserver. Default: `R6RS`. More options please refere scheme-langserver."
         },
+        "magicScheme.scheme-langserver.autoUpdate": {
+          "type": "string",
+          "enum": [
+            "notify",
+            "auto",
+            "off"
+          ],
+          "default": "notify",
+          "enumDescriptions": [
+            "Show a status-bar hint and notification when a new version is available",
+            "Download and install updates silently in the background",
+            "Never check for updates"
+          ],
+          "markdownDescription": "Update policy for auto-downloaded scheme-langserver binaries. Only applies to binaries managed by Magic Scheme. Manual installations (configured path, PATH, or ./run) are never touched."
+        },
         "magicScheme.scheme.path": {
           "type": "string",
           "default": "scheme",

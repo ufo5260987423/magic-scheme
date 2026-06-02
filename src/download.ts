@@ -6,6 +6,14 @@ import { spawnSync } from 'child_process';
 const DOWNLOAD_URL =
   'https://github.com/ufo5260987423/scheme-langserver/releases/latest/download/scheme-langserver-x86_64-linux-glibc';
 
+const LATEST_RELEASE_URL =
+  'https://github.com/ufo5260987423/scheme-langserver/releases/latest';
+
+const VERSION_FILE = 'scheme-langserver.version';
+const LAST_CHECK_FILE = 'scheme-langserver.lastCheck';
+const UPDATE_INTERVAL_HOURS = 24;
+const CHECK_TIMEOUT_MS = 5000;
+
 export function isExecutable(filePath: string): boolean {
   if (!fs.existsSync(filePath)) {
     return false;
@@ -32,6 +40,202 @@ export function findLangserverInPath(): string | undefined {
     }
   }
   return undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Version management for auto-downloaded binaries
+// ---------------------------------------------------------------------------
+
+export function readLocalVersion(globalStoragePath: string): string | undefined {
+  const versionPath = path.join(globalStoragePath, VERSION_FILE);
+  if (!fs.existsSync(versionPath)) {
+    return undefined;
+  }
+  try {
+    return fs.readFileSync(versionPath, 'utf8').trim();
+  } catch {
+    return undefined;
+  }
+}
+
+export function writeLocalVersion(globalStoragePath: string, version: string): void {
+  const versionPath = path.join(globalStoragePath, VERSION_FILE);
+  try {
+    fs.writeFileSync(versionPath, version, 'utf8');
+  } catch {
+    // ignore
+  }
+}
+
+function readLastCheck(globalStoragePath: string): Date | undefined {
+  const checkPath = path.join(globalStoragePath, LAST_CHECK_FILE);
+  if (!fs.existsSync(checkPath)) {
+    return undefined;
+  }
+  try {
+    const content = fs.readFileSync(checkPath, 'utf8').trim();
+    return new Date(content);
+  } catch {
+    return undefined;
+  }
+}
+
+function writeLastCheck(globalStoragePath: string, isoString: string): void {
+  const checkPath = path.join(globalStoragePath, LAST_CHECK_FILE);
+  try {
+    fs.writeFileSync(checkPath, isoString, 'utf8');
+  } catch {
+    // ignore
+  }
+}
+
+export function shouldCheckForUpdate(globalStoragePath: string): boolean {
+  const lastCheck = readLastCheck(globalStoragePath);
+  if (!lastCheck) {
+    return true;
+  }
+  const hoursSince = (Date.now() - lastCheck.getTime()) / (1000 * 60 * 60);
+  return hoursSince >= UPDATE_INTERVAL_HOURS;
+}
+
+/**
+ * Query the latest release version from GitHub using the release redirect URL.
+ * This avoids GitHub API rate limits (api.github.com is NOT used).
+ */
+export async function getLatestRemoteVersion(): Promise<string | undefined> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), CHECK_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(LATEST_RELEASE_URL, {
+      method: 'HEAD',
+      redirect: 'follow',
+      headers: { 'User-Agent': 'magic-scheme-vscode-extension' },
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    const finalUrl = response.url;
+    const match = finalUrl.match(/\/tag\/([^/]+)$/);
+    return match ? match[1] : undefined;
+  } catch {
+    clearTimeout(timeoutId);
+    return undefined;
+  }
+}
+
+/**
+ * Download the latest binary and replace the old one.
+ */
+export async function updateLangserver(
+  context: vscode.ExtensionContext,
+  statusBarItem: vscode.StatusBarItem,
+  restartLsp: () => void,
+  newVersion: string
+): Promise<void> {
+  const globalStoragePath = context.globalStorageUri.fsPath;
+  const destPath = path.join(globalStoragePath, 'scheme-langserver');
+  const tmpPath = destPath + '.new';
+
+  try {
+    statusBarItem.text = `$(sync~spin) Updating scheme-langserver to ${newVersion}...`;
+    statusBarItem.tooltip = 'Downloading latest scheme-langserver...';
+    statusBarItem.show();
+
+    await downloadLangserver(tmpPath);
+
+    if (!isExecutable(tmpPath)) {
+      throw new Error('Downloaded file appears to be corrupt');
+    }
+
+    // Atomically replace old binary
+    if (fs.existsSync(destPath)) {
+      fs.unlinkSync(destPath);
+    }
+    fs.renameSync(tmpPath, destPath);
+    fs.chmodSync(destPath, 0o755);
+
+    writeLocalVersion(globalStoragePath, newVersion);
+
+    statusBarItem.text = `$(check) scheme-langserver ${newVersion} Ready`;
+    statusBarItem.tooltip = 'Language Server is ready';
+    statusBarItem.show();
+
+    restartLsp();
+  } catch (err) {
+    try {
+      if (fs.existsSync(tmpPath)) {
+        fs.unlinkSync(tmpPath);
+      }
+    } catch {
+      // ignore cleanup errors
+    }
+    statusBarItem.text = '$(error) scheme-langserver Update Failed';
+    statusBarItem.tooltip = err instanceof Error ? err.message : String(err);
+    statusBarItem.show();
+  }
+}
+
+/**
+ * Check for updates and either auto-update or notify the user.
+ * Only applies to binaries managed by Magic Scheme (auto-downloaded).
+ */
+export async function checkForUpdate(
+  context: vscode.ExtensionContext,
+  statusBarItem: vscode.StatusBarItem,
+  restartLsp: () => void
+): Promise<void> {
+  const globalStoragePath = context.globalStorageUri.fsPath;
+  const config = vscode.workspace.getConfiguration('magicScheme.scheme-langserver');
+  const autoUpdate = config.get<string>('autoUpdate', 'notify');
+
+  if (autoUpdate === 'off') {
+    return;
+  }
+
+  if (!shouldCheckForUpdate(globalStoragePath)) {
+    return;
+  }
+
+  // Mark as checked immediately to prevent duplicate checks during slow network
+  writeLastCheck(globalStoragePath, new Date().toISOString());
+
+  const localVersion = readLocalVersion(globalStoragePath);
+  let remoteVersion: string | undefined;
+  try {
+    remoteVersion = await getLatestRemoteVersion();
+  } catch {
+    // Silent fail on network issues
+    return;
+  }
+
+  if (!remoteVersion) {
+    return;
+  }
+
+  // If no local version recorded (downloaded by old magic-scheme), treat as unknown → prompt update
+  if (localVersion && localVersion === remoteVersion) {
+    return;
+  }
+
+  if (autoUpdate === 'auto') {
+    await updateLangserver(context, statusBarItem, restartLsp, remoteVersion);
+  } else {
+    // notify mode
+    statusBarItem.text = `$(cloud-download) scheme-langserver ${remoteVersion} available`;
+    statusBarItem.tooltip = 'Click to update scheme-langserver';
+    statusBarItem.command = 'magic-scheme.updateLangserver';
+    statusBarItem.show();
+
+    const choice = await vscode.window.showInformationMessage(
+      `scheme-langserver ${remoteVersion} is available. Current: ${localVersion || 'unknown'}.`,
+      'Update Now',
+      'Later'
+    );
+    if (choice === 'Update Now') {
+      await updateLangserver(context, statusBarItem, restartLsp, remoteVersion);
+    }
+  }
 }
 
 export function findLocalRun(): string | undefined {
@@ -191,6 +395,12 @@ export async function ensureLangserver(context: vscode.ExtensionContext): Promis
         return undefined;
       }
       vscode.window.showInformationMessage('scheme-langserver installed successfully.');
+      // Best-effort: fetch and record the exact version we just downloaded
+      void getLatestRemoteVersion().then((version) => {
+        if (version) {
+          writeLocalVersion(globalStoragePath, version);
+        }
+      });
       const needsConfigUpdate = !configuredPath || !isExecutable(configuredPath);
       if (needsConfigUpdate) {
         try {
