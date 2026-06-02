@@ -10,7 +10,7 @@ This extension adds support for Scheme(r6rs standard) to VS Code. With the help 
 >
 > For macOS, Windows, ARM Linux, and NixOS users, please see [platform-specific notes](#setting-up--some-configuration) below.
 
-You can click [this patreon page](https://www.patreon.com/PoorProgrammer/membership) or [爱发电](https://afdian.com/a/ufo5260987423) to donate monthly, or just donate 10 USD just once time with the following paypal link. 
+You can click [this Patreon page](https://www.patreon.com/PoorProgrammer/membership) or [Aifadian](https://afdian.com/a/ufo5260987423) to donate monthly, or just donate 10 USD just once time with the following paypal link. 
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/paypalme/ufo5260987423/10)
 
@@ -30,10 +30,10 @@ Magic Scheme **does**
 - Support Scheme LSP through [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver), which brings jump to definition, auto complete, type inference(early stage) and more. Especially, Magic Scheme can handle local identifiers and partial evaluation technique, which are not provided by many counterparts.
 - Support Scheme project with through [AKKU](https://akkuscm.org/), which make you possible to load project depdendencies in REPL or directly run scheme script in terminal.
 - Support highlighting of nearly all of the r6rs standard functions and Chez Scheme functions.
-- 扩展现在有状态栏指示器显示 LSP 初始化状态 (Status bar indicator shows LSP initialization state).
-- `serverPath` 和 `logPath` 支持相对路径和 `~`（tilde）展开 (`serverPath` and `logPath` support relative paths and `~` expansion).
-- Linux x64 下首次激活会自动下载 scheme-langserver (Auto-downloads `scheme-langserver` on first activation for Linux x64).
-- 运行脚本时使用的 flag（如 `--script`）可在设置中自定义 (The flag used when running scripts, e.g. `--script`, can be customized in settings via `magicScheme.scheme.scriptFlag`).
+- Status bar indicator shows LSP initialization state.
+- `serverPath` and `logPath` support relative paths and `~` expansion.
+- Auto-downloads `scheme-langserver` on first activation for Linux x64.
+- The flag used when running scripts, e.g. `--script`, can be customized in settings via `magicScheme.scheme.scriptFlag`.
 
 ### LSP
 Magic Scheme now supports [scheme-langserver](https://github.com/ufo5260987423/scheme-langserver). The current features are:
