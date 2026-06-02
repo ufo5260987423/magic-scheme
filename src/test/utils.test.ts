@@ -1,8 +1,11 @@
 import * as assert from 'assert';
-import { suite, test } from 'mocha';
+import { suite, test, suiteTeardown } from 'mocha';
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 import { getOrDefault } from '../commands';
-import { isWindowsOS, quoteWindowsPath } from '../utils';
+import { isWindowsOS, quoteWindowsPath, readProjectConfig } from '../utils';
 
 suite('Unit Tests: Pure Logic', () => {
     suite('getOrDefault', () => {
@@ -84,6 +87,37 @@ suite('Unit Tests: Pure Logic', () => {
             const config = vscode.workspace.getConfiguration('magicScheme.scheme');
             const value = config.get<string>('path');
             assert.strictEqual(value, 'scheme');
+        });
+    });
+
+    suite('readProjectConfig', () => {
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'magic-scheme-test-'));
+        const configPath = path.join(tmpDir, '.scheme-langserver.json');
+
+        suiteTeardown(() => {
+            fs.rmSync(tmpDir, { recursive: true, force: true });
+        });
+
+        test('returns undefined when file does not exist', () => {
+            if (fs.existsSync(configPath)) {
+                fs.unlinkSync(configPath);
+            }
+            const result = readProjectConfig(tmpDir);
+            assert.strictEqual(result, undefined);
+        });
+
+        test('reads valid config file', () => {
+            fs.writeFileSync(configPath, JSON.stringify({ topEnvironment: 'R7RS', multiThread: 'disable' }));
+            const result = readProjectConfig(tmpDir);
+            assert.deepStrictEqual(result, { topEnvironment: 'R7RS', multiThread: 'disable' });
+            fs.unlinkSync(configPath);
+        });
+
+        test('returns undefined for invalid JSON', () => {
+            fs.writeFileSync(configPath, 'invalid json {');
+            const result = readProjectConfig(tmpDir);
+            assert.strictEqual(result, undefined);
+            fs.unlinkSync(configPath);
         });
     });
 });

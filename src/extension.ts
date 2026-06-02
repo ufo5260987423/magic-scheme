@@ -289,6 +289,16 @@ export async function activate(context: vscode.ExtensionContext) {
   });
   context.subscriptions.push(configChangeDisposable);
 
+  // Watch for project-level config file changes and restart LSP accordingly.
+  const projectConfigWatcher = vscode.workspace.createFileSystemWatcher('**/.scheme-langserver.json');
+  const restartLspOnProjectConfigChange = () => {
+    void disposeLangClient().then(() => trySetupAndStartLSP());
+  };
+  projectConfigWatcher.onDidCreate(restartLspOnProjectConfigChange);
+  projectConfigWatcher.onDidChange(restartLspOnProjectConfigChange);
+  projectConfigWatcher.onDidDelete(restartLspOnProjectConfigChange);
+  context.subscriptions.push(projectConfigWatcher);
+
   const script = vscode.commands.registerCommand('magic-scheme.runSchemeScript', () => com.runInTerminal(terminals));
   const replCmd = vscode.commands.registerCommand('magic-scheme.runSchemeREPL', () => com.openRepl(repls));
   const loadRepl = vscode.commands.registerCommand('magic-scheme.loadInRepl', () => com.loadInRepl(repls));

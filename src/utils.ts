@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { quote } from "shell-quote";
 import * as path from "path";
 import * as os from "os";
+import * as fs from "fs";
 
 export const isWindowsOS: () => boolean = () => process.platform === "win32";
 export const isCmdExeShell: () => boolean = () => vscode.env.shell?.endsWith("cmd.exe") ?? false;
@@ -51,22 +52,46 @@ function normalizeFilePath(filePath: string): string {
   return filePath;
 }
 
+export interface ProjectConfig {
+  topEnvironment?: string;
+  multiThread?: string;
+  typeInference?: string;
+  logPath?: string;
+}
+
+export function readProjectConfig(workspacePath: string): ProjectConfig | undefined {
+  const configPath = path.join(workspacePath, '.scheme-langserver.json');
+  if (!fs.existsSync(configPath)) {
+    return undefined;
+  }
+  try {
+    const content = fs.readFileSync(configPath, 'utf8');
+    return JSON.parse(content) as ProjectConfig;
+  } catch {
+    vscode.window.showWarningMessage(
+      `Failed to parse .scheme-langserver.json in ${workspacePath}. Using VS Code settings instead.`
+    );
+    return undefined;
+  }
+}
+
+function getCurrentWorkspacePath(): string | undefined {
+  const editor = vscode.window.activeTextEditor;
+  if (editor) {
+    const folder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+    if (folder) {
+      return folder.uri.fsPath;
+    }
+  }
+  if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+    return vscode.workspace.workspaceFolders[0].uri.fsPath;
+  }
+  return undefined;
+}
+
 export function withLanguageServer(func: (command: string, args: string[]) => void): void {
-  const command = vscode.workspace
-    .getConfiguration("magicScheme.scheme-langserver")
-    .get<string>("serverPath");
-  const log = vscode.workspace
-    .getConfiguration("magicScheme.scheme-langserver")
-    .get<string>("logPath");
-  const multiThread = vscode.workspace
-    .getConfiguration("magicScheme.scheme-langserver")
-    .get<string>("multiThread");
-  const typeInference = vscode.workspace
-    .getConfiguration("magicScheme.scheme-langserver")
-    .get<string>("typeInference");
-  const topEnvironment = vscode.workspace
-    .getConfiguration("magicScheme.scheme-langserver")
-    .get<string>("topEnvironment");
+  const vscodeConfig = vscode.workspace.getConfiguration("magicScheme.scheme-langserver");
+  const command = vscodeConfig.get<string>("serverPath");
 
   if (!command) {
     vscode.window.showErrorMessage(
@@ -74,6 +99,15 @@ export function withLanguageServer(func: (command: string, args: string[]) => vo
     );
     return;
   }
+
+  const workspacePath = getCurrentWorkspacePath();
+  const projectConfig = workspacePath ? readProjectConfig(workspacePath) : undefined;
+
+  // Project config (.scheme-langserver.json) takes precedence over VS Code settings
+  const log = projectConfig?.logPath ?? vscodeConfig.get<string>("logPath");
+  const multiThread = projectConfig?.multiThread ?? vscodeConfig.get<string>("multiThread");
+  const typeInference = projectConfig?.typeInference ?? vscodeConfig.get<string>("typeInference");
+  const topEnvironment = projectConfig?.topEnvironment ?? vscodeConfig.get<string>("topEnvironment");
 
   // Resolve relative paths against the workspace root so that LanguageClient
   // spawns the binary from the correct CWD.

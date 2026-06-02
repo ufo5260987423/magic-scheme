@@ -145,6 +145,33 @@ tar -xf akku-1.1.0.amd64-linux.tar.xz && cd akku-1.1.0.amd64-linux
 bash install
 ```
 
+### Project-Level Configuration
+
+You can place a `.scheme-langserver.json` file in your project root to override VS Code settings on a per-project basis. This is useful when different projects use different Scheme standards (e.g., R6RS vs R7RS).
+
+Create `.scheme-langserver.json` in your workspace root:
+
+```json
+{
+  "topEnvironment": "R7RS",
+  "multiThread": "enable",
+  "typeInference": "disable"
+}
+```
+
+Supported fields (all optional):
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `topEnvironment` | Scheme top environment: `R6RS`, `R7RS`, `S7`, or `goldfish` | `R6RS` |
+| `multiThread` | Enable/disable multi-threading: `enable` or `disable` | `enable` |
+| `typeInference` | Enable/disable type inference: `enable` or `disable` | `disable` |
+| `logPath` | Path to scheme-langserver log file | `~/scheme-langserver.log` |
+
+**Priority**: `.scheme-langserver.json` > VS Code workspace settings > VS Code user settings.
+
+When you edit or delete this file, Magic Scheme will automatically restart the language server to pick up the changes.
+
 ## For Developer
 
 ### Setup (NixOS)
