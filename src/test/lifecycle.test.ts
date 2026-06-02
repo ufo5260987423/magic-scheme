@@ -9,6 +9,8 @@ suite('LSP Lifecycle Tests (Mock Server)', () => {
     const mockServerPath = path.join(__dirname, 'mock-server', 'server.js');
     const originalSettings: Record<string, unknown> = {};
 
+    const projectConfigPath = path.join(__dirname, '../../.vscode-test', '.scheme-langserver.json');
+
     suiteSetup(async function () {
         this.timeout(10000);
         // Ensure the mock server is executable
@@ -19,17 +21,16 @@ suite('LSP Lifecycle Tests (Mock Server)', () => {
         const config = vscode.workspace.getConfiguration('magicScheme.scheme-langserver');
         originalSettings.serverPath = config.get<string>('serverPath');
         originalSettings.enable = config.get<boolean>('enable');
-        originalSettings.logPath = config.get<string>('logPath');
-        originalSettings.multiThread = config.get<string>('multiThread');
-        originalSettings.typeInference = config.get<string>('typeInference');
-        originalSettings.topEnvironment = config.get<string>('topEnvironment');
 
         await config.update('serverPath', mockServerPath, false);
         await config.update('enable', true, false);
-        await config.update('logPath', '/tmp/mock-lsp.log', false);
-        await config.update('multiThread', 'enable', false);
-        await config.update('typeInference', 'disable', false);
-        await config.update('topEnvironment', 'R6RS', false);
+
+        fs.writeFileSync(projectConfigPath, JSON.stringify({
+            topEnvironment: 'R6RS',
+            multiThread: 'enable',
+            typeInference: 'disable',
+            logPath: '/tmp/mock-lsp.log',
+        }, null, 2) + '\n', 'utf8');
     });
 
     suiteTeardown(async function () {

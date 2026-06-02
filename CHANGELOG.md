@@ -6,9 +6,15 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 
 ### Added
 - Added `.sld` (R7RS library) to registered Scheme file extensions, enabling syntax highlighting and LSP for R7RS library files.
+- **Project-level configuration**: Magic Scheme now automatically creates `.scheme-langserver.json` in the workspace root on first activation.
+- **Unified configuration source**: `.scheme-langserver.json` is now the sole source for scheme-langserver runtime parameters (`topEnvironment`, `multiThread`, `typeInference`, `logPath`).
+- **Effective config display**: The Scheme output channel now shows the actual LSP configuration values and their source.
+- **Auto-update for scheme-langserver**: Background version checks (via GitHub release redirect, API-rate-limit-free) with `notify`/`auto`/`off` modes.
 
 ### Changed
 - Declared compatibility with scheme-langserver 2.1.0.
+- **BREAKING**: Removed `magicScheme.scheme-langserver.topEnvironment`, `multiThread`, `typeInference`, and `logPath` from VS Code Settings. These parameters are now configured exclusively via `.scheme-langserver.json`.
+- `getEffectiveServerConfig()` now reads LSP parameters only from `.scheme-langserver.json` with hard-coded defaults; VS Code Settings are no longer consulted for these values.
 
 ## [0.0.7] - 2026-05-22
 

@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { getOrDefault } from '../commands';
-import { isWindowsOS, quoteWindowsPath, readProjectConfig } from '../utils';
+import { isWindowsOS, quoteWindowsPath, readProjectConfig, DEFAULT_SERVER_CONFIG } from '../utils';
 
 suite('Unit Tests: Pure Logic', () => {
     suite('getOrDefault', () => {
@@ -87,6 +87,14 @@ suite('Unit Tests: Pure Logic', () => {
             const config = vscode.workspace.getConfiguration('magicScheme.scheme');
             const value = config.get<string>('path');
             assert.strictEqual(value, 'scheme');
+        });
+
+        test('DEFAULT_SERVER_CONFIG has expected defaults', () => {
+            const defaults = DEFAULT_SERVER_CONFIG;
+            assert.strictEqual(defaults.topEnvironment, 'R6RS');
+            assert.strictEqual(defaults.multiThread, 'enable');
+            assert.strictEqual(defaults.typeInference, 'disable');
+            assert.strictEqual(defaults.logPath, '~/scheme-langserver.log');
         });
     });
 

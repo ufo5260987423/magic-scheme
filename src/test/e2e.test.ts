@@ -23,6 +23,8 @@ function findLangserver(): string | undefined {
 suite('E2E Tests (Real scheme-langserver)', () => {
     const langserverPath = findLangserver();
 
+    const projectConfigPath = path.join(__dirname, '../../.vscode-test', '.scheme-langserver.json');
+
     suiteSetup(async function () {
         if (!langserverPath) {
             this.skip();
@@ -31,20 +33,22 @@ suite('E2E Tests (Real scheme-langserver)', () => {
         const config = vscode.workspace.getConfiguration('magicScheme.scheme-langserver');
         await config.update('serverPath', langserverPath, false);
         await config.update('enable', true, false);
-        await config.update('logPath', '/tmp/scheme-langserver-e2e.log', false);
-        await config.update('multiThread', 'enable', false);
-        await config.update('typeInference', 'disable', false);
-        await config.update('topEnvironment', 'R6RS', false);
+
+        fs.writeFileSync(projectConfigPath, JSON.stringify({
+            topEnvironment: 'R6RS',
+            multiThread: 'enable',
+            typeInference: 'disable',
+            logPath: '/tmp/scheme-langserver-e2e.log',
+        }, null, 2) + '\n', 'utf8');
     });
 
     suiteTeardown(async function () {
         const config = vscode.workspace.getConfiguration('magicScheme.scheme-langserver');
         await config.update('serverPath', undefined, false);
         await config.update('enable', undefined, false);
-        await config.update('logPath', undefined, false);
-        await config.update('multiThread', undefined, false);
-        await config.update('typeInference', undefined, false);
-        await config.update('topEnvironment', undefined, false);
+        if (fs.existsSync(projectConfigPath)) {
+            fs.unlinkSync(projectConfigPath);
+        }
     });
 
     test('extension activates with real scheme-langserver', async function () {

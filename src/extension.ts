@@ -13,6 +13,9 @@ let currentClientState: State | undefined;
 let stateListenerDisposable: vscode.Disposable | undefined;
 let statusBarItem: vscode.StatusBarItem;
 
+// Global flag to prevent file-watcher restart when we ourselves write the config file.
+let isWritingProjectConfig = false;
+
 export async function deactivate(): Promise<void> {
   process.off('unhandledRejection', uncaughtRejectionHandler);
   await disposeLangClient();
@@ -49,21 +52,17 @@ function printEnvironmentInfo(): vscode.OutputChannel {
     // ignore
   }
 
-  // Print effective LSP config (including project-level overrides)
+  // Print effective LSP config (solely from .scheme-langserver.json)
   try {
     const effective = getEffectiveServerConfig();
     if (effective) {
       channel.appendLine("");
-      channel.appendLine("Effective scheme-langserver configuration:");
-      channel.appendLine(`  topEnvironment:  ${effective.topEnvironment || 'R6RS'} (${effective.topEnvironmentSource === 'project' ? '.scheme-langserver.json' : 'VS Code settings'})`);
-      channel.appendLine(`  multiThread:     ${effective.multiThread || 'enable'} (${effective.multiThreadSource === 'project' ? '.scheme-langserver.json' : 'VS Code settings'})`);
-      channel.appendLine(`  typeInference:   ${effective.typeInference || 'disable'} (${effective.typeInferenceSource === 'project' ? '.scheme-langserver.json' : 'VS Code settings'})`);
-      channel.appendLine(`  logPath:         ${effective.log || '~/scheme-langserver.log'} (${effective.logSource === 'project' ? '.scheme-langserver.json' : 'VS Code settings'})`);
-      if (effective.projectConfigFound) {
-        channel.appendLine(`  project config:  ${path.join(effective.workspacePath || '', '.scheme-langserver.json')}`);
-      } else {
-        channel.appendLine(`  project config:  (not found)`);
-      }
+      channel.appendLine("Effective scheme-langserver configuration (from .scheme-langserver.json):");
+      channel.appendLine(`  topEnvironment:  ${effective.topEnvironment}`);
+      channel.appendLine(`  multiThread:     ${effective.multiThread}`);
+      channel.appendLine(`  typeInference:   ${effective.typeInference}`);
+      channel.appendLine(`  logPath:         ${effective.log}`);
+      channel.appendLine(`  project config:  ${path.join(effective.workspacePath || '', '.scheme-langserver.json')}`);
     }
   } catch {
     // ignore
@@ -318,9 +317,29 @@ export async function activate(context: vscode.ExtensionContext) {
   });
   context.subscriptions.push(configChangeDisposable);
 
+  // Auto-create .scheme-langserver.json if missing.
+  if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+    const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    const projectConfigPath = path.join(workspaceRoot, '.scheme-langserver.json');
+    if (!fs.existsSync(projectConfigPath)) {
+      const defaultConfig = {
+        topEnvironment: 'R6RS',
+        multiThread: 'enable',
+        typeInference: 'disable',
+        logPath: '~/scheme-langserver.log',
+      };
+      isWritingProjectConfig = true;
+      fs.writeFileSync(projectConfigPath, JSON.stringify(defaultConfig, null, 2) + '\n', 'utf8');
+      setTimeout(() => { isWritingProjectConfig = false; }, 100);
+    }
+  }
+
   // Watch for project-level config file changes and restart LSP accordingly.
   const projectConfigWatcher = vscode.workspace.createFileSystemWatcher('**/.scheme-langserver.json');
   const restartLspOnProjectConfigChange = () => {
+    if (isWritingProjectConfig) {
+      return;
+    }
     void disposeLangClient().then(() => trySetupAndStartLSP());
   };
   projectConfigWatcher.onDidCreate(restartLspOnProjectConfigChange);

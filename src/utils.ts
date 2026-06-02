@@ -89,16 +89,19 @@ function getCurrentWorkspacePath(): string | undefined {
   return undefined;
 }
 
+export const DEFAULT_SERVER_CONFIG: Required<ProjectConfig> = {
+  topEnvironment: 'R6RS',
+  multiThread: 'enable',
+  typeInference: 'disable',
+  logPath: '~/scheme-langserver.log',
+};
+
 export interface EffectiveServerConfig {
   command: string | undefined;
-  log: string | undefined;
-  logSource: 'project' | 'vscode';
-  multiThread: string | undefined;
-  multiThreadSource: 'project' | 'vscode';
-  typeInference: string | undefined;
-  typeInferenceSource: 'project' | 'vscode';
-  topEnvironment: string | undefined;
-  topEnvironmentSource: 'project' | 'vscode';
+  log: string;
+  multiThread: string;
+  typeInference: string;
+  topEnvironment: string;
   workspacePath: string | undefined;
   projectConfigFound: boolean;
 }
@@ -113,36 +116,16 @@ export function getEffectiveServerConfig(): EffectiveServerConfig | undefined {
 
   const workspacePath = getCurrentWorkspacePath();
   const projectConfig = workspacePath ? readProjectConfig(workspacePath) : undefined;
-  const projectConfigFound = !!projectConfig;
-
-  const logProject = projectConfig?.logPath;
-  const log = logProject ?? vscodeConfig.get<string>("logPath");
-  const logSource: 'project' | 'vscode' = logProject !== undefined ? 'project' : 'vscode';
-
-  const mtProject = projectConfig?.multiThread;
-  const multiThread = mtProject ?? vscodeConfig.get<string>("multiThread");
-  const multiThreadSource: 'project' | 'vscode' = mtProject !== undefined ? 'project' : 'vscode';
-
-  const tiProject = projectConfig?.typeInference;
-  const typeInference = tiProject ?? vscodeConfig.get<string>("typeInference");
-  const typeInferenceSource: 'project' | 'vscode' = tiProject !== undefined ? 'project' : 'vscode';
-
-  const teProject = projectConfig?.topEnvironment;
-  const topEnvironment = teProject ?? vscodeConfig.get<string>("topEnvironment");
-  const topEnvironmentSource: 'project' | 'vscode' = teProject !== undefined ? 'project' : 'vscode';
+  const defaults = DEFAULT_SERVER_CONFIG;
 
   return {
     command,
-    log,
-    logSource,
-    multiThread,
-    multiThreadSource,
-    typeInference,
-    typeInferenceSource,
-    topEnvironment,
-    topEnvironmentSource,
+    log: projectConfig?.logPath ?? defaults.logPath,
+    multiThread: projectConfig?.multiThread ?? defaults.multiThread,
+    typeInference: projectConfig?.typeInference ?? defaults.typeInference,
+    topEnvironment: projectConfig?.topEnvironment ?? defaults.topEnvironment,
     workspacePath,
-    projectConfigFound,
+    projectConfigFound: !!projectConfig,
   };
 }
 

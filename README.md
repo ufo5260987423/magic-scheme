@@ -159,21 +159,22 @@ If Magic Scheme automatically downloaded `scheme-langserver` for you, it will pe
 
 The check runs at most once every 24 hours and uses GitHub's release redirect (not the API), so it is **not affected by GitHub API rate limits**.
 
-### Project-Level Configuration
+### Project Configuration
 
-You can place a `.scheme-langserver.json` file in your project root to override VS Code settings on a per-project basis. This is useful when different projects use different Scheme standards (e.g., R6RS vs R7RS).
+Magic Scheme uses `.scheme-langserver.json` in your workspace root as the **sole configuration source** for scheme-langserver runtime parameters.
 
-Create `.scheme-langserver.json` in your workspace root:
+**On first activation**, Magic Scheme automatically creates this file with default values if it does not exist:
 
 ```json
 {
-  "topEnvironment": "R7RS",
+  "topEnvironment": "R6RS",
   "multiThread": "enable",
-  "typeInference": "disable"
+  "typeInference": "disable",
+  "logPath": "~/scheme-langserver.log"
 }
 ```
 
-Supported fields (all optional):
+Edit the file directly to change settings. All fields are optional — omitted fields fall back to the defaults above.
 
 | Field | Description | Default |
 |-------|-------------|---------|
@@ -182,9 +183,7 @@ Supported fields (all optional):
 | `typeInference` | Enable/disable type inference: `enable` or `disable` | `disable` |
 | `logPath` | Path to scheme-langserver log file | `~/scheme-langserver.log` |
 
-**Priority**: `.scheme-langserver.json` > VS Code workspace settings > VS Code user settings.
-
-When you edit or delete this file, Magic Scheme will automatically restart the language server to pick up the changes.
+When you save changes to this file, Magic Scheme automatically restarts the language server to apply them.
 
 ## For Developer
 

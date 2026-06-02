@@ -134,26 +134,7 @@
           "default": "scheme-langserver",
           "markdownDescription": "Path to the scheme-langserver executable `scheme-langserver` (for nixos akkupackages.scheme-langserver) or `run`. Can be either an absolute path or relative to the workspace root. Default: `scheme-langserver`, which works if `scheme-langserver` is in your `PATH`."
         },
-        "magicScheme.scheme-langserver.logPath": {
-          "type": "string",
-          "default": "~/scheme-langserver.log",
-          "markdownDescription": "Path to the scheme-langserver's log. Can be either an absolute path or relative to the workspace root. Default: `~/scheme-langserver.log`, which is located on your `$HOME`."
-        },
-        "magicScheme.scheme-langserver.multiThread": {
-          "type": "string",
-          "default": "enable",
-          "markdownDescription": "Enable/disable multithreads for scheme-langserver. Default: `enable`."
-        },
-        "magicScheme.scheme-langserver.typeInference": {
-          "type": "string",
-          "default": "disable",
-          "markdownDescription": "Enable/disable type inference for scheme-langserver. Default: `disable`. NOTE: this feature haven't been fully test, be careful!"
-        },
-        "magicScheme.scheme-langserver.topEnvironment": {
-          "type": "string",
-          "default": "R6RS",
-          "markdownDescription": "Switch top environment for scheme-langserver. Default: `R6RS`. More options please refere scheme-langserver."
-        },
+
         "magicScheme.scheme-langserver.autoUpdate": {
           "type": "string",
           "enum": [
