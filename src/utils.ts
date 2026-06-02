@@ -89,25 +89,80 @@ function getCurrentWorkspacePath(): string | undefined {
   return undefined;
 }
 
-export function withLanguageServer(func: (command: string, args: string[]) => void): void {
+export interface EffectiveServerConfig {
+  command: string | undefined;
+  log: string | undefined;
+  logSource: 'project' | 'vscode';
+  multiThread: string | undefined;
+  multiThreadSource: 'project' | 'vscode';
+  typeInference: string | undefined;
+  typeInferenceSource: 'project' | 'vscode';
+  topEnvironment: string | undefined;
+  topEnvironmentSource: 'project' | 'vscode';
+  workspacePath: string | undefined;
+  projectConfigFound: boolean;
+}
+
+export function getEffectiveServerConfig(): EffectiveServerConfig | undefined {
   const vscodeConfig = vscode.workspace.getConfiguration("magicScheme.scheme-langserver");
   const command = vscodeConfig.get<string>("serverPath");
 
   if (!command) {
+    return undefined;
+  }
+
+  const workspacePath = getCurrentWorkspacePath();
+  const projectConfig = workspacePath ? readProjectConfig(workspacePath) : undefined;
+  const projectConfigFound = !!projectConfig;
+
+  const logProject = projectConfig?.logPath;
+  const log = logProject ?? vscodeConfig.get<string>("logPath");
+  const logSource: 'project' | 'vscode' = logProject !== undefined ? 'project' : 'vscode';
+
+  const mtProject = projectConfig?.multiThread;
+  const multiThread = mtProject ?? vscodeConfig.get<string>("multiThread");
+  const multiThreadSource: 'project' | 'vscode' = mtProject !== undefined ? 'project' : 'vscode';
+
+  const tiProject = projectConfig?.typeInference;
+  const typeInference = tiProject ?? vscodeConfig.get<string>("typeInference");
+  const typeInferenceSource: 'project' | 'vscode' = tiProject !== undefined ? 'project' : 'vscode';
+
+  const teProject = projectConfig?.topEnvironment;
+  const topEnvironment = teProject ?? vscodeConfig.get<string>("topEnvironment");
+  const topEnvironmentSource: 'project' | 'vscode' = teProject !== undefined ? 'project' : 'vscode';
+
+  return {
+    command,
+    log,
+    logSource,
+    multiThread,
+    multiThreadSource,
+    typeInference,
+    typeInferenceSource,
+    topEnvironment,
+    topEnvironmentSource,
+    workspacePath,
+    projectConfigFound,
+  };
+}
+
+export function withLanguageServer(func: (command: string, args: string[]) => void): void {
+  const effective = getEffectiveServerConfig();
+  if (!effective) {
     vscode.window.showErrorMessage(
       'scheme-langserver not found. Please install it or set "magicScheme.scheme-langserver.serverPath".'
     );
     return;
   }
 
-  const workspacePath = getCurrentWorkspacePath();
-  const projectConfig = workspacePath ? readProjectConfig(workspacePath) : undefined;
-
-  // Project config (.scheme-langserver.json) takes precedence over VS Code settings
-  const log = projectConfig?.logPath ?? vscodeConfig.get<string>("logPath");
-  const multiThread = projectConfig?.multiThread ?? vscodeConfig.get<string>("multiThread");
-  const typeInference = projectConfig?.typeInference ?? vscodeConfig.get<string>("typeInference");
-  const topEnvironment = projectConfig?.topEnvironment ?? vscodeConfig.get<string>("topEnvironment");
+  const command = effective.command;
+  if (!command) {
+    return;
+  }
+  const log = effective.log;
+  const multiThread = effective.multiThread;
+  const typeInference = effective.typeInference;
+  const topEnvironment = effective.topEnvironment;
 
   // Resolve relative paths against the workspace root so that LanguageClient
   // spawns the binary from the correct CWD.

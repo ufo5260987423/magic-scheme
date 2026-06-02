@@ -5,7 +5,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as com from "./commands";
 import { TaskProvider } from "./tasks";
-import { withLanguageServer } from "./utils";
+import { withLanguageServer, getEffectiveServerConfig } from "./utils";
 import { ensureLangserver, isExecutable, checkForUpdate, getLatestRemoteVersion, readLocalVersion, updateLangserver } from "./download";
 
 let langClient: LanguageClient | undefined;
@@ -44,6 +44,26 @@ function printEnvironmentInfo(): vscode.OutputChannel {
     const schemePath = vscode.workspace.getConfiguration("magicScheme.scheme").get<string>("path");
     if (schemePath) {
       channel.appendLine(`scheme executable:    ${schemePath}`);
+    }
+  } catch {
+    // ignore
+  }
+
+  // Print effective LSP config (including project-level overrides)
+  try {
+    const effective = getEffectiveServerConfig();
+    if (effective) {
+      channel.appendLine("");
+      channel.appendLine("Effective scheme-langserver configuration:");
+      channel.appendLine(`  topEnvironment:  ${effective.topEnvironment || 'R6RS'} (${effective.topEnvironmentSource === 'project' ? '.scheme-langserver.json' : 'VS Code settings'})`);
+      channel.appendLine(`  multiThread:     ${effective.multiThread || 'enable'} (${effective.multiThreadSource === 'project' ? '.scheme-langserver.json' : 'VS Code settings'})`);
+      channel.appendLine(`  typeInference:   ${effective.typeInference || 'disable'} (${effective.typeInferenceSource === 'project' ? '.scheme-langserver.json' : 'VS Code settings'})`);
+      channel.appendLine(`  logPath:         ${effective.log || '~/scheme-langserver.log'} (${effective.logSource === 'project' ? '.scheme-langserver.json' : 'VS Code settings'})`);
+      if (effective.projectConfigFound) {
+        channel.appendLine(`  project config:  ${path.join(effective.workspacePath || '', '.scheme-langserver.json')}`);
+      } else {
+        channel.appendLine(`  project config:  (not found)`);
+      }
     }
   } catch {
     // ignore
