@@ -4,6 +4,17 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 
 ## [Unreleased]
 
+## [0.0.9] - 2026-05-30
+
+### Added
+- **Interactive project config wizard**: New command `Configure Magic Scheme Project` (Ctrl+Shift+P) opens a QuickPick + InputBox wizard for editing `.vscode/magic-scheme.json` without hand-editing JSON.
+- **Arbitrary property support**: The wizard supports any property name, not just the four built-in fields. Users can add scheme-langserver-specific parameters (e.g. future `maxMemory`, `cacheDir`) via "Add new property...".
+- **Known-field enums**: `topEnvironment` shows `[R6RS, R7RS]`; `multiThread`/`typeInference` show `[enable, disable]` as QuickPick options.
+- **Multi-root workspace aware**: The wizard targets the workspace folder of the currently active editor, matching the LSP's config resolution behavior.
+
+### Changed
+- `getCurrentWorkspacePath()` is now exported from `utils.ts` for reuse by the configuration wizard.
+
 ## [0.0.8] - 2026-05-30
 
 ### Added
