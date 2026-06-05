@@ -230,6 +230,11 @@
       {
         "command": "magic-scheme.showOutput",
         "title": "Show Output Terminal"
+      },
+      {
+        "command": "magic-scheme.configureProject",
+        "title": "Configure Magic Scheme Project",
+        "icon": "$(gear)"
       }
     ]
   },

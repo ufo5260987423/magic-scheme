@@ -75,7 +75,7 @@ export function readProjectConfig(workspacePath: string): ProjectConfig | undefi
   }
 }
 
-function getCurrentWorkspacePath(): string | undefined {
+export function getCurrentWorkspacePath(): string | undefined {
   const editor = vscode.window.activeTextEditor;
   if (editor) {
     const folder = vscode.workspace.getWorkspaceFolder(editor.document.uri);

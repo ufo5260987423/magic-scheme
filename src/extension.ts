@@ -5,7 +5,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as com from "./commands";
 import { TaskProvider } from "./tasks";
-import { withLanguageServer, getEffectiveServerConfig } from "./utils";
+import { withLanguageServer, getEffectiveServerConfig, DEFAULT_SERVER_CONFIG, getCurrentWorkspacePath } from "./utils";
 import { ensureLangserver, isExecutable, checkForUpdate, getLatestRemoteVersion, readLocalVersion, updateLangserver } from "./download";
 
 let langClient: LanguageClient | undefined;
@@ -355,6 +355,127 @@ export async function activate(context: vscode.ExtensionContext) {
   const replCmd = vscode.commands.registerCommand('magic-scheme.runSchemeREPL', () => com.openRepl(repls));
   const loadRepl = vscode.commands.registerCommand('magic-scheme.loadInRepl', () => com.loadInRepl(repls));
   const showOutput = vscode.commands.registerCommand('magic-scheme.showOutput', () => com.showOutput(terminals));
+  const configureProjectCmd = vscode.commands.registerCommand('magic-scheme.configureProject', async () => {
+    if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+      vscode.window.showWarningMessage('No workspace folder open.');
+      return;
+    }
+
+    let workspaceRoot = getCurrentWorkspacePath();
+    if (!workspaceRoot) {
+      workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    }
+    const vscodeDir = path.join(workspaceRoot, '.vscode');
+    const projectConfigPath = path.join(vscodeDir, 'magic-scheme.json');
+
+    let currentConfig: Record<string, string> = {};
+    try {
+      if (fs.existsSync(projectConfigPath)) {
+        currentConfig = JSON.parse(fs.readFileSync(projectConfigPath, 'utf8'));
+      }
+    } catch {
+      // ignore parse errors, start fresh
+    }
+
+    const defaults = DEFAULT_SERVER_CONFIG;
+
+    // Known enums for friendlier UI
+    const enumOptions: Record<string, string[]> = {
+      topEnvironment: ['R6RS', 'R7RS'],
+      multiThread: ['enable', 'disable'],
+      typeInference: ['enable', 'disable'],
+    };
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      // Collect all keys: defaults first, then any extra keys from the file
+      const allKeys = Array.from(new Set([...Object.keys(defaults), ...Object.keys(currentConfig)]));
+
+      const items: (vscode.QuickPickItem & { value: string })[] = allKeys.map((key) => {
+        const hasCustom = key in currentConfig;
+        const val = hasCustom ? currentConfig[key] : (defaults as Record<string, string>)[key];
+        return {
+          label: `${key}: ${val}`,
+          value: key,
+          description: hasCustom ? '' : '(default)',
+        };
+      });
+
+      items.push(
+        { label: '$(add) Add new property...', value: '__add__', description: '' },
+        { label: '$(check) Done', value: '__done__', description: 'Save and exit' }
+      );
+
+      const picked = await vscode.window.showQuickPick(items, {
+        placeHolder: 'Select a setting to configure',
+        title: 'Magic Scheme Project Configuration',
+      });
+
+      if (!picked || picked.value === '__done__') {
+        break;
+      }
+
+      if (picked.value === '__add__') {
+        const newKey = await vscode.window.showInputBox({
+          prompt: 'Enter property name (e.g. maxMemory, cacheDir)',
+          placeHolder: 'newProperty',
+          title: 'New Property',
+          validateInput: (v) => v.trim() ? undefined : 'Property name cannot be empty',
+        });
+        if (!newKey) { continue; }
+        const newValue = await vscode.window.showInputBox({
+          prompt: `Enter value for "${newKey}"`,
+          title: newKey,
+        });
+        if (newValue !== undefined) {
+          currentConfig[newKey.trim()] = newValue;
+        }
+        continue;
+      }
+
+      const key = picked.value;
+      const currentVal = currentConfig[key] ?? (defaults as Record<string, string>)[key] ?? '';
+      let newValue: string | undefined;
+
+      if (enumOptions[key]) {
+        newValue = await vscode.window.showQuickPick(enumOptions[key], {
+          placeHolder: `Select ${key}`,
+          title: key,
+        }) ?? undefined;
+      } else {
+        newValue = await vscode.window.showInputBox({
+          prompt: `Enter ${key}`,
+          value: currentVal,
+          title: key,
+        });
+      }
+
+      if (newValue !== undefined) {
+        currentConfig[key] = newValue;
+      }
+    }
+
+    // Build final config: defaults + overrides + extra keys
+    const merged: Record<string, string> = {};
+    for (const key of Object.keys(defaults)) {
+      merged[key] = currentConfig[key] ?? (defaults as Record<string, string>)[key];
+    }
+    for (const key of Object.keys(currentConfig)) {
+      if (!(key in defaults)) {
+        merged[key] = currentConfig[key];
+      }
+    }
+
+    if (!fs.existsSync(vscodeDir)) {
+      fs.mkdirSync(vscodeDir, { recursive: true });
+    }
+    isWritingProjectConfig = true;
+    fs.writeFileSync(projectConfigPath, JSON.stringify(merged, null, 2) + '\n', 'utf8');
+    setTimeout(() => { isWritingProjectConfig = false; }, 100);
+
+    vscode.window.showInformationMessage('Magic Scheme project configuration saved.');
+  });
+
   const updateLangserverCmd = vscode.commands.registerCommand('magic-scheme.updateLangserver', async () => {
     const globalStoragePath = context.globalStorageUri.fsPath;
     const localVersion = readLocalVersion(globalStoragePath);
@@ -371,7 +492,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   });
   const taskProvider = vscode.tasks.registerTaskProvider(TaskProvider.taskType, new TaskProvider());
-  context.subscriptions.push(replCmd, script, loadRepl, showOutput, updateLangserverCmd, taskProvider);
+  context.subscriptions.push(replCmd, script, loadRepl, showOutput, configureProjectCmd, updateLangserverCmd, taskProvider);
 
   return {
     getLangClient: () => langClient,
