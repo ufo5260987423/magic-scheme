@@ -4,11 +4,19 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 
 ## [Unreleased]
 
+## [0.0.10] - 2026-05-30
+
+### Added
+- **Custom enum values**: Known fields like `topEnvironment` now offer a "Custom value..." option for values outside the built-in enum (e.g. `S7`, `goldfish`).
+
+### Changed
+- **Type inference enabled by default**: `DEFAULT_SERVER_CONFIG.typeInference` changed from `disable` to `enable`. New workspaces automatically get `typeInference: "enable"`.
+
 ## [0.0.9] - 2026-05-30
 
 ### Added
 - **Interactive project config wizard**: New command `Configure Magic Scheme Project` (Ctrl+Shift+P) opens a QuickPick + InputBox wizard for editing `.vscode/magic-scheme.json` without hand-editing JSON.
-- **Arbitrary property support**: The wizard supports any property name, not just the four built-in fields. Users can add scheme-langserver-specific parameters (e.g. future `maxMemory`, `cacheDir`) via "Add new property...".
+- **Arbitrary property support**: The wizard supports any property name, not just the four built-in fields. Users can add scheme-langserver-specific parameters via "Add new property...".
 - **Known-field enums**: `topEnvironment` shows `[R6RS, R7RS]`; `multiThread`/`typeInference` show `[enable, disable]` as QuickPick options.
 - **Multi-root workspace aware**: The wizard targets the workspace folder of the currently active editor, matching the LSP's config resolution behavior.
 
