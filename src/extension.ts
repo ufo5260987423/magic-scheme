@@ -326,7 +326,7 @@ export async function activate(context: vscode.ExtensionContext) {
       const defaultConfig = {
         topEnvironment: 'R6RS',
         multiThread: 'enable',
-        typeInference: 'disable',
+        typeInference: 'enable',
         logPath: '~/scheme-langserver.log',
       };
       if (!fs.existsSync(vscodeDir)) {

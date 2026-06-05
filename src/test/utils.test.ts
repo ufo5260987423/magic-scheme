@@ -93,7 +93,7 @@ suite('Unit Tests: Pure Logic', () => {
             const defaults = DEFAULT_SERVER_CONFIG;
             assert.strictEqual(defaults.topEnvironment, 'R6RS');
             assert.strictEqual(defaults.multiThread, 'enable');
-            assert.strictEqual(defaults.typeInference, 'disable');
+            assert.strictEqual(defaults.typeInference, 'enable');
             assert.strictEqual(defaults.logPath, '~/scheme-langserver.log');
         });
     });

@@ -92,7 +92,7 @@ export function getCurrentWorkspacePath(): string | undefined {
 export const DEFAULT_SERVER_CONFIG: Required<ProjectConfig> = {
   topEnvironment: 'R6RS',
   multiThread: 'enable',
-  typeInference: 'disable',
+  typeInference: 'enable',
   logPath: '~/scheme-langserver.log',
 };
 

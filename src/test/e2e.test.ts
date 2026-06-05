@@ -41,7 +41,7 @@ suite('E2E Tests (Real scheme-langserver)', () => {
         fs.writeFileSync(projectConfigPath, JSON.stringify({
             topEnvironment: 'R6RS',
             multiThread: 'enable',
-            typeInference: 'disable',
+            typeInference: 'enable',
             logPath: '/tmp/scheme-langserver-e2e.log',
         }, null, 2) + '\n', 'utf8');
     });

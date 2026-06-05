@@ -32,7 +32,7 @@ suite('LSP Lifecycle Tests (Mock Server)', () => {
         fs.writeFileSync(projectConfigPath, JSON.stringify({
             topEnvironment: 'R6RS',
             multiThread: 'enable',
-            typeInference: 'disable',
+            typeInference: 'enable',
             logPath: '/tmp/mock-lsp.log',
         }, null, 2) + '\n', 'utf8');
     });

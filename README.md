@@ -165,25 +165,51 @@ The check runs at most once every 24 hours and uses GitHub's release redirect (n
 
 Magic Scheme uses `.vscode/magic-scheme.json` as the **sole configuration source** for scheme-langserver runtime parameters.
 
-**On first activation**, Magic Scheme automatically creates this file (and `.vscode/` if needed) with default values:
+#### Quick Setup: Configure Magic Scheme Project
+
+The easiest way to configure your project is through the built-in wizard:
+
+1. Open your Scheme project in VS Code.
+2. Press <kbd>Ctrl+Shift+P</kbd> (or <kbd>Cmd+Shift+P</kbd>) and run **`Configure Magic Scheme Project`**.
+3. A QuickPick panel shows the current settings:
+   ```
+   topEnvironment: R6RS        (default)
+   multiThread: enable         (default)
+   typeInference: enable       (default)
+   logPath: ~/scheme-langserver.log  (default)
+   + Add new property...
+   ✓ Done
+   ```
+4. Click any field to change it:
+   - `topEnvironment` — choose from `R6RS`, `R7RS`, or select **Custom value...** to enter any other environment (e.g. `S7`, `goldfish`).
+   - `multiThread` / `typeInference` — choose `enable` or `disable`.
+   - `logPath` — type any path (supports `~` for home directory).
+5. Click **+ Add new property...** to add arbitrary scheme-langserver parameters not listed above.
+6. Click **✓ Done** to save.
+
+The wizard automatically creates `.vscode/magic-scheme.json` (and `.vscode/` if needed) and restarts the language server.
+
+#### Manual Setup: Edit JSON Directly
+
+You can also edit `.vscode/magic-scheme.json` by hand. **On first activation**, Magic Scheme automatically creates this file with default values:
 
 ```json
 {
   "topEnvironment": "R6RS",
   "multiThread": "enable",
-  "typeInference": "disable",
+  "typeInference": "enable",
   "logPath": "~/scheme-langserver.log"
 }
 ```
 
-Edit the file directly to change settings. All fields are optional — omitted fields fall back to the defaults above.
+All fields are optional — omitted fields fall back to the defaults above.
 
 | Field | Description | Default |
 |-------|-------------|---------|
-| `topEnvironment` | Scheme top environment: `R6RS`, `R7RS`, `S7`, or `goldfish` | `R6RS` |
+| `topEnvironment` | Scheme top environment: `R6RS`, `R7RS`, or any value your scheme-langserver supports (e.g. `S7`, `goldfish`) | `R6RS` |
 | `multiThread` | Enable/disable multi-threading: `enable` or `disable` | `enable` |
-| `typeInference` | Enable/disable type inference: `enable` or `disable` | `disable` |
-| `logPath` | Path to scheme-langserver log file | `~/scheme-langserver.log` |
+| `typeInference` | Enable/disable type inference: `enable` or `disable` | `enable` |
+| `logPath` | Path to scheme-langserver log file (supports `~` expansion) | `~/scheme-langserver.log` |
 
 When you save changes to this file, Magic Scheme automatically restarts the language server to apply them.
 
