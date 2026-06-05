@@ -9,7 +9,7 @@ suite('LSP Lifecycle Tests (Mock Server)', () => {
     const mockServerPath = path.join(__dirname, 'mock-server', 'server.js');
     const originalSettings: Record<string, unknown> = {};
 
-    const projectConfigPath = path.join(__dirname, '../../.vscode-test', '.scheme-langserver.json');
+    const projectConfigPath = path.join(__dirname, '../../.vscode-test', '.vscode', 'magic-scheme.json');
 
     suiteSetup(async function () {
         this.timeout(10000);
@@ -25,6 +25,10 @@ suite('LSP Lifecycle Tests (Mock Server)', () => {
         await config.update('serverPath', mockServerPath, false);
         await config.update('enable', true, false);
 
+        const vscodeDir = path.dirname(projectConfigPath);
+        if (!fs.existsSync(vscodeDir)) {
+            fs.mkdirSync(vscodeDir, { recursive: true });
+        }
         fs.writeFileSync(projectConfigPath, JSON.stringify({
             topEnvironment: 'R6RS',
             multiThread: 'enable',

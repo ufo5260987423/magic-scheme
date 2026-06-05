@@ -23,7 +23,7 @@ function findLangserver(): string | undefined {
 suite('E2E Tests (Real scheme-langserver)', () => {
     const langserverPath = findLangserver();
 
-    const projectConfigPath = path.join(__dirname, '../../.vscode-test', '.scheme-langserver.json');
+    const projectConfigPath = path.join(__dirname, '../../.vscode-test', '.vscode', 'magic-scheme.json');
 
     suiteSetup(async function () {
         if (!langserverPath) {
@@ -34,6 +34,10 @@ suite('E2E Tests (Real scheme-langserver)', () => {
         await config.update('serverPath', langserverPath, false);
         await config.update('enable', true, false);
 
+        const vscodeDir = path.dirname(projectConfigPath);
+        if (!fs.existsSync(vscodeDir)) {
+            fs.mkdirSync(vscodeDir, { recursive: true });
+        }
         fs.writeFileSync(projectConfigPath, JSON.stringify({
             topEnvironment: 'R6RS',
             multiThread: 'enable',

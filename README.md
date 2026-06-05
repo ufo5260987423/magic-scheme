@@ -161,9 +161,9 @@ The check runs at most once every 24 hours and uses GitHub's release redirect (n
 
 ### Project Configuration
 
-Magic Scheme uses `.scheme-langserver.json` in your workspace root as the **sole configuration source** for scheme-langserver runtime parameters.
+Magic Scheme uses `.vscode/magic-scheme.json` as the **sole configuration source** for scheme-langserver runtime parameters.
 
-**On first activation**, Magic Scheme automatically creates this file with default values if it does not exist:
+**On first activation**, Magic Scheme automatically creates this file (and `.vscode/` if needed) with default values:
 
 ```json
 {

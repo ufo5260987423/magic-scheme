@@ -60,7 +60,7 @@ export interface ProjectConfig {
 }
 
 export function readProjectConfig(workspacePath: string): ProjectConfig | undefined {
-  const configPath = path.join(workspacePath, '.scheme-langserver.json');
+  const configPath = path.join(workspacePath, '.vscode', 'magic-scheme.json');
   if (!fs.existsSync(configPath)) {
     return undefined;
   }

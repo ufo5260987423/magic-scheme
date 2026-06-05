@@ -62,7 +62,7 @@ function printEnvironmentInfo(): vscode.OutputChannel {
       channel.appendLine(`  multiThread:     ${effective.multiThread}`);
       channel.appendLine(`  typeInference:   ${effective.typeInference}`);
       channel.appendLine(`  logPath:         ${effective.log}`);
-      channel.appendLine(`  project config:  ${path.join(effective.workspacePath || '', '.scheme-langserver.json')}`);
+      channel.appendLine(`  project config:  ${path.join(effective.workspacePath || '', '.vscode', 'magic-scheme.json')}`);
     }
   } catch {
     // ignore
@@ -317,10 +317,11 @@ export async function activate(context: vscode.ExtensionContext) {
   });
   context.subscriptions.push(configChangeDisposable);
 
-  // Auto-create .scheme-langserver.json if missing.
+  // Auto-create .vscode/magic-scheme.json if missing.
   if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
     const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    const projectConfigPath = path.join(workspaceRoot, '.scheme-langserver.json');
+    const vscodeDir = path.join(workspaceRoot, '.vscode');
+    const projectConfigPath = path.join(vscodeDir, 'magic-scheme.json');
     if (!fs.existsSync(projectConfigPath)) {
       const defaultConfig = {
         topEnvironment: 'R6RS',
@@ -328,6 +329,9 @@ export async function activate(context: vscode.ExtensionContext) {
         typeInference: 'disable',
         logPath: '~/scheme-langserver.log',
       };
+      if (!fs.existsSync(vscodeDir)) {
+        fs.mkdirSync(vscodeDir, { recursive: true });
+      }
       isWritingProjectConfig = true;
       fs.writeFileSync(projectConfigPath, JSON.stringify(defaultConfig, null, 2) + '\n', 'utf8');
       setTimeout(() => { isWritingProjectConfig = false; }, 100);
@@ -335,7 +339,7 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 
   // Watch for project-level config file changes and restart LSP accordingly.
-  const projectConfigWatcher = vscode.workspace.createFileSystemWatcher('**/.scheme-langserver.json');
+  const projectConfigWatcher = vscode.workspace.createFileSystemWatcher('**/.vscode/magic-scheme.json');
   const restartLspOnProjectConfigChange = () => {
     if (isWritingProjectConfig) {
       return;

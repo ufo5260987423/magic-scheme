@@ -100,7 +100,8 @@ suite('Unit Tests: Pure Logic', () => {
 
     suite('readProjectConfig', () => {
         const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'magic-scheme-test-'));
-        const configPath = path.join(tmpDir, '.scheme-langserver.json');
+        const vscodeDir = path.join(tmpDir, '.vscode');
+        const configPath = path.join(vscodeDir, 'magic-scheme.json');
 
         suiteTeardown(() => {
             fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -115,6 +116,9 @@ suite('Unit Tests: Pure Logic', () => {
         });
 
         test('reads valid config file', () => {
+            if (!fs.existsSync(vscodeDir)) {
+                fs.mkdirSync(vscodeDir, { recursive: true });
+            }
             fs.writeFileSync(configPath, JSON.stringify({ topEnvironment: 'R7RS', multiThread: 'disable' }));
             const result = readProjectConfig(tmpDir);
             assert.deepStrictEqual(result, { topEnvironment: 'R7RS', multiThread: 'disable' });
@@ -122,6 +126,9 @@ suite('Unit Tests: Pure Logic', () => {
         });
 
         test('returns undefined for invalid JSON', () => {
+            if (!fs.existsSync(vscodeDir)) {
+                fs.mkdirSync(vscodeDir, { recursive: true });
+            }
             fs.writeFileSync(configPath, 'invalid json {');
             const result = readProjectConfig(tmpDir);
             assert.strictEqual(result, undefined);
