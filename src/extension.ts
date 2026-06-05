@@ -438,10 +438,20 @@ export async function activate(context: vscode.ExtensionContext) {
       let newValue: string | undefined;
 
       if (enumOptions[key]) {
-        newValue = await vscode.window.showQuickPick(enumOptions[key], {
+        const options = [...enumOptions[key], '$(edit) Custom value...'];
+        const picked = await vscode.window.showQuickPick(options, {
           placeHolder: `Select ${key}`,
           title: key,
-        }) ?? undefined;
+        });
+        if (picked === '$(edit) Custom value...') {
+          newValue = await vscode.window.showInputBox({
+            prompt: `Enter custom value for ${key}`,
+            value: currentVal,
+            title: key,
+          });
+        } else {
+          newValue = picked;
+        }
       } else {
         newValue = await vscode.window.showInputBox({
           prompt: `Enter ${key}`,
