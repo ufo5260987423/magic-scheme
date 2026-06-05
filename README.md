@@ -15,6 +15,7 @@ You can click [this Patreon page](https://www.patreon.com/PoorProgrammer/members
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/paypalme/ufo5260987423/10)
 
 ## Release
+0.0.8 Unified project-level config via `.vscode/magic-scheme.json`; auto-update for scheme-langserver; removed legacy VS Code settings for LSP parameters.
 0.0.7 Compatible with scheme-langserver 2.1.0 (workspace/symbol, improved diagnostics, .sld support); comprehensive syntax highlighting improvements.
 0.0.6 Be compatible with new Scheme-langserver[<=2.0.0] !
 0.0.5 OK, at least I removed the annoying surrounding pair with "'" and also, 0.0.4 works now!

@@ -69,7 +69,7 @@ export function readProjectConfig(workspacePath: string): ProjectConfig | undefi
     return JSON.parse(content) as ProjectConfig;
   } catch {
     vscode.window.showWarningMessage(
-      `Failed to parse .scheme-langserver.json in ${workspacePath}. Using VS Code settings instead.`
+      `Failed to parse .vscode/magic-scheme.json in ${workspacePath}. Using hard-coded defaults.`
     );
     return undefined;
   }

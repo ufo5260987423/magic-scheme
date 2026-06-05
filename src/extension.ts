@@ -52,12 +52,12 @@ function printEnvironmentInfo(): vscode.OutputChannel {
     // ignore
   }
 
-  // Print effective LSP config (solely from .scheme-langserver.json)
+  // Print effective LSP config (solely from .vscode/magic-scheme.json)
   try {
     const effective = getEffectiveServerConfig();
     if (effective) {
       channel.appendLine("");
-      channel.appendLine("Effective scheme-langserver configuration (from .scheme-langserver.json):");
+      channel.appendLine("Effective scheme-langserver configuration (from .vscode/magic-scheme.json):");
       channel.appendLine(`  topEnvironment:  ${effective.topEnvironment}`);
       channel.appendLine(`  multiThread:     ${effective.multiThread}`);
       channel.appendLine(`  typeInference:   ${effective.typeInference}`);
