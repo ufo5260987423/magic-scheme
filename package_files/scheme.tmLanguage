@@ -797,19 +797,19 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\s])(#\\)(space|newline|tab)(?=[\s\)])</string>
+					<string>(?&lt;=[\(\[\s])(#\\)(space|newline|tab|linefeed|return|nul|null|alarm|backspace|vtab|page|esc|delete|rubout)(?=[\s\)\]])</string>
 					<key>name</key>
 					<string>constant.character.named.scheme</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\s])(#\\)x[0-9A-F]{1,6}(?=[\s\)])</string>
+					<string>(?&lt;=[\(\[\s])(#\\)x[0-9A-F]{1,6}(?=[\s\)\]])</string>
 					<key>name</key>
 					<string>constant.character.hex-literal.scheme</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\s])(#\\).(?=[\s\)])</string>
+					<string>(?&lt;=[\(\[\s])(#\\).(?=[\s\)\]])</string>
 					<key>name</key>
 					<string>constant.character.escape.scheme</string>
 				</dict>

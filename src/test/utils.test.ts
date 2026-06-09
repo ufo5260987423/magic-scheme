@@ -135,4 +135,47 @@ suite('Unit Tests: Pure Logic', () => {
             fs.unlinkSync(configPath);
         });
     });
+
+    suite('Language Configuration', () => {
+        const configPath = path.join(__dirname, '../../package_files/scheme.configuration.json');
+
+        test('brackets do not include curly braces', () => {
+            const raw = fs.readFileSync(configPath, 'utf8');
+            const config = JSON.parse(raw);
+            assert.ok(Array.isArray(config.brackets), 'brackets should be defined');
+            const hasBraces = config.brackets.some((pair: string[]) => pair[0] === '{' && pair[1] === '}');
+            assert.strictEqual(hasBraces, false, 'brackets should not contain {}');
+            const hasParens = config.brackets.some((pair: string[]) => pair[0] === '(' && pair[1] === ')');
+            assert.strictEqual(hasParens, true, 'brackets should contain ()');
+            const hasSquare = config.brackets.some((pair: string[]) => pair[0] === '[' && pair[1] === ']');
+            assert.strictEqual(hasSquare, true, 'brackets should contain []');
+        });
+
+        test('colorizedBracketPairs do not include curly braces', () => {
+            const raw = fs.readFileSync(configPath, 'utf8');
+            const config = JSON.parse(raw);
+            assert.ok(Array.isArray(config.colorizedBracketPairs), 'colorizedBracketPairs should be defined');
+            const hasBraces = config.colorizedBracketPairs.some((pair: string[]) => pair[0] === '{' && pair[1] === '}');
+            assert.strictEqual(hasBraces, false, 'colorizedBracketPairs should not contain {}');
+            const hasParens = config.colorizedBracketPairs.some((pair: string[]) => pair[0] === '(' && pair[1] === ')');
+            assert.strictEqual(hasParens, true, 'colorizedBracketPairs should contain ()');
+            const hasSquare = config.colorizedBracketPairs.some((pair: string[]) => pair[0] === '[' && pair[1] === ']');
+            assert.strictEqual(hasSquare, true, 'colorizedBracketPairs should contain []');
+        });
+
+        test('autoClosingPairs do not include curly braces', () => {
+            const raw = fs.readFileSync(configPath, 'utf8');
+            const config = JSON.parse(raw);
+            assert.ok(Array.isArray(config.autoClosingPairs), 'autoClosingPairs should be defined');
+            const pairs = config.autoClosingPairs as string[][];
+            const hasBraces = pairs.some(pair => pair[0] === '{' && pair[1] === '}');
+            assert.strictEqual(hasBraces, false, 'autoClosingPairs should not contain {}');
+            const hasParens = pairs.some(pair => pair[0] === '(' && pair[1] === ')');
+            assert.strictEqual(hasParens, true, 'autoClosingPairs should contain ()');
+            const hasSquare = pairs.some(pair => pair[0] === '[' && pair[1] === ']');
+            assert.strictEqual(hasSquare, true, 'autoClosingPairs should contain []');
+            const hasQuote = pairs.some(pair => pair[0] === '"' && pair[1] === '"');
+            assert.strictEqual(hasQuote, true, 'autoClosingPairs should contain ""');
+        });
+    });
 });

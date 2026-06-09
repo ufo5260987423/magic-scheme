@@ -98,7 +98,14 @@
         "path": "./package_files/scheme.tmLanguage",
         "embeddedLanguages": {
           "meta.embedded.block.scheme": "scheme"
-        }
+        },
+        "unbalancedBracketScopes": [
+          "comment",
+          "constant.character.escape.scheme",
+          "constant.character.hex-literal.scheme",
+          "constant.character.named.scheme",
+          "string.quoted.double.scheme"
+        ]
       }
     ],
     "configurationDefaults": {
@@ -134,7 +141,6 @@
           "default": "scheme-langserver",
           "markdownDescription": "Path to the scheme-langserver executable `scheme-langserver` (for nixos akkupackages.scheme-langserver) or `run`. Can be either an absolute path or relative to the workspace root. Default: `scheme-langserver`, which works if `scheme-langserver` is in your `PATH`."
         },
-
         "magicScheme.scheme-langserver.autoUpdate": {
           "type": "string",
           "enum": [
@@ -267,7 +273,10 @@
     "@vscode/test-electron": "^2.4.0",
     "esbuild": "^0.21.5",
     "eslint": "^8.57.0",
-    "typescript": "^5.4.5"
+    "plist": "^5.0.0",
+    "typescript": "^5.4.5",
+    "vscode-oniguruma": "^1.7.0",
+    "vscode-textmate": "^8.0.0"
   },
   "dependencies": {
     "shell-quote": "^1.8.0",

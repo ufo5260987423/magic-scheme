@@ -33,7 +33,7 @@ const localCode = findVSCode();
 export default defineConfig([
     {
         label: 'unit',
-        files: ['out/test/utils.test.js', 'out/test/download.test.js'],
+        files: ['out/test/utils.test.js', 'out/test/download.test.js', 'out/test/grammar.test.js'],
         workspaceFolder: '.',
         useInstallation: localCode ? { fromPath: localCode } : undefined
     },
