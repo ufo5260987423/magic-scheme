@@ -58,6 +58,18 @@
 		</dict>
 		<dict>
 			<key>include</key>
+			<string>#fixnum-vector</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#flonum-vector</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#stencil-vector</string>
+		</dict>
+		<dict>
+			<key>include</key>
 			<string>#sexp</string>
 		</dict>
 		<dict>
@@ -66,15 +78,15 @@
 		</dict>
 		<dict>
 			<key>include</key>
-			<string>#here-string</string>
-		</dict>
-		<dict>
-			<key>include</key>
 			<string>#language-functions</string>
 		</dict>
 		<dict>
 			<key>include</key>
 			<string>#quote</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#constants</string>
 		</dict>
 		<dict>
 			<key>include</key>
@@ -179,15 +191,137 @@
 			<array>
 				<dict>
 					<key>match</key>
-					<string>#[tf]|#true|#false</string>
+					<string>#(?i:[tf]|true|false)</string>
 					<key>name</key>
 					<string>constant.language.boolean.scheme</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\s])((#e|#i)?[0-9]+(\.[0-9]+)?|(#x)[0-9a-fA-F]+|(#o)[0-7]+|(#b)[01]+)(?=[\s;()'",\[\]])</string>
+					<string>(?&lt;=[\(\[\s])([+-]inf\.0|[+-]nan\.0)(?=[\s;()'",\[\]])</string>
 					<key>name</key>
 					<string>constant.numeric.scheme</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?&lt;=[\(\[\s])([+-]?(?:\d+/\d+|\d+\.\d+(?:[esfdl][+-]?\d+)?|\d+[esfdl][+-]?\d+|\d+\.\d*|\.\d+|\d+)?[+-](?:\d+/\d+|\d+\.\d+(?:[esfdl][+-]?\d+)?|\d+[esfdl][+-]?\d+|\d+\.\d*|\.\d+|\d+)?i|[+-]i)(?=[\s;()'",\[\]])</string>
+					<key>name</key>
+					<string>constant.numeric.scheme</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?&lt;=[\(\[\s])(\#\d+[rR][0-9a-zA-Z]+)(?=[\s;()'",\[\]])</string>
+					<key>name</key>
+					<string>constant.numeric.scheme</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?&lt;=[\(\[\s])(?:\#[ei]?\#[boxd]|\#[boxd]\#[ei]?|\#[ei]?|\#[boxd]?)?(?:\d+/\d+|\d+\.\d+(?:[esfdl][+-]?\d+)?|\d+[esfdl][+-]?\d+|\d+\.\d*|\.\d+|\d+)(?=[\s;()'",\[\]])</string>
+					<key>name</key>
+					<string>constant.numeric.scheme</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?&lt;=[\(\[\s])(#\d+=)(?=[\s\)\]])</string>
+					<key>name</key>
+					<string>constant.other.graph-mark.scheme</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?&lt;=[\(\[\s])(#\d+#)(?=[\s\)\]])</string>
+					<key>name</key>
+					<string>constant.other.graph-ref.scheme</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?&lt;=[\(\[\s])(#&amp;)(?=[\s\)\]])</string>
+					<key>name</key>
+					<string>constant.other.box.scheme</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?&lt;=[\(\[\s])(#:[A-Za-z0-9_!$%&amp;*+./:&lt;=&gt;?@^~-]+)(?=[\s\)\]])</string>
+					<key>name</key>
+					<string>constant.other.gensym.scheme</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?&lt;=[\(\[\s])(#%|#2%|#3%)(?=[\s\)\]])</string>
+					<key>name</key>
+					<string>constant.other.primitive.scheme</string>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>(#\{)</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.definition.gensym.begin.scheme</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>(\})</string>
+					<key>endCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.definition.gensym.end.scheme</string>
+						</dict>
+					</dict>
+					<key>name</key>
+					<string>meta.gensym.scheme</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>match</key>
+							<string>[A-Za-z0-9_!$%&amp;*+./:&lt;=&gt;?@^_~-]+</string>
+							<key>name</key>
+							<string>entity.name.tag.scheme</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>(#\&#x5B;)</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.definition.record.begin.scheme</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>(\&#x5D;)</string>
+					<key>endCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.definition.record.end.scheme</string>
+						</dict>
+					</dict>
+					<key>name</key>
+					<string>meta.record.scheme</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#constants</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#string</string>
+						</dict>
+						<dict>
+							<key>match</key>
+							<string>[A-Za-z0-9_!$%&amp;*+./:&lt;=&gt;?@^_~-]+</string>
+							<key>name</key>
+							<string>entity.name.type.scheme</string>
+						</dict>
+					</array>
 				</dict>
 			</array>
 		</dict>
@@ -472,7 +606,7 @@
 				</dict>
 				<dict>
 					<key>begin</key>
-					<string>(#['`,]|#,@)\s*</string>
+					<string>(#'|#`|#,|#,@|#['`,])\s*</string>
 					<key>beginCaptures</key>
 					<dict>
 						<key>1</key>
@@ -797,7 +931,7 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s])(#\\)(space|newline|tab|linefeed|return|nul|null|alarm|backspace|vtab|page|esc|delete|rubout)(?=[\s\)\]])</string>
+					<string>(?&lt;=[\(\[\s])(#\\)(space|newline|tab|linefeed|return|nul|null|alarm|backspace|vtab|vt|page|esc|delete|rubout|bel|ls|nel)(?=[\s\)\]])</string>
 					<key>name</key>
 					<string>constant.character.named.scheme</string>
 				</dict>
@@ -845,7 +979,7 @@
 		<key>vector</key>
 		<dict>
 			<key>begin</key>
-			<string>(#\()</string>
+			<string>(#\d*\()</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -901,7 +1035,7 @@
 		<key>bytevector</key>
 		<dict>
 			<key>begin</key>
-			<string>(#vu8\()</string>
+			<string>(#\d*vu8\()</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -922,6 +1056,126 @@
 			</dict>
 			<key>name</key>
 			<string>meta.bytevector.scheme</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#comment</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#constants</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#illegal</string>
+				</dict>
+			</array>
+		</dict>
+		<key>fixnum-vector</key>
+		<dict>
+			<key>begin</key>
+			<string>(#\d*vfx\()</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.fixnum-vector.begin.scheme</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(\))</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.fixnum-vector.end.scheme</string>
+				</dict>
+			</dict>
+			<key>name</key>
+			<string>meta.fixnum-vector.scheme</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#comment</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#constants</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#illegal</string>
+				</dict>
+			</array>
+		</dict>
+		<key>flonum-vector</key>
+		<dict>
+			<key>begin</key>
+			<string>(#\d*vfl\()</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.flonum-vector.begin.scheme</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(\))</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.flonum-vector.end.scheme</string>
+				</dict>
+			</dict>
+			<key>name</key>
+			<string>meta.flonum-vector.scheme</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#comment</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#constants</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#illegal</string>
+				</dict>
+			</array>
+		</dict>
+		<key>stencil-vector</key>
+		<dict>
+			<key>begin</key>
+			<string>(#\d+vs\()</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.stencil-vector.begin.scheme</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(\))</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.stencil-vector.end.scheme</string>
+				</dict>
+			</dict>
+			<key>name</key>
+			<string>meta.stencil-vector.scheme</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -972,23 +1226,7 @@
 				</dict>
 			</array>
 		</dict>
-			<key>here-string</key>
-			<dict>
-				<key>begin</key>
-				<string>#&lt;&lt;([A-Za-z0-9!$%&amp;*+-./:&lt;=&gt;?@^_~]+)\n</string>
-				<key>beginCaptures</key>
-				<dict>
-					<key>1</key>
-					<dict>
-						<key>name</key>
-						<string>punctuation.definition.here-string.scheme</string>
-					</dict>
-				</dict>
-				<key>end</key>
-				<string>^\1$</string>
-				<key>name</key>
-				<string>string.quoted.other.here-string.scheme</string>
-			</dict>
+
 	</dict>
 	<key>scopeName</key>
 	<string>source.scheme</string>
