@@ -193,4 +193,26 @@ suite('Grammar Tokenization', () => {
         assert.ok(found.some(f => f.text === '#\\newline' && f.scopes.includes('constant.character.named.scheme')), '#\\newline');
         assert.ok(found.some(f => f.text === '#\\tab' && f.scopes.includes('constant.character.named.scheme')), '#\\tab');
     });
+
+    test('vector literal #(a b c) is tokenized', () => {
+        let state: any = null;
+        const code = '#(a b c)';
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const vectorBegin = tokens.find(t => t.text === '#(');
+        assert.ok(vectorBegin, 'Token #( should be found');
+        assert.ok(
+            vectorBegin!.scopes.includes('punctuation.definition.vector.begin.scheme'),
+            `Expected #( to have scope punctuation.definition.vector.begin.scheme, got: ${vectorBegin!.scopes.join(' ')}`
+        );
+        const vectorEnd = tokens.find(t => t.text === ')');
+        assert.ok(vectorEnd, 'Token ) should be found');
+        assert.ok(
+            vectorEnd!.scopes.includes('punctuation.definition.vector.end.scheme'),
+            `Expected ) to have scope punctuation.definition.vector.end.scheme, got: ${vectorEnd!.scopes.join(' ')}`
+        );
+    });
 });
