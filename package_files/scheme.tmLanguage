@@ -197,6 +197,12 @@
 				</dict>
 				<dict>
 					<key>match</key>
+					<string>(?i:#!(?:eof|bwp|r6rs|chezscheme|fold-case|no-fold-case))</string>
+					<key>name</key>
+					<string>constant.language.directive.scheme</string>
+				</dict>
+				<dict>
+					<key>match</key>
 					<string>(?&lt;=[\(\[\s])([+-]inf\.0|[+-]nan\.0)(?=[\s;()'",\[\]])</string>
 					<key>name</key>
 					<string>constant.numeric.scheme</string>
@@ -342,12 +348,15 @@
 						(?&lt;=(\s|\(|\[)) # preceded by space or ( 
 						( do|or|and|else|quasiquote|begin|if|case|set!|
 						  cond|let|unquote|define|let\*|unquote-splicing|delay|
-						  letrec|when|unless|guard|dynamic-wind|raise|
+						  letrec|letrec\*|when|unless|guard|dynamic-wind|raise|
 						  with-exception-handler|library|import|export|
 						  define-record-type|let-values|let\*-values|
 						  define-values|call-with-values|parameterize|
-						  fluid-let|syntax-case|with-syntax|
-						  identifier-syntax|and-let\*|time)
+						  fluid-let|syntax-case|with-syntax|syntax-rules|
+						  identifier-syntax|and-let\*|time|assert|case-lambda|
+						  define-library|include|include-ci|cond-expand|
+						  top-level-program|module|import-only|alias|
+						  =>|rename|only|except|prefix|for|meta)
 						(?=(\s|\())</string>
 					<key>name</key>
 					<string>keyword.control.scheme</string>
@@ -1218,6 +1227,18 @@
 			<string>string.quoted.double.scheme</string>
 			<key>patterns</key>
 			<array>
+				<dict>
+					<key>match</key>
+					<string>\\x[0-9a-fA-F]+;</string>
+					<key>name</key>
+					<string>constant.character.escape.scheme</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>\\[abtnvfr"\\]</string>
+					<key>name</key>
+					<string>constant.character.escape.scheme</string>
+				</dict>
 				<dict>
 					<key>match</key>
 					<string>\\.</string>
