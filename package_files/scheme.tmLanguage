@@ -551,7 +551,7 @@
 					<key>match</key>
 					<string>(?x)
 						(')\s*
-						([[:alnum:]][[:alnum:]!$%&amp;*+-./:&lt;=&gt;?@^_~]*)
+						((?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+)
 					</string>
 					<key>name</key>
 					<string>constant.other.symbol.scheme</string>
@@ -765,9 +765,9 @@
 						(?&lt;=\()       # preceded by (
 						(define)\s+   # define
 						(\()          # list of parameters
-						  ([[:alnum:]][[:alnum:]!$%&amp;*+-./:&lt;=&gt;?@^_~]*)
+						  ((?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+)
 						  ((\s+
-						    ([[:alnum:]][[:alnum:]!$%&amp;*+-./:&lt;=&gt;?@^_~]*|[._])
+						    ((?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+|[._])
 						   )*
 						  )\s*
 						(\))
@@ -827,10 +827,10 @@
 						(lambda)\s+
 						(\() # opening paren
 						((?:
-						  ([[:alnum:]][[:alnum:]!$%&amp;*+-./:&lt;=&gt;?@^_~]*|[._])
+						  ((?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+|[._])
 						  \s+
 						)*(?:
-						  ([[:alnum:]][[:alnum:]!$%&amp;*+-./:&lt;=&gt;?@^_~]*|[._])
+						  ((?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+|[._])
 						)?)
 						(\)) # closing paren
 					</string>
@@ -884,7 +884,7 @@
 				</dict>
 				<dict>
 					<key>begin</key>
-					<string>(?&lt;=\()(define)\s([[:alnum:]][[:alnum:]!$%&amp;*+-./:&lt;=&gt;?@^_~]*)\s*.*?</string>
+					<string>(?&lt;=\()(define)\s((?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+)\s*.*?</string>
 					<key>captures</key>
 					<dict>
 						<key>1</key>
@@ -929,6 +929,12 @@
 				<dict>
 					<key>include</key>
 					<string>#language-functions</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>\|[^\|]*\|</string>
+					<key>name</key>
+					<string>variable.other.scheme</string>
 				</dict>
 				<dict>
 					<key>include</key>
@@ -1227,6 +1233,14 @@
 			<string>string.quoted.double.scheme</string>
 			<key>patterns</key>
 			<array>
+				<dict>
+					<key>begin</key>
+					<string>\\[ \t]*$</string>
+					<key>end</key>
+					<string>^[ \t]*</string>
+					<key>name</key>
+					<string>constant.character.escape.scheme</string>
+				</dict>
 				<dict>
 					<key>match</key>
 					<string>\\x[0-9a-fA-F]+;</string>
