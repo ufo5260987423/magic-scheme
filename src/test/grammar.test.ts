@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as assert from 'assert';
 import { suite, test } from 'mocha';
 import * as fs from 'fs';
@@ -195,7 +196,7 @@ suite('Grammar Tokenization', () => {
     });
 
     test('vector literal #(a b c) is tokenized', () => {
-        let state: any = null;
+        const state: any = null;
         const code = '#(a b c)';
         const result = grammar.tokenizeLine(code, state);
         const tokens = result.tokens.map(t => ({
@@ -213,6 +214,139 @@ suite('Grammar Tokenization', () => {
         assert.ok(
             vectorEnd!.scopes.includes('punctuation.definition.vector.end.scheme'),
             `Expected ) to have scope punctuation.definition.vector.end.scheme, got: ${vectorEnd!.scopes.join(' ')}`
+        );
+    });
+
+
+    test('octal character literal #\\000 is tokenized', () => {
+        const state: any = null;
+        const code = '(#\\000)';
+        const { token } = findToken(code, '#\\000', state);
+        assert.ok(token, 'Token #\\000 should be found');
+        assert.ok(
+            token!.scopes.includes('constant.character.octal.scheme'),
+            `Expected #\\000 to have scope constant.character.octal.scheme, got: ${token!.scopes.join(' ')}`
+        );
+    });
+
+    test('hex character literal #\\x41; with semicolon is tokenized', () => {
+        const state: any = null;
+        const code = '(#\\x41;)';
+        const { token } = findToken(code, '#\\x41;', state);
+        assert.ok(token, 'Token #\\x41; should be found');
+        assert.ok(
+            token!.scopes.includes('constant.character.hex-literal.scheme'),
+            `Expected #\\x41; to have scope constant.character.hex-literal.scheme, got: ${token!.scopes.join(' ')}`
+        );
+    });
+
+    test('fixnum vector #vfx(1 2 3) is tokenized', () => {
+        const state: any = null;
+        const code = '#vfx(1 2 3)';
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const vectorBegin = tokens.find(t => t.text === '#vfx(');
+        assert.ok(vectorBegin, 'Token #vfx( should be found');
+        assert.ok(
+            vectorBegin!.scopes.includes('punctuation.definition.fixnum-vector.begin.scheme'),
+            `Expected #vfx( to have scope punctuation.definition.fixnum-vector.begin.scheme, got: ${vectorBegin!.scopes.join(' ')}`
+        );
+    });
+
+    test('flonum vector #vfl(1.0 2.0) is tokenized', () => {
+        const state: any = null;
+        const code = '#vfl(1.0 2.0)';
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const vectorBegin = tokens.find(t => t.text === '#vfl(');
+        assert.ok(vectorBegin, 'Token #vfl( should be found');
+        assert.ok(
+            vectorBegin!.scopes.includes('punctuation.definition.flonum-vector.begin.scheme'),
+            `Expected #vfl( to have scope punctuation.definition.flonum-vector.begin.scheme, got: ${vectorBegin!.scopes.join(' ')}`
+        );
+    });
+
+    test('box #& is tokenized', () => {
+        const state: any = null;
+        const code = '(#&1)';
+        const { token } = findToken(code, '#&', state);
+        assert.ok(token, 'Token #& should be found');
+        assert.ok(
+            token!.scopes.includes('constant.other.box.scheme'),
+            `Expected #& to have scope constant.other.box.scheme, got: ${token!.scopes.join(' ')}`
+        );
+    });
+
+    test('gensym #{g0} is tokenized', () => {
+        const state: any = null;
+        const code = '#{g0}';
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const gensymBegin = tokens.find(t => t.text === '#{');
+        assert.ok(gensymBegin, 'Token #{ should be found');
+        assert.ok(
+            gensymBegin!.scopes.includes('punctuation.definition.gensym.begin.scheme'),
+            `Expected #{ to have scope punctuation.definition.gensym.begin.scheme, got: ${gensymBegin!.scopes.join(' ')}`
+        );
+    });
+
+    test('record #[rtd] is tokenized', () => {
+        const state: any = null;
+        const code = '#[rtd]';
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const recordBegin = tokens.find(t => t.text === '#[');
+        assert.ok(recordBegin, 'Token #[ should be found');
+        assert.ok(
+            recordBegin!.scopes.includes('punctuation.definition.record.begin.scheme'),
+            `Expected #[ to have scope punctuation.definition.record.begin.scheme, got: ${recordBegin!.scopes.join(' ')}`
+        );
+    });
+
+    test('arbitrary radix float #36rZZ.5 is tokenized', () => {
+        const state: any = null;
+        const code = '(#36rZZ.5)';
+        const { token } = findToken(code, '#36rZZ.5', state);
+        assert.ok(token, 'Token #36rZZ.5 should be found');
+        assert.ok(
+            token!.scopes.includes('constant.numeric.scheme'),
+            `Expected #36rZZ.5 to have scope constant.numeric.scheme, got: ${token!.scopes.join(' ')}`
+        );
+    });
+
+    test('quoted fixnum vector \'#vfx(1 2) tokenizes quote and vector separately', () => {
+        const state: any = null;
+        const code = "'#vfx(1 2)";
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        // The ' should be quote punctuation
+        const quoteTok = tokens.find(t => t.text === "'");
+        assert.ok(quoteTok, 'Token \' should be found');
+        assert.ok(
+            quoteTok!.scopes.some(s => s.includes('quoted') || s.includes('quote')),
+            `Expected ' to have a quote scope, got: ${quoteTok!.scopes.join(' ')}`
+        );
+        // The #vfx( should be vector begin
+        const vectorBegin = tokens.find(t => t.text === '#vfx(');
+        assert.ok(vectorBegin, 'Token #vfx( should be found');
+        assert.ok(
+            vectorBegin!.scopes.includes('punctuation.definition.fixnum-vector.begin.scheme'),
+            `Expected #vfx( to have scope punctuation.definition.fixnum-vector.begin.scheme, got: ${vectorBegin!.scopes.join(' ')}`
         );
     });
 });

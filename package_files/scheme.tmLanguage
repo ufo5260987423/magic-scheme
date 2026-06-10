@@ -181,6 +181,18 @@
 				</dict>
 				<dict>
 					<key>include</key>
+					<string>#fixnum-vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#flonum-vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#stencil-vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
 					<string>#constants</string>
 				</dict>
 			</array>
@@ -203,55 +215,55 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s])([+-]inf\.0|[+-]nan\.0)(?=[\s;()'",\[\]])</string>
+					<string>(?&lt;=[\(\[\s{}"'\,;#])([+-]inf\.0|[+-]nan\.0)(?=[\s;()'",\[\]])</string>
 					<key>name</key>
 					<string>constant.numeric.scheme</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s])([+-]?(?:\d+/\d+|\d+\.\d+(?:[esfdl][+-]?\d+)?|\d+[esfdl][+-]?\d+|\d+\.\d*|\.\d+|\d+)?[+-](?:\d+/\d+|\d+\.\d+(?:[esfdl][+-]?\d+)?|\d+[esfdl][+-]?\d+|\d+\.\d*|\.\d+|\d+)?i|[+-]i)(?=[\s;()'",\[\]])</string>
+					<string>(?&lt;=[\(\[\s{}"'\,;#])([+-]?(?:\d+/\d+|\d+\.\d+(?:[esfdl][+-]?\d+)?|\d+[esfdl][+-]?\d+|\d+\.\d*|\.\d+|\d+)?[+-](?:\d+/\d+|\d+\.\d+(?:[esfdl][+-]?\d+)?|\d+[esfdl][+-]?\d+|\d+\.\d*|\.\d+|\d+)?i|[+-]i)(?=[\s;()'",\[\]])</string>
 					<key>name</key>
 					<string>constant.numeric.scheme</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s])(\#\d+[rR][0-9a-zA-Z]+)(?=[\s;()'",\[\]])</string>
+					<string>(?&lt;=[\(\[\s{}"'\,;#])(\#\d+[rR](?:[0-9a-zA-Z]+\.[0-9a-zA-Z]*|\.[0-9a-zA-Z]+|[0-9a-zA-Z]+))(?=[\s;()'",\[\]])</string>
 					<key>name</key>
 					<string>constant.numeric.scheme</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s])(?:\#[ei]?\#[boxd]|\#[boxd]\#[ei]?|\#[ei]?|\#[boxd]?)?(?:\d+/\d+|\d+\.\d+(?:[esfdl][+-]?\d+)?|\d+[esfdl][+-]?\d+|\d+\.\d*|\.\d+|\d+)(?=[\s;()'",\[\]])</string>
+					<string>(?&lt;=[\(\[\s{}"'\,;#])(?:\#[ei]?\#[boxd]|\#[boxd]\#[ei]?|\#[ei]?|\#[boxd]?)?(?:\d+/\d+|\d+\.\d+(?:[esfdl][+-]?\d+)?|\d+[esfdl][+-]?\d+|\d+\.\d*|\.\d+|\d+)(?=[\s;()'",\[\]])</string>
 					<key>name</key>
 					<string>constant.numeric.scheme</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s])(#\d+=)(?=[\s\)\]])</string>
+					<string>(?&lt;=[\(\[\s{}"'\,;#])(#\d+=)</string>
 					<key>name</key>
 					<string>constant.other.graph-mark.scheme</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s])(#\d+#)(?=[\s\)\]])</string>
+					<string>(?&lt;=[\(\[\s{}"'\,;#])(#\d+#)</string>
 					<key>name</key>
 					<string>constant.other.graph-ref.scheme</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s])(#&amp;)(?=[\s\)\]])</string>
+					<string>(?&lt;=[\(\[\s{}"'\,;#])(#&amp;)</string>
 					<key>name</key>
 					<string>constant.other.box.scheme</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s])(#:[A-Za-z0-9_!$%&amp;*+./:&lt;=&gt;?@^~-]+)(?=[\s\)\]])</string>
+					<string>(?&lt;=[\(\[\s{}"'\,;#])(#:[A-Za-z0-9_!$%&amp;*+./:&lt;=&gt;?@^~-]+)</string>
 					<key>name</key>
 					<string>constant.other.gensym.scheme</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s])(#%|#2%|#3%)(?=[\s\)\]])</string>
+					<string>(?&lt;=[\(\[\s{}"'\,;#])(#%|#2%|#3%)</string>
 					<key>name</key>
 					<string>constant.other.primitive.scheme</string>
 				</dict>
@@ -282,7 +294,13 @@
 					<array>
 						<dict>
 							<key>match</key>
-							<string>[A-Za-z0-9_!$%&amp;*+./:&lt;=&gt;?@^_~-]+</string>
+							<string>\|[^\|]*\|</string>
+							<key>name</key>
+							<string>entity.name.tag.scheme</string>
+						</dict>
+						<dict>
+							<key>match</key>
+							<string>(?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~|#-]|\.)+</string>
 							<key>name</key>
 							<string>entity.name.tag.scheme</string>
 						</dict>
@@ -323,7 +341,13 @@
 						</dict>
 						<dict>
 							<key>match</key>
-							<string>[A-Za-z0-9_!$%&amp;*+./:&lt;=&gt;?@^_~-]+</string>
+							<string>\|[^\|]*\|</string>
+							<key>name</key>
+							<string>entity.name.type.scheme</string>
+						</dict>
+						<dict>
+							<key>match</key>
+							<string>(?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\.)+</string>
 							<key>name</key>
 							<string>entity.name.type.scheme</string>
 						</dict>
@@ -347,7 +371,7 @@
 					<string>(?x)
 						(?&lt;=(\s|\(|\[)) # preceded by space or ( 
 						( do|or|and|else|quasiquote|begin|if|case|set!|
-						  cond|let|unquote|define|let\*|unquote-splicing|delay|
+						  cond|let|unquote|define|let\*|unquote-splicing|delay|letrec-syntax|
 						  letrec|letrec\*|when|unless|guard|dynamic-wind|raise|
 						  with-exception-handler|library|import|export|
 						  define-record-type|let-values|let\*-values|
@@ -454,7 +478,7 @@
 						  construct-identifier|define-syntax|display|
 						  for-each|force|format|cd|gen-counter|gen-loser|
 						  generate-identifier|last-pair|length|let-syntax|
-						  letrec-syntax|list|list-ref|list-tail|load|log|
+						  list|list-ref|list-tail|load|log|
 						  macro|magnitude|map|map-streams|max|member|memq|
 						  memv|min|newline|nil|not|peek-char|rationalize|
 						  read|read-char|return|reverse|sequence|substring|
@@ -551,7 +575,7 @@
 					<key>match</key>
 					<string>(?x)
 						(')\s*
-						((?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+)
+						((?!\#)(?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+)
 					</string>
 					<key>name</key>
 					<string>constant.other.symbol.scheme</string>
@@ -720,6 +744,22 @@
 				</dict>
 				<dict>
 					<key>include</key>
+					<string>#fixnum-vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#flonum-vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#stencil-vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#constants</string>
+				</dict>
+				<dict>
+					<key>include</key>
 					<string>#illegal</string>
 				</dict>
 			</array>
@@ -765,7 +805,7 @@
 						(?&lt;=\()       # preceded by (
 						(define)\s+   # define
 						(\()          # list of parameters
-						  ((?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+)
+						  ((?!\#)(?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+)
 						  ((\s+
 						    ((?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+|[._])
 						   )*
@@ -884,7 +924,7 @@
 				</dict>
 				<dict>
 					<key>begin</key>
-					<string>(?&lt;=\()(define)\s((?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+)\s*.*?</string>
+					<string>(?&lt;=\()(define)\s((?!\#)(?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+)\s*.*?</string>
 					<key>captures</key>
 					<dict>
 						<key>1</key>
@@ -942,23 +982,41 @@
 				</dict>
 				<dict>
 					<key>include</key>
+					<string>#fixnum-vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#flonum-vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#stencil-vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
 					<string>#constants</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s])(#\\)(space|newline|tab|linefeed|return|nul|null|alarm|backspace|vtab|vt|page|esc|delete|rubout|bel|ls|nel)(?=[\s\)\]])</string>
+					<string>(?&lt;=[\(\[\s{}"'\,;#])(#\\)(space|newline|tab|linefeed|return|nul|null|alarm|backspace|vtab|vt|page|esc|delete|rubout|bel|ls|nel)(?=[\s\)\]\\{ }"'\,;#])</string>
 					<key>name</key>
 					<string>constant.character.named.scheme</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s])(#\\)x[0-9A-F]{1,6}(?=[\s\)\]])</string>
+					<string>(?&lt;=[\(\[\s{}"'\,;#])(#\\)x[0-9A-F]+;(?=[\s\)\]\\{ }"'\,;#])</string>
 					<key>name</key>
 					<string>constant.character.hex-literal.scheme</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s])(#\\).(?=[\s\)\]])</string>
+					<string>(?&lt;=[\(\[\s{}"'\,;#])(#\\)[0-7]{3}(?=[\s\)\]\\{ }"'\,;#])</string>
+					<key>name</key>
+					<string>constant.character.octal.scheme</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?&lt;=[\(\[\s{}"'\,;#])(#\\).(?=[\s\)\]\\{ }"'\,;#])</string>
 					<key>name</key>
 					<string>constant.character.escape.scheme</string>
 				</dict>
@@ -984,6 +1042,22 @@
 				<dict>
 					<key>include</key>
 					<string>#bytevector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#fixnum-vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#flonum-vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#stencil-vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#constants</string>
 				</dict>
 				<dict>
 					<key>include</key>
@@ -1032,6 +1106,18 @@
 				<dict>
 					<key>include</key>
 					<string>#string</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#fixnum-vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#flonum-vector</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#stencil-vector</string>
 				</dict>
 				<dict>
 					<key>include</key>

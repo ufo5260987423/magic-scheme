@@ -96,15 +96,19 @@
         "language": "scheme",
         "scopeName": "source.scheme",
         "path": "./package_files/scheme.tmLanguage",
-        "embeddedLanguages": {
-          "meta.embedded.block.scheme": "scheme"
-        },
         "unbalancedBracketScopes": [
           "comment",
           "constant.character.escape.scheme",
           "constant.character.hex-literal.scheme",
           "constant.character.named.scheme",
-          "string.quoted.double.scheme"
+          "constant.character.octal.scheme",
+          "string.quoted.double.scheme",
+          "meta.gensym.scheme",
+          "meta.record.scheme",
+          "meta.vector.scheme",
+          "meta.stencil-vector.scheme",
+          "meta.fixnum-vector.scheme",
+          "meta.flonum-vector.scheme"
         ]
       }
     ],

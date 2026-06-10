@@ -8,6 +8,10 @@ function fileName(filePath: string): string {
   return path.basename(filePath);
 }
 
+function toSchemeString(filePath: string): string {
+  return '"' + filePath.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+}
+
 function sendAkkuSetup(terminal: vscode.Terminal, workspacePath: string): void {
   const akku = vscode.workspace.getConfiguration("magicScheme.akku").get<string>("path");
   const manifestPath = path.join(workspacePath, "AKKU.manifest");
@@ -23,7 +27,7 @@ function sendAkkuSetup(terminal: vscode.Terminal, workspacePath: string): void {
   }
 
   if (existsSync(envPath)) {
-    terminal.sendText(quote(["bash", envPath]));
+    terminal.sendText(quote(["sh", envPath]));
   }
 }
 
@@ -59,7 +63,7 @@ export function runFileInTerminal(
 
 export function loadFileInRepl(filePath: string, repl: vscode.Terminal): void {
   repl.show();
-  repl.sendText(`(load ${quote([filePath])})`);
+  repl.sendText(`(load ${toSchemeString(filePath)})`);
 }
 
 export function createTerminal(filePath: string | null): vscode.Terminal {

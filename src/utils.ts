@@ -182,11 +182,11 @@ export function withScheme(func: (command: string[]) => void): void {
 export function withREPL(func: (command: string[]) => void): void {
   const scheme = vscode.workspace.getConfiguration("magicScheme.scheme").get<string>("path");
   const args = vscode.workspace.getConfiguration("magicScheme.scheme").get<string[]>("arguments");
-  if (scheme !== undefined && scheme !== "" && args !== undefined) {
-    func([scheme, ...args]);
+  if (scheme !== undefined && scheme !== "") {
+    func(args !== undefined ? [scheme, ...args] : [scheme]);
   } else {
     vscode.window.showErrorMessage(
-      "Please configure the path to the scheme executable and the arguments for launching a REPL in settings.",
+      "Please configure the path to the scheme executable in settings.",
     );
   }
 }

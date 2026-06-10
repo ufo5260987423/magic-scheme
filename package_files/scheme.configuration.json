@@ -10,14 +10,15 @@
     "autoClosingPairs": [
         ["[", "]"],
         ["(", ")"],
-        ["\"", "\""]
+        ["\"", "\""],
+        ["|", "|"]
     ],
     "surroundingPairs": [
         ["[", "]"],
         ["(", ")"],
         ["\"", "\""]
     ],
-    "wordPattern": "([A-Za-z0-9_!$%&*+./:<=>?@^~{}|-]+)",
+    "wordPattern": "([A-Za-z0-9_!$%&*+./:<=>?@^~{}|#-]+)",
     "indentationRules": {
         "increaseIndentPattern": "^.*[\\(\\[][^\\)\\]]*$",
         "decreaseIndentPattern": "^\\s*[\\)\\]]"

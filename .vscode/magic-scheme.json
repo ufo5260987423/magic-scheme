@@ -1,0 +1,6 @@
+{
+  "topEnvironment": "R6RS",
+  "multiThread": "enable",
+  "typeInference": "enable",
+  "logPath": "~/scheme-langserver.log"
+}

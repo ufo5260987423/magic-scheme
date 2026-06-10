@@ -122,7 +122,7 @@ If automatic installation is not available for your platform, you can manually d
 | Platform | Support | Notes |
 |----------|---------|-------|
 | Linux x64 | ✅ Auto-download | Automatically downloaded on first use. |
-| NixOS | ✅ Auto-download | Generic Linux binary; if it fails, install via `nix-shell -p akkuPackages.scheme-langserver`. |
+| NixOS | ❌ Manual only | Generic Linux binary crashes on NixOS; install via `nix-shell -p akkuPackages.scheme-langserver`. |
 | macOS | ❌ Manual only | No prebuilt binary. Install via Nix or [build from source](https://github.com/ufo5260987423/scheme-langserver). |
 | Windows | ❌ Manual only | No prebuilt binary. Use WSL2 or build from source. |
 | Linux ARM | ❌ Manual only | No prebuilt binary. Build from source. |
