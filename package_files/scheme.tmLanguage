@@ -460,12 +460,12 @@
 						  with-exception-handler|library|import|export|
 						  define-record-type|let-values|let\*-values|
 						  define-values|call-with-values|parameterize|
-						  fluid-let|syntax-case|with-syntax|syntax-rules|
+						  fluid-let|syntax|syntax-case|with-syntax|syntax-rules|
 						  identifier-syntax|and-let\*|time|assert|case-lambda|
 						  lambda|
 						  define-library|include|include-ci|cond-expand|
 						  top-level-program|module|import-only|alias|
-						  =&gt;|rename|only|except|prefix|for|meta|rec|ormap|andmap|record-case|engine-block|engine-return|fluid-let-syntax)
+						  =&gt;|\.\.\.|rename|only|except|prefix|for|meta|rec|ormap|andmap|record-case|engine-block|engine-return|fluid-let-syntax)
 						(?=[\s\(\)\[\]])</string>
 					<key>name</key>
 					<string>keyword.control.scheme</string>
@@ -567,7 +567,7 @@
 						  macro|magnitude|map|map-streams|max|member|memq|
 						  memv|min|newline|nil|not|peek-char|rationalize|
 						  read|read-char|return|reverse|sequence|substring|
-						  syntax|syntax-rules|transcript-off|transcript-on|
+						  syntax-rules|transcript-off|transcript-on|
 						  truncate|unwrap-syntax|values-list|write|write-char|
 						  
 						  # cons, car, cdr, etc
@@ -780,7 +780,7 @@
 		<key>quote-sexp</key>
 		<dict>
 			<key>begin</key>
-			<string>(?&lt;=\()\s*(quote)\s+</string>
+			<string>(?&lt;=[\(\[])\s*(quote)\s+</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -797,7 +797,7 @@
 			<key>contentName</key>
 			<string>string.other.quote.scheme</string>
 			<key>end</key>
-			<string>(?=[\s)])|(?&lt;=\n)</string>
+			<string>(?=[\s)\]])|(?&lt;=\n)</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -927,15 +927,15 @@
 				<dict>
 					<key>begin</key>
 					<string>(?x)
-							(?&lt;=\()			# preceded by (
+							(?&lt;=[\(\[])			# preceded by ( or [
 							(define)\s+	# define
-							(\()			  # list of parameters
+							([\(\[])			  # list of parameters
 							  ((?!\#)(?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+)
 							  ((\s+
 							    ((?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+|[._])
 							   )*
 							  )\s*
-							(\))
+							([\)\]])
 						</string>
 					<key>captures</key>
 					<dict>
@@ -966,7 +966,7 @@
 						</dict>
 					</dict>
 					<key>end</key>
-					<string>(?=\))</string>
+					<string>(?=[\)\]])</string>
 					<key>name</key>
 					<string>meta.declaration.procedure.scheme</string>
 					<key>patterns</key>
@@ -988,16 +988,16 @@
 				<dict>
 					<key>begin</key>
 					<string>(?x)
-						(?&lt;=\() # preceded by (
+						(?&lt;=[\(\[]) # preceded by ( or [
 						(lambda)\s+
-						(\() # opening paren
+						([\(\[]) # opening paren or bracket
 						((?:
 						  ((?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+|[._])
 						  \s+
 						)*(?:
 						  ((?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+|[._])
 						)?)
-						(\)) # closing paren
+						([\)\]]) # closing paren or bracket
 					</string>
 					<key>captures</key>
 					<dict>
@@ -1028,7 +1028,7 @@
 						particularly troubling
 					</string>
 					<key>end</key>
-					<string>(?=\))</string>
+					<string>(?=[\)\]])</string>
 					<key>name</key>
 					<string>meta.declaration.procedure.scheme</string>
 					<key>patterns</key>
@@ -1049,7 +1049,7 @@
 				</dict>
 				<dict>
 					<key>begin</key>
-					<string>(?&lt;=\()(define|define-syntax)\s((?!\#)(?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+)\s*.*?</string>
+					<string>(?&lt;=[\(\[])(define|define-syntax)\s((?!\#)(?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+)\s*.*?</string>
 					<key>captures</key>
 					<dict>
 						<key>1</key>
@@ -1064,7 +1064,7 @@
 						</dict>
 					</dict>
 					<key>end</key>
-					<string>(?=\))</string>
+					<string>(?=[\)\]])</string>
 					<key>name</key>
 					<string>meta.declaration.variable.scheme</string>
 					<key>patterns</key>
@@ -1085,7 +1085,7 @@
 				</dict>
 				<dict>
 					<key>begin</key>
-					<string>(?&lt;=\()(define-record-type|define-record)\s((?!#)(?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+)\s*.*?</string>
+					<string>(?&lt;=[\(\[])(define-record-type|define-record)\s((?!#)(?:[A-Za-z0-9!$%&amp;*+./:&lt;=&gt;?@^_~{}|#-]|\\.)+)\s*.*?</string>
 					<key>captures</key>
 					<dict>
 						<key>1</key>
@@ -1100,7 +1100,7 @@
 						</dict>
 					</dict>
 					<key>end</key>
-					<string>(?=\))</string>
+					<string>(?=[\)\]])</string>
 					<key>name</key>
 					<string>meta.declaration.record.scheme</string>
 					<key>patterns</key>

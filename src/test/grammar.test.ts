@@ -524,4 +524,88 @@ suite('Grammar Tokenization', () => {
         );
     });
 
+    test('ellipsis ... is tokenized as keyword.control', () => {
+        const state: any = null;
+        const code = '(...)';
+        const { token } = findToken(code, '...', state);
+        assert.ok(token, 'Token ... should be found');
+        assert.ok(
+            token!.scopes.includes('keyword.control.scheme'),
+            `Expected ... to have scope keyword.control.scheme, got: ${token!.scopes.join(' ')}`
+        );
+    });
+
+    test('arbitrary 3-char identifier is NOT mis-tokenized as keyword.control', () => {
+        const state: any = null;
+        const code = '(foo)';
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const fooTok = tokens.find(t => t.text === 'foo');
+        assert.ok(fooTok, 'Token foo should be found');
+        assert.ok(
+            !fooTok!.scopes.some(s => s.includes('keyword.control')),
+            `Expected foo NOT to have keyword.control scope, got: ${fooTok!.scopes.join(' ')}`
+        );
+    });
+
+    test('syntax-rules pattern with ... tokenizes correctly', () => {
+        const state: any = null;
+        const code = '(syntax-rules () ((_ x ...) x))';
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const syntaxRulesTok = tokens.find(t => t.text === 'syntax-rules');
+        assert.ok(syntaxRulesTok, 'Token syntax-rules should be found');
+        assert.ok(
+            syntaxRulesTok!.scopes.includes('keyword.control.scheme'),
+            `Expected syntax-rules to have keyword.control.scheme, got: ${syntaxRulesTok!.scopes.join(' ')}`
+        );
+        const ellipsisTok = tokens.find(t => t.text === '...');
+        assert.ok(ellipsisTok, 'Token ... should be found');
+        assert.ok(
+            ellipsisTok!.scopes.includes('keyword.control.scheme'),
+            `Expected ... to have keyword.control.scheme, got: ${ellipsisTok!.scopes.join(' ')}`
+        );
+        for (const tok of tokens) {
+            if (tok.text === 'syntax-rules' || tok.text === '...') {
+                continue;
+            }
+            assert.ok(
+                !tok.scopes.some(s => s.includes('keyword.control')),
+                `Expected no non-keyword token to have keyword.control scope, but found: ${tok.text} => ${tok.scopes.join(' ')}`
+            );
+        }
+    });
+
+    test('lambda declaration inside square brackets is tokenized', () => {
+        const state: any = null;
+        const code = '[lambda (x) x]';
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const lambdaTok = tokens.find(t => t.text === 'lambda');
+        assert.ok(lambdaTok, 'Token lambda should be found');
+        assert.ok(
+            lambdaTok!.scopes.includes('meta.declaration.procedure.scheme'),
+            `Expected lambda to have meta.declaration.procedure.scheme, got: ${lambdaTok!.scopes.join(' ')}`
+        );
+        assert.ok(
+            lambdaTok!.scopes.includes('keyword.control.scheme'),
+            `Expected lambda to have keyword.control.scheme, got: ${lambdaTok!.scopes.join(' ')}`
+        );
+        const xTok = tokens.find(t => t.text === 'x');
+        assert.ok(xTok, 'Token x should be found');
+        assert.ok(
+            xTok!.scopes.includes('variable.parameter.scheme'),
+            `Expected x to have variable.parameter.scheme, got: ${xTok!.scopes.join(' ')}`
+        );
+    });
+
 });
