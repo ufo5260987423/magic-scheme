@@ -459,4 +459,69 @@ suite('Grammar Tokenization', () => {
             `Expected #:{x} to have scope constant.other.gensym.scheme, got: ${token!.scopes.join(' ')}`
         );
     });
+    test('square brackets [foo bar] are tokenized as expressions', () => {
+        const state: any = null;
+        const code = '[foo bar]';
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const bracketBegin = tokens.find(t => t.text === '[');
+        assert.ok(bracketBegin, 'Token [ should be found');
+        assert.ok(
+            bracketBegin!.scopes.includes('punctuation.section.expression.begin.scheme'),
+            `Expected [ to have expression begin scope, got: ${bracketBegin!.scopes.join(' ')}`
+        );
+        const bracketEnd = tokens.find(t => t.text === ']');
+        assert.ok(bracketEnd, 'Token ] should be found');
+        assert.ok(
+            bracketEnd!.scopes.includes('punctuation.section.expression.end.scheme'),
+            `Expected ] to have expression end scope, got: ${bracketEnd!.scopes.join(' ')}`
+        );
+    });
+
+    test('complex number 1+2i is tokenized as numeric', () => {
+        const state: any = null;
+        const code = '(1+2i)';
+        const { token } = findToken(code, '1+2i', state);
+        assert.ok(token, 'Token 1+2i should be found');
+        assert.ok(
+            token!.scopes.includes('constant.numeric.scheme'),
+            `Expected 1+2i to have scope constant.numeric.scheme, got: ${token!.scopes.join(' ')}`
+        );
+    });
+
+    test('quasiquote backtick is tokenized as quote', () => {
+        const state: any = null;
+        const code = '`test';
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const quoteTok = tokens.find(t => t.text === '`');
+        assert.ok(quoteTok, 'Token ` should be found');
+        assert.ok(
+            quoteTok!.scopes.some(s => s.includes('quoted') || s.includes('quote')),
+            `Expected \` to have a quote scope, got: ${quoteTok!.scopes.join(' ')}`
+        );
+    });
+
+    test('unquote-splicing ,@ is tokenized as quote', () => {
+        const state: any = null;
+        const code = ',@lst';
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const quoteTok = tokens.find(t => t.text === ',@');
+        assert.ok(quoteTok, 'Token ,@ should be found');
+        assert.ok(
+            quoteTok!.scopes.some(s => s.includes('quoted') || s.includes('quote')),
+            `Expected ,@ to have a quote scope, got: ${quoteTok!.scopes.join(' ')}`
+        );
+    });
+
 });

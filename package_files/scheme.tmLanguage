@@ -442,7 +442,7 @@
 		<key>illegal</key>
 		<dict>
 			<key>match</key>
-			<string>[()\[\]]</string>
+			<string>[()]</string>
 			<key>name</key>
 			<string>invalid.illegal.parenthesis.scheme</string>
 		</dict>
@@ -754,7 +754,7 @@
 				</dict>
 				<dict>
 					<key>begin</key>
-					<string>(#'|#`|#,|#,@|#['`,])\s*</string>
+					<string>(#'|#`|#,@|#,|#['`,]|`|,@|,)\s*</string>
 					<key>beginCaptures</key>
 					<dict>
 						<key>1</key>
@@ -820,7 +820,7 @@
 				</dict>
 				<dict>
 					<key>begin</key>
-					<string>(\()</string>
+					<string>(\(|\[)</string>
 					<key>beginCaptures</key>
 					<dict>
 						<key>1</key>
@@ -830,7 +830,7 @@
 						</dict>
 					</dict>
 					<key>end</key>
-					<string>(\))</string>
+					<string>(\)|\])</string>
 					<key>endCaptures</key>
 					<dict>
 						<key>1</key>
@@ -886,7 +886,7 @@
 		<key>sexp</key>
 		<dict>
 			<key>begin</key>
-			<string>(\()</string>
+			<string>(\(|\[)</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -896,7 +896,7 @@
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>(\))(\n)?</string>
+			<string>(\)|\])(\n)?</string>
 			<key>endCaptures</key>
 			<dict>
 				<key>1</key>
@@ -1123,6 +1123,10 @@
 				</dict>
 				<dict>
 					<key>include</key>
+					<string>#constants</string>
+				</dict>
+				<dict>
+					<key>include</key>
 					<string>#language-functions</string>
 				</dict>
 				<dict>
@@ -1146,10 +1150,6 @@
 				<dict>
 					<key>include</key>
 					<string>#stencil-vector</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#constants</string>
 				</dict>
 				<dict>
 					<key>match</key>
