@@ -261,7 +261,7 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s{}"',;#])(#\d+%)</string>
+					<string>(?&lt;=[\(\[\s{}"',;#])(#\d*%)</string>
 					<key>name</key>
 					<string>constant.other.primitive.scheme</string>
 				</dict>
@@ -465,7 +465,7 @@
 						  define-library|include|include-ci|cond-expand|
 						  top-level-program|module|import-only|alias|
 						  =&gt;|rename|only|except|prefix|for|meta|rec|ormap|andmap|record-case|engine-block|engine-return)
-						(?=(\s|\())</string>
+						(?=[\s\(\)\[\]])</string>
 					<key>name</key>
 					<string>keyword.control.scheme</string>
 				</dict>
@@ -494,7 +494,7 @@
 						  eof-object
 						)
 						(\?)		# name ends with ? sign
-						(?=(\s|\()) # followed by space or (
+						(?=[\s\(\)\[\]]) # followed by space or (
 					</string>
 					<key>name</key>
 					<string>support.function.boolean-test.scheme</string>
@@ -513,7 +513,7 @@
 						  string-&gt;list|string-&gt;number|string-&gt;symbol|
 						  number-&gt;string
 						)
-						(?=(\s|\()) # followed by space or (					
+						(?=[\s\(\)\[\]]) # followed by space or (					
 					</string>
 					<key>name</key>
 					<string>support.function.convert-type.scheme</string>
@@ -534,7 +534,7 @@
 						  bytevector-(?:fill|copy)
 						)
 						(!)			# name ends with ! sign
-						(?=(\s|\()) # followed by space or (
+						(?=[\s\(\)\[\]]) # followed by space or (
 					</string>
 					<key>name</key>
 					<string>support.function.with-side-effects.scheme</string>
@@ -624,8 +624,7 @@
 						  put-u8|put-char|put-string|put-datum|
 						  pretty-print|printf|fprintf|
 						  print-gensym|print-length|print-level|print-precision|
-						  print-radix|print-record|print-unicode
-						)|
+						  print-radix|print-record|print-unicode|
 						  # Chez-specific objects and utilities
 						  gensym|gensym-prefix|gensym-count|string-&gt;uninterned-symbol|uninterned-symbol?|
 						  putprop|getprop|remprop|property-list|oblist|void|
@@ -656,8 +655,8 @@
 						  print-graph|print-level|print-length|print-radix|print-gensym|print-brackets|print-vector-length|
 						  pretty-line-length|pretty-one-line-limit|pretty-initial-indent|pretty-standard-indent|pretty-maximum-lines|
 						  fasl-write|fasl-file|current-directory|file-exists\?|delete-file|
-						  fluid-let-syntax|identifier-syntax
-						(?=(\s|\()) # followed by space or (
+						  fluid-let-syntax|identifier-syntax)
+						(?=[\s\(\)\[\]]) # followed by space, bracket, or paren
 					</string>
 					<key>name</key>
 					<string>support.function.general.scheme</string>
@@ -915,6 +914,12 @@
 			<key>patterns</key>
 			<array>
 				<dict>
+					<key>match</key>
+					<string>\\x[0-9a-fA-F]+;</string>
+					<key>name</key>
+					<string>constant.character.hex-escape.scheme</string>
+				</dict>
+				<dict>
 					<key>include</key>
 					<string>#comment</string>
 				</dict>
@@ -1159,7 +1164,7 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;=[\(\[\s{}"'\,;#])(#\\)x[0-9A-F]+;(?=[\s\)\]\\{ }"'\,;#])</string>
+					<string>(?&lt;=[\(\[\s{}"'\,;#])(#\\)[xX][0-9a-fA-F]+;(?=[\s\)\]\\{ }"'\,;#])</string>
 					<key>name</key>
 					<string>constant.character.hex-literal.scheme</string>
 				</dict>
@@ -1182,7 +1187,7 @@
 						a and b. (a b c) == (a . (b . (c . nil)))
 					</string>
 					<key>match</key>
-					<string>(?&lt;=[ ()])\.(?=[ ()])</string>
+					<string>(?&lt;=[\s\(\[\]])\.(?=[\s\)\]\(\[])</string>
 					<key>name</key>
 					<string>punctuation.separator.cons.scheme</string>
 				</dict>
@@ -1274,12 +1279,24 @@
 					<key>include</key>
 					<string>#constants</string>
 				</dict>
+				<dict>
+					<key>match</key>
+					<string>\\x[0-9a-fA-F]+;</string>
+					<key>name</key>
+					<string>constant.character.hex-escape.scheme</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>\|[^\|]*\|</string>
+					<key>name</key>
+					<string>variable.other.scheme</string>
+				</dict>
 			</array>
 		</dict>
 		<key>stencil-vector</key>
 		<dict>
 			<key>begin</key>
-			<string>(#\d+vs\()</string>
+			<string>(#\d*vs\()</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
