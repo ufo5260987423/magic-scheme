@@ -349,4 +349,114 @@ suite('Grammar Tokenization', () => {
             `Expected #vfx( to have scope punctuation.definition.fixnum-vector.begin.scheme, got: ${vectorBegin!.scopes.join(' ')}`
         );
     });
+
+    test('sexp-comment #; includes vector #(', () => {
+        const state: any = null;
+        const code = '#;#(1 2)';
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const vectorBegin = tokens.find(t => t.text === '#(');
+        assert.ok(vectorBegin, 'Token #( should be found in sexp-comment');
+        assert.ok(
+            vectorBegin!.scopes.includes('punctuation.definition.vector.begin.scheme'),
+            `Expected #( to have vector begin scope in sexp-comment, got: ${vectorBegin!.scopes.join(' ')}`
+        );
+    });
+
+    test('sexp-comment #; includes bytevector #vu8(', () => {
+        const state: any = null;
+        const code = '#;#vu8(1 2)';
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const bvBegin = tokens.find(t => t.text === '#vu8(');
+        assert.ok(bvBegin, 'Token #vu8( should be found in sexp-comment');
+        assert.ok(
+            bvBegin!.scopes.includes('punctuation.definition.bytevector.begin.scheme'),
+            `Expected #vu8( to have bytevector begin scope in sexp-comment, got: ${bvBegin!.scopes.join(' ')}`
+        );
+    });
+
+    test('quoted context includes comment', () => {
+        const state: any = null;
+        const line1 = "'(a ; comment";
+        const result1 = grammar.tokenizeLine(line1, state);
+        const tokens1 = result1.tokens.map(t => ({
+            text: line1.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const hasComment = tokens1.some(t => t.scopes.includes('comment.line.semicolon.scheme'));
+        assert.ok(hasComment, 'Comment scope should be found inside quoted context');
+    });
+
+    test('directive #!true #!false #!null are tokenized', () => {
+        const state: any = null;
+        for (const tok of ['#!true', '#!false', '#!null']) {
+            const { token } = findToken(tok, tok, state);
+            assert.ok(token, `Token ${tok} should be found`);
+            assert.ok(
+                token!.scopes.includes('constant.language.directive.scheme'),
+                `Expected ${tok} to have scope constant.language.directive.scheme, got: ${token!.scopes.join(' ')}`
+            );
+        }
+    });
+
+    test('primitive #n% is tokenized', () => {
+        const state: any = null;
+        const code = '(#2%car)';
+        const { token } = findToken(code, '#2%', state);
+        assert.ok(token, 'Token #2% should be found');
+        assert.ok(
+            token!.scopes.includes('constant.other.primitive.scheme'),
+            `Expected #2% to have scope constant.other.primitive.scheme, got: ${token!.scopes.join(' ')}`
+        );
+    });
+
+    test('string escape \' is tokenized', () => {
+        const state: any = null;
+        const code = '"it\'s"';
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const esc = tokens.find(t => t.text === "'");
+        assert.ok(esc, 'Token \' should be found in string');
+        assert.ok(
+            esc!.scopes.includes('constant.character.escape.scheme'),
+            `Expected ' to have escape scope, got: ${esc!.scopes.join(' ')}`
+        );
+    });
+
+    test('string escape octal \\000 is tokenized', () => {
+        const state: any = null;
+        const code = String.raw`"a\000b"`;
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const esc = tokens.find(t => t.text === '\\000');
+        assert.ok(esc, 'Token \\000 should be found in string');
+        assert.ok(
+            esc!.scopes.includes('constant.character.escape.scheme'),
+            `Expected \\000 to have escape scope, got: ${esc!.scopes.join(' ')}`
+        );
+    });
+
+    test('gensym-prefix #: with braces is tokenized', () => {
+        const state: any = null;
+        const code = '(#:{x})';
+        const { token } = findToken(code, '#:{x}', state);
+        assert.ok(token, 'Token #:{x} should be found');
+        assert.ok(
+            token!.scopes.includes('constant.other.gensym.scheme'),
+            `Expected #:{x} to have scope constant.other.gensym.scheme, got: ${token!.scopes.join(' ')}`
+        );
+    });
 });

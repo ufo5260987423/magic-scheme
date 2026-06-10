@@ -108,7 +108,8 @@
           "meta.vector.scheme",
           "meta.stencil-vector.scheme",
           "meta.fixnum-vector.scheme",
-          "meta.flonum-vector.scheme"
+          "meta.flonum-vector.scheme",
+          "meta.bytevector.scheme"
         ]
       }
     ],
