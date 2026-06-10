@@ -464,7 +464,7 @@
 						  identifier-syntax|and-let\*|time|assert|case-lambda|
 						  define-library|include|include-ci|cond-expand|
 						  top-level-program|module|import-only|alias|
-						  =&gt;|rename|only|except|prefix|for|meta|rec|ormap|andmap|record-case|engine-block|engine-return)
+						  =&gt;|rename|only|except|prefix|for|meta|rec|ormap|andmap|record-case|engine-block|engine-return|fluid-let-syntax)
 						(?=[\s\(\)\[\]])</string>
 					<key>name</key>
 					<string>keyword.control.scheme</string>
@@ -655,7 +655,7 @@
 						  print-graph|print-level|print-length|print-radix|print-gensym|print-brackets|print-vector-length|
 						  pretty-line-length|pretty-one-line-limit|pretty-initial-indent|pretty-standard-indent|pretty-maximum-lines|
 						  fasl-write|fasl-file|current-directory|file-exists\?|delete-file|
-						  fluid-let-syntax|identifier-syntax)
+						  identifier-syntax)
 						(?=[\s\(\)\[\]]) # followed by space, bracket, or paren
 					</string>
 					<key>name</key>
