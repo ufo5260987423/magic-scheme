@@ -608,4 +608,35 @@ suite('Grammar Tokenization', () => {
         );
     });
 
+    function assertTokenScope(code: string, target: string, expectedScope: string, msg?: string) {
+        const state: any = null;
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => ({
+            text: code.substring(t.startIndex, t.endIndex),
+            scopes: t.scopes
+        }));
+        const tok = tokens.find(t => t.text === target);
+        assert.ok(tok, `Token ${target} should be found in "${code}"`);
+        assert.ok(
+            tok!.scopes.some(s => s.includes(expectedScope)),
+            msg || `Expected ${target} to have scope including ${expectedScope}, got: ${tok!.scopes.join(' ')}`
+        );
+    }
+
+    test('syntax-case keywords are classified as keyword.control', () => {
+        assertTokenScope('(quasisyntax x)', 'quasisyntax', 'keyword.control');
+        assertTokenScope('(unsyntax x)', 'unsyntax', 'keyword.control');
+        assertTokenScope('(unsyntax-splicing x)', 'unsyntax-splicing', 'keyword.control');
+    });
+
+    test('Chez-specific procedures are classified as support.function', () => {
+        assertTokenScope('(make-list 3 \'a)', 'make-list', 'support.function.general');
+        assertTokenScope('(call/1cc f)', 'call/1cc', 'support.function.general');
+        assertTokenScope('(make-engine thunk)', 'make-engine', 'support.function.general');
+        assertTokenScope('(logand 1 2)', 'logand', 'support.function.general');
+        assertTokenScope('(fxlogbit? 0 1)', 'fxlogbit?', 'support.function.general');
+        assertTokenScope('(flnonpositive? -1.0)', 'flnonpositive?', 'support.function.general');
+        assertTokenScope('(-1+ 5)', '-1+', 'support.function.general');
+    });
+
 });
