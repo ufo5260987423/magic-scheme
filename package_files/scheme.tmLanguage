@@ -462,6 +462,7 @@
 						  define-values|call-with-values|parameterize|
 						  fluid-let|syntax-case|with-syntax|syntax-rules|
 						  identifier-syntax|and-let\*|time|assert|case-lambda|
+						  lambda|
 						  define-library|include|include-ci|cond-expand|
 						  top-level-program|module|import-only|alias|
 						  =&gt;|rename|only|except|prefix|for|meta|rec|ormap|andmap|record-case|engine-block|engine-return|fluid-let-syntax)
