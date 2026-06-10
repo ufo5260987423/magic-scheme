@@ -546,9 +546,9 @@
 					</string>
 					<key>match</key>
 					<string>(?x)
-						(?&lt;=(\s|\()) # preceded by space or (
+						(?&lt;=(\s|\(|\[)) # preceded by space or (
 						( &gt;=?|&lt;=?|=|[*/+-])
-						(?=(\s|\()) # followed by space or (
+						(?=(\s|\)|\])) # followed by space or (
 						</string>
 					<key>name</key>
 					<string>keyword.operator.arithmetic.scheme</string>
@@ -1243,6 +1243,10 @@
 			<string>comment.block.sexp.scheme</string>
 			<key>patterns</key>
 			<array>
+				<dict>
+					<key>include</key>
+					<string>#sexp-comment</string>
+				</dict>
 				<dict>
 					<key>include</key>
 					<string>#quoted</string>
