@@ -461,11 +461,12 @@
 						  define-record-type|let-values|let\*-values|
 						  define-values|call-with-values|parameterize|
 						  fluid-let|syntax|quasisyntax|unsyntax|unsyntax-splicing|syntax-case|with-syntax|syntax-rules|
-						  identifier-syntax|and-let\*|time|assert|case-lambda|
+						  define-syntax|identifier-syntax|and-let\*|time|assert|case-lambda|
 						  lambda|
 						  define-library|include|include-ci|cond-expand|
 						  top-level-program|module|import-only|alias|
-						  =&gt;|\.\.\.|rename|only|except|prefix|for|meta|rec|ormap|andmap|record-case|engine-block|engine-return|fluid-let-syntax)
+						  =&gt;|\.\.\.|rename|only|except|prefix|for|meta|rec|ormap|andmap|record-case|engine-block|engine-return|fluid-let-syntax|
+						  eval-when|with-interrupts-disabled|critical-section)
 						(?=[\s\(\)\[\]])</string>
 					<key>name</key>
 					<string>keyword.control.scheme</string>
@@ -560,7 +561,7 @@
 						(?&lt;=(\s|\(|\[)) # preceded by space or (
 						( append|apply|approximate|
 						  call-with-current-continuation|call/cc|call/1cc|catch|
-						  construct-identifier|define-syntax|display|
+						  construct-identifier|display|
 						  for-each|force|format|cd|gen-counter|gen-loser|
 						  generate-identifier|last-pair|length|let-syntax|
 						  list|list-ref|list-tail|load|log|
@@ -656,6 +657,14 @@
 						  print-graph|print-level|print-length|print-radix|print-gensym|print-brackets|print-vector-length|
 						  pretty-line-length|pretty-one-line-limit|pretty-initial-indent|pretty-standard-indent|pretty-maximum-lines|
 						  fasl-write|fasl-file|current-directory|file-exists\?|delete-file|
+						  # Chez system operations
+						  visit|revisit|load-library|load-program|compile-script|compile-port|make-boot-file|
+						  system|process|open-process-ports|expand/optimize|
+						  apropos|apropos-list|scheme-environment|ieee-environment|copy-environment|environment-symbols|revert-interaction-semantics|
+						  top-level-value|set-top-level-value!|top-level-bound?|top-level-syntax|set-top-level-syntax!|
+						  fork-thread|make-mutex|make-condition|mutex-acquire|mutex-release|condition-signal|condition-broadcast|condition-wait|get-thread-id|
+						  fxvector\?|make-fxvector|fxvector-length|fxvector-ref|fxvector-set!|fxvector-fill!|fxvector-copy|fxvector->list|list->fxvector|
+						  enumerate|iota|list-head|last-pair|bytevector-truncate!|string-truncate!|vector-set-fixnum!|
 						  identifier-syntax|append|map|for-each|apply|eval|list|length|reverse|member|assoc|memq|memv|assq|assv|list-ref|list-tail|list-sort|expt|sqrt|max|min|abs|quotient|remainder|modulo|gcd|lcm|floor|ceiling|truncate|round|sin|cos|tan|asin|acos|atan|exp|log|make-vector|vector-ref|vector-set!|vector-length|vector-fill!|vector-map|vector-for-each|make-string|string-ref|string-set!|string-length|substring|string-append|string-upcase|string-downcase|string-foldcase|string-ci\=?|string-ci\&lt;?|string-ci\&gt;?|string-ci\&lt;=\?|string-ci\&gt;=\?|symbol-&gt;string|string-&gt;symbol|symbol=\?|procedure\?|call-with-current-continuation|call/cc|values|call-with-values|scheme-report-environment|null-environment|interaction-environment|call-with-port|call-with-input-file|with-input-from-file|open-input-file|open-output-file|close-port|current-error-port|peek-char|write-char|display|newline|port\?|input-port\?|output-port\?|textual-port\?|binary-port\?|port-eof\?|open-output-bytevector|get-output-bytevector|open-input-bytevector|make-eq-hashtable|make-eqv-hashtable|make-hashtable|hashtable-size|hashtable-ref|hashtable-set!|hashtable-delete!|hashtable-contains\?|hashtable-update!|hashtable-keys|hashtable-entries|hashtable-copy|hashtable-clear!|make-bytevector|bytevector-length|bytevector=\?|bytevector-fill!|bytevector-copy|bytevector-copy!|bytevector-u8-ref|bytevector-u8-set!|bytevector-&gt;u8-list|u8-list-&gt;bytevector|fx[+-/*]|fxquotient|fxremainder|fxmodulo|fxand|fxior|fxxor|fxnot|fxarithmetic-shift-left|fxarithmetic-shift-right|fx=\?|fx&lt;\?|fx&gt;\?|fx&lt;=\?|fx&gt;=\?|fxpositive\?|fxnegative\?|fxeven\?|fxodd\?|fxmin|fxmax|fxabs|fxsll|fxsra|fxlognot|fxlogand|fxlogior|fxlogxor|fl[+-/*]|fl=\?|fl&lt;\?|fl&gt;\?|fl&lt;=\?|fl&gt;=\?|flinteger\?|flzero\?|flpositive\?|flnegative\?|flnonpositive\?|flnonnegative\?|flodd\?|fleven\?|flfinite\?|flinfinite\?|flnan\?|flmax|flmin|flabs|flfloor|flceiling|fltruncate|flround|flexp|fllog|flsin|flcos|fltan|flasin|flacos|flatan|flsqrt|flexpt|make-record-type-descriptor|make-record-constructor-descriptor|record-constructor|record-predicate|record-accessor|record-mutator|record\?|record-rtd|record-type-name|record-type-parent|record-type-uid|record-type-generative\?|record-type-sealed\?|record-type-opaque\?|record-type-field-names|record-type-mutable\?|condition\?|condition|simple-conditions|condition-predicate|condition-accessor|make-condition-type|make-transcoder|native-transcoder|transcoder-codec|transcoder-eol-style|transcoder-error-handling-mode|latin-1-codec|utf-8-codec|utf-16-codec|utf-16le-codec|utf-16be-codec|utf-16bom-codec|native-eol-style|native-error-handling-mode|make-enumeration|enum-set-universe|enum-set-indexer|enum-set-constructor|enum-set-&gt;list|list-&gt;enum-set|enum-set-member\?|enum-set-subset\?|enum-set=\?|enum-set-union|enum-set-intersection|enum-set-difference|enum-set-complement|enum-set-projection|get-char|look-ahead|unget-char|get-string|get-string-n|get-string-n!|get-string-all|get-line|get-datum|put-char|put-string|put-datum|flush-output-port|open-file-input-port|open-file-output-port|open-bytevector-input-port|open-bytevector-output-port|collect|collect-generation-radix|collect-maximum-generation|collect-notify|collect-request-handler|collect-trip-bytes|compile|compile-compressed|compile-file|compile-file-message|compile-imported-libraries|compile-interpret-simple|compile-library|compile-library-handler|compile-port|compile-profile|compile-program|compile-script|command-line|command-line-arguments|exit|abort|reset|statistics|time-utc-&gt;date|date-&gt;time-utc|current-time|time-duration|time-nanosecond|time-second|time-type|time&lt;=\?|time&lt;\?|time=\?|time&gt;=\?|time&gt;\?|time-difference|add-duration|subtract-duration|current-date|date|date\?|date-nanosecond|date-second|date-minute|date-hour|date-day|date-month|date-year|date-week-day|date-year-day|date-zone-offset|date-and-time|make-date|date-&gt;string|string-&gt;date|sleep|thread|fork-thread|thread\?|thread-id|thread-name|thread-state|thread-condition|thread-wait|thread-join|thread-kill|thread-suspend|thread-resume|thread-quantum|thread-quantum-set!|thread-priority|thread-priority-set!|thread-dead\?|make-mutex|mutex\?|mutex-name|mutex-state|mutex-lock!|mutex-unlock!|make-condition-variable|condition-variable\?|condition-variable-name|condition-variable-signal!|condition-variable-broadcast!|socket|socket\?|socket-port-number|socket-address|socket-host-name|socket-host-address|socket-family|socket-type|socket-protocol|socket-input-port|socket-output-port|socket-shutdown|identifier-syntax)
 						(?=[\s\(\)\[\]]) # followed by space, bracket, or paren
 					</string>

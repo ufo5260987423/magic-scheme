@@ -639,4 +639,22 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(-1+ 5)', '-1+', 'support.function.general');
     });
 
+    test('Chez syntax forms are classified as keyword.control', () => {
+        assertTokenScope('(define-syntax foo (syntax-rules ()))', 'define-syntax', 'keyword.control');
+        assertTokenScope('(eval-when (compile) x)', 'eval-when', 'keyword.control');
+        assertTokenScope('(with-interrupts-disabled x)', 'with-interrupts-disabled', 'keyword.control');
+        assertTokenScope('(critical-section x)', 'critical-section', 'keyword.control');
+    });
+
+    test('Chez system procedures are classified as support.function', () => {
+        assertTokenScope('(visit "foo.so")', 'visit', 'support.function.general');
+        assertTokenScope('(system "ls")', 'system', 'support.function.general');
+        assertTokenScope('(expand/optimize x)', 'expand/optimize', 'support.function.general');
+        assertTokenScope('(apropos "foo")', 'apropos', 'support.function.general');
+        assertTokenScope('(top-level-value \'x)', 'top-level-value', 'support.function.general');
+        assertTokenScope('(fork-thread thunk)', 'fork-thread', 'support.function.general');
+        assertTokenScope('(make-fxvector 3)', 'make-fxvector', 'support.function.general');
+        assertTokenScope('(enumerate 3)', 'enumerate', 'support.function.general');
+    });
+
 });
