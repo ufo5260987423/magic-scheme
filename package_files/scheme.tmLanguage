@@ -599,7 +599,7 @@
 						  call-with-(?:input|output)-file|
 						  (?:close|current)-(?:input|output)-port|
 						  with-(?:input|output)-from-file|
-						  open-(?:input|output)-file|
+						  open-(?:input|output)-file|open-input-output-file|
 						  
 						  # char-«foo»
 						  char-(?:downcase|upcase|ready|foldcase)|
