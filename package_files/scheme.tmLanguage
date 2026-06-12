@@ -469,7 +469,8 @@
 						  eval-when|with-interrupts-disabled|critical-section|
 						  datum|define-property|with-implicit|meta-cond|
 						  implicit-exports|indirect-export|library-group|extend-syntax|with|
-						  define-condition-type)
+						  define-condition-type|
+						  fields|mutable|immutable|opaque|sealed|nongenerative|parent|parent-rtd|protocol|predicate)
 						(?=[\s\(\)\[\]])</string>
 					<key>name</key>
 					<string>keyword.control.scheme</string>

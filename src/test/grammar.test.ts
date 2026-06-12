@@ -652,6 +652,8 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(library-group (foo))', 'library-group', 'keyword.control');
         assertTokenScope('(extend-syntax (foo) ...)', 'extend-syntax', 'keyword.control');
         assertTokenScope('(define-condition-type &c (&condition) c?)', 'define-condition-type', 'keyword.control');
+        assertTokenScope('(define-record-type foo (fields (immutable x)))', 'immutable', 'keyword.control');
+        assertTokenScope('(define-record-type foo (parent bar))', 'parent', 'keyword.control');
     });
 
     test('Chez system procedures are classified as support.function', () => {
