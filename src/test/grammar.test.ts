@@ -657,4 +657,14 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(enumerate 3)', 'enumerate', 'support.function.general');
     });
 
+    test('R6RS procedures are classified as support.function', () => {
+        assertTokenScope('(filter odd? lst)', 'filter', 'support.function.general');
+        assertTokenScope('(string-map char-upcase s)', 'string-map', 'support.function.general');
+        assertTokenScope('(vector-sort < v)', 'vector-sort', 'support.function.general');
+        assertTokenScope('(for-all positive? lst)', 'for-all', 'support.function.general');
+        assertTokenScope('(exists positive? lst)', 'exists', 'support.function.general');
+        assertTokenScope('(bitwise-and 1 2)', 'bitwise-and', 'support.function.general');
+        assertTokenScope('(bitwise-bit-set? 1 0)', 'bitwise-bit-set?', 'support.function.general');
+    });
+
 });
