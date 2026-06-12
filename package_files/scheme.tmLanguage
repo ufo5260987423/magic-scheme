@@ -603,13 +603,13 @@
 						  open-(?:input|output)-file|open-input-output-file|
 						  
 						  # char-«foo»
-						  char-(?:downcase|upcase|ready|foldcase)|
+						  char-(?:downcase|upcase|ready|foldcase|titlecase)|
 						  
 						  # make-«foo»
 						  make-(?:polar|promise|rectangular|string|vector)
 						  
 						  # string-«foo», vector-«foo»
-						  string(?:-(?:append|copy|length|ref))?|
+						  string|string-append|string-copy|string-length|string-ref|string-set!|string-titlecase|string-normalize-nfd|string-normalize-nfkd|string-normalize-nfc|string-normalize-nfkc|
 						  vector(?:-length|-ref)|
 						  
 						  # R6RS / modern additions
