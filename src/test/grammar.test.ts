@@ -651,6 +651,7 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(implicit-exports #t)', 'implicit-exports', 'keyword.control');
         assertTokenScope('(library-group (foo))', 'library-group', 'keyword.control');
         assertTokenScope('(extend-syntax (foo) ...)', 'extend-syntax', 'keyword.control');
+        assertTokenScope('(define-condition-type &c (&condition) c?)', 'define-condition-type', 'keyword.control');
     });
 
     test('Chez system procedures are classified as support.function', () => {
@@ -663,7 +664,8 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(make-fxvector 3)', 'make-fxvector', 'support.function.general');
         assertTokenScope('(enumerate 3)', 'enumerate', 'support.function.general');
         assertTokenScope('(syntax-error x)', 'syntax-error', 'support.function.general');
-        assertTokenScope('(annotation? x)', 'annotation?', 'support.function.general');
+        assertTokenScope('(annotation? x)', 'annotation?', 'support.function.boolean-test');
+        assertTokenScope('(environment? x)', 'environment?', 'support.function.boolean-test');
         assertTokenScope('(syntax->list x)', 'syntax->list', 'support.function.general');
         assertTokenScope('(make-guardian)', 'make-guardian', 'support.function.general');
         assertTokenScope('(library-requirements (foo))', 'library-requirements', 'support.function.general');
@@ -671,6 +673,15 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(raise-continuable exn)', 'raise-continuable', 'support.function.general');
         assertTokenScope('(assertion-violation \'who "msg")', 'assertion-violation', 'support.function.general');
         assertTokenScope('(syntax-violation \'who "msg" form)', 'syntax-violation', 'support.function.general');
+        assertTokenScope('(make-error)', 'make-error', 'support.function.general');
+    });
+
+    test('Chez boolean predicates are classified as support.function.boolean-test', () => {
+        assertTokenScope('(fixnum? x)', 'fixnum?', 'support.function.boolean-test');
+        assertTokenScope('(bignum? x)', 'bignum?', 'support.function.boolean-test');
+        assertTokenScope('(box? x)', 'box?', 'support.function.boolean-test');
+        assertTokenScope('(port-closed? p)', 'port-closed?', 'support.function.boolean-test');
+        assertTokenScope('(thread-condition? x)', 'thread-condition?', 'support.function.boolean-test');
     });
 
     test('R6RS procedures are classified as support.function', () => {

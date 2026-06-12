@@ -468,7 +468,8 @@
 						  =&gt;|\.\.\.|rename|only|except|prefix|for|meta|rec|ormap|andmap|record-case|engine-block|engine-return|fluid-let-syntax|
 						  eval-when|with-interrupts-disabled|critical-section|
 						  datum|define-property|with-implicit|meta-cond|
-						  implicit-exports|indirect-export|library-group|extend-syntax|with)
+						  implicit-exports|indirect-export|library-group|extend-syntax|with|
+						  define-condition-type)
 						(?=[\s\(\)\[\]])</string>
 					<key>name</key>
 					<string>keyword.control.scheme</string>
@@ -490,11 +491,12 @@
 						  eof-object|exact|list|(?:input|output)-port|pair|
 						  real|rational|zero|vector|negative|odd|null|string|
 						  eq|equal|eqv|even|number|positive|procedure|
-						  bytevector|hashtable|eq-hashtable|eqv-hashtable|
+						  bytevector|hashtable|eq-hashtable|eqv-hashtable|weak-eq-hashtable|weak-eqv-hashtable|
 						  record|record-type-descriptor|record-constructor-descriptor|
-						  time|date|enum-set|fixnum|flonum|exact-integer|
-						  finite|infinite|nan|port|input-port|output-port|
-						  binary-port|textual-port|socket|thread|mutex|condition-variable|
+						  time|date|enum-set|fixnum|flonum|exact-integer|bignum|ratnum|cflonum|
+						  finite|infinite|nan|port|input-port|output-port|port-closed|port-eof|port-nonblocking|
+						  binary-port|textual-port|socket|thread|mutex|condition-variable|thread-condition|
+						  box|environment|environment-mutable|annotation|source-object|source-file-descriptor|
 						  eof-object
 						)
 						(\?)		# name ends with ? sign
@@ -682,6 +684,8 @@
 						  # Chez I/O and filesystem
 						  # Chez storage, library, and compatibility
 						  # R6RS / Chez exceptions and conditions
+						  # R6RS condition constructors
+						  make-error|make-assertion-violation|make-warning|make-serious-condition|
 						  raise-continuable|assertion-violation|syntax-violation|
 						  current-exception-state|create-exception-state|break|warning|
 						  errorf|warningf|assertion-violationf|display-condition|default-exception-handler|
