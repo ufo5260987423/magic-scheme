@@ -229,6 +229,12 @@
 					<key>name</key>
 					<string>constant.numeric.scheme</string>
 				</dict>
+					<dict>
+						<key>match</key>
+						<string>(?&lt;=[\(\[\s{}"\',;#])(\#x[+-]?(?:[0-9a-fA-F]+(?:\.[0-9a-fA-F]*)?|\.[0-9a-fA-F]+)?[+-](?:[0-9a-fA-F]+(?:\.[0-9a-fA-F]*)?|\.[0-9a-fA-F]+)?i|\#x[+-]i)(?=[\s;()"',\[\]{}])</string>
+						<key>name</key>
+						<string>constant.numeric.scheme</string>
+					</dict>
 				<dict>
 					<key>match</key>
 					<string>(?&lt;=[\(\[\s{}"'\,;#])(?:\#[ei]?\#[boxd]|\#[boxd]\#[ei]?|\#[ei]?|\#[boxd]?)?[+-]?(?:\d+/\d+|\d+\.\d+(?:[eEsSfFdDlL][+-]?\d+)?|\d+[eEsSfFdDlL][+-]?\d+|\d+\.\d*|\.\d+(?:[eEsSfFdDlL][+-]?\d+)?|\d+)(?=[\s;()'",\[\]])</string>

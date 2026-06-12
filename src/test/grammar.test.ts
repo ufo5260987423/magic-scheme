@@ -492,6 +492,17 @@ suite('Grammar Tokenization', () => {
         );
     });
 
+    test('hex complex number #x1+2i is tokenized as numeric', () => {
+        const state: any = null;
+        const code = '(#x1+2i)';
+        const { token } = findToken(code, '#x1+2i', state);
+        assert.ok(token, 'Token #x1+2i should be found');
+        assert.ok(
+            token!.scopes.includes('constant.numeric.scheme'),
+            `Expected #x1+2i to have scope constant.numeric.scheme, got: ${token!.scopes.join(' ')}`
+        );
+    });
+
     test('quasiquote backtick is tokenized as quote', () => {
         const state: any = null;
         const code = '`test';
