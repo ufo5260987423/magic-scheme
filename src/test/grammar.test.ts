@@ -668,6 +668,9 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(make-guardian)', 'make-guardian', 'support.function.general');
         assertTokenScope('(library-requirements (foo))', 'library-requirements', 'support.function.general');
         assertTokenScope('(make-hash-table)', 'make-hash-table', 'support.function.general');
+        assertTokenScope('(raise-continuable exn)', 'raise-continuable', 'support.function.general');
+        assertTokenScope('(assertion-violation \'who "msg")', 'assertion-violation', 'support.function.general');
+        assertTokenScope('(syntax-violation \'who "msg" form)', 'syntax-violation', 'support.function.general');
     });
 
     test('R6RS procedures are classified as support.function', () => {

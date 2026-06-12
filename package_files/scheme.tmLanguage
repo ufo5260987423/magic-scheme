@@ -681,6 +681,10 @@
 						  enumerate|iota|list-head|last-pair|bytevector-truncate!|string-truncate!|vector-set-fixnum!|
 						  # Chez I/O and filesystem
 						  # Chez storage, library, and compatibility
+						  # R6RS / Chez exceptions and conditions
+						  raise-continuable|assertion-violation|syntax-violation|
+						  current-exception-state|create-exception-state|break|warning|
+						  errorf|warningf|assertion-violationf|display-condition|default-exception-handler|
 						  make-guardian|lock-object|unlock-object|locked-object\?|weak-cons|weak-pair\?|bwp-object\?|
 						  library-exports|library-list|library-object-filename|library-requirements|library-version|
 						  make-hash-table|get-hash-table|put-hash-table!|remove-hash-table!|hash-table\?|hash-table-for-each|hash-table-map|
