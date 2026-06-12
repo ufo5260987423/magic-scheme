@@ -654,6 +654,7 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(define-condition-type &c (&condition) c?)', 'define-condition-type', 'keyword.control');
         assertTokenScope('(define-record-type foo (fields (immutable x)))', 'immutable', 'keyword.control');
         assertTokenScope('(define-record-type foo (parent bar))', 'parent', 'keyword.control');
+        assertTokenScope('(define-ftype ptr (* int))', 'define-ftype', 'keyword.control');
     });
 
     test('Chez system procedures are classified as support.function', () => {
@@ -672,6 +673,7 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(make-guardian)', 'make-guardian', 'support.function.general');
         assertTokenScope('(library-requirements (foo))', 'library-requirements', 'support.function.general');
         assertTokenScope('(make-hash-table)', 'make-hash-table', 'support.function.general');
+        assertTokenScope('(ftype-pointer-address p)', 'ftype-pointer-address', 'support.function.general');
         assertTokenScope('(raise-continuable exn)', 'raise-continuable', 'support.function.general');
         assertTokenScope('(assertion-violation \'who "msg")', 'assertion-violation', 'support.function.general');
         assertTokenScope('(syntax-violation \'who "msg" form)', 'syntax-violation', 'support.function.general');

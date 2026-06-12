@@ -470,7 +470,8 @@
 						  datum|define-property|with-implicit|meta-cond|
 						  implicit-exports|indirect-export|library-group|extend-syntax|with|
 						  define-condition-type|
-						  fields|mutable|immutable|opaque|sealed|nongenerative|parent|parent-rtd|protocol|predicate)
+						  fields|mutable|immutable|opaque|sealed|nongenerative|parent|parent-rtd|protocol|predicate|
+						  define-ftype|ftype)
 						(?=[\s\(\)\[\]])</string>
 					<key>name</key>
 					<string>keyword.control.scheme</string>
@@ -684,6 +685,9 @@
 						  fxvector\?|make-fxvector|fxvector-length|fxvector-ref|fxvector-set!|fxvector-fill!|fxvector-copy|fxvector->list|list->fxvector|
 						  enumerate|iota|list-head|last-pair|bytevector-truncate!|string-truncate!|vector-set-fixnum!|
 						  # Chez I/O and filesystem
+						  # Chez foreign/ftype procedures
+						  ftype-pointer-address|ftype-pointer-ftype|ftype-pointer->sexpr|
+						  foreign-address-name|foreign-callable-code-object|foreign-callable-entry-point|foreign-entry\?|remove-foreign-entry|
 						  # Chez storage, library, and compatibility
 						  # R6RS / Chez exceptions and conditions
 						  # R6RS condition constructors
