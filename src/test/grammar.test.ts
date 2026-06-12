@@ -674,6 +674,8 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(library-requirements (foo))', 'library-requirements', 'support.function.general');
         assertTokenScope('(make-hash-table)', 'make-hash-table', 'support.function.general');
         assertTokenScope('(ftype-pointer-address p)', 'ftype-pointer-address', 'support.function.general');
+        assertTokenScope('(optimize-level 3)', 'optimize-level', 'support.function.general');
+        assertTokenScope('(library-directories)', 'library-directories', 'support.function.general');
         assertTokenScope('(raise exn)', 'raise', 'support.function.general');
         assertTokenScope('(raise-continuable exn)', 'raise-continuable', 'support.function.general');
         assertTokenScope('(assertion-violation \'who "msg")', 'assertion-violation', 'support.function.general');

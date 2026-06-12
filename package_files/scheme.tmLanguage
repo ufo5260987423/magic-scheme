@@ -687,6 +687,11 @@
 						  enumerate|iota|list-head|last-pair|bytevector-truncate!|string-truncate!|vector-set-fixnum!|
 						  # Chez I/O and filesystem
 						  # Chez foreign/ftype procedures
+						  # Chez parameters and system hooks
+						  optimize-level|run-cp0|cp0-effort-limit|cp0-score-limit|cp0-outer-unroll-limit|
+						  generate-inspector-information|generate-interrupt-trap|compile-profile|compile-compressed|
+						  library-directories|library-extensions|source-directories|
+						  waiter-prompt-and-read|waiter-prompt-string|waiter-write|trace-output-port|trace-print|print-char-name|
 						  ftype-pointer-address|ftype-pointer-ftype|ftype-pointer->sexpr|
 						  foreign-address-name|foreign-callable-code-object|foreign-callable-entry-point|foreign-entry\?|remove-foreign-entry|
 						  # Chez storage, library, and compatibility
