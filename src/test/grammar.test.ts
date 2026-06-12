@@ -730,6 +730,8 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(bitwise-bit-set? 1 0)', 'bitwise-bit-set?', 'support.function.general');
         assertTokenScope('(div-and-mod 10 3)', 'div-and-mod', 'support.function.general');
         assertTokenScope('(char-foldcase #A)', 'char-foldcase', 'support.function.general');
+        assertTokenScope('(bytevector-s16-ref bv 0 (endianness little))', 'bytevector-s16-ref', 'support.function.general');
+        assertTokenScope('(bytevector-ieee-double-native-ref bv 0)', 'bytevector-ieee-double-native-ref', 'support.function.general');
     });
 
 });
