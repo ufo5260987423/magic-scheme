@@ -697,8 +697,10 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(syntax-error x)', 'syntax-error', 'support.function.general');
         assertTokenScope('(annotation? x)', 'annotation?', 'support.function.boolean-test');
         assertTokenScope('(environment? x)', 'environment?', 'support.function.boolean-test');
+        assertTokenScope('(gensym? x)', 'gensym?', 'support.function.boolean-test');
         assertTokenScope('(syntax->list x)', 'syntax->list', 'support.function.general');
         assertTokenScope('(make-guardian)', 'make-guardian', 'support.function.general');
+        assertTokenScope('(gensym->unique-string g)', 'gensym->unique-string', 'support.function.general');
         assertTokenScope('(library-requirements (foo))', 'library-requirements', 'support.function.general');
         assertTokenScope('(make-hash-table)', 'make-hash-table', 'support.function.general');
         assertTokenScope('(ftype-pointer-address p)', 'ftype-pointer-address', 'support.function.general');

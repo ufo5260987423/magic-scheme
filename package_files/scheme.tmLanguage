@@ -506,7 +506,7 @@
 						  finite|infinite|nan|port|input-port|output-port|port-closed|port-eof|port-nonblocking|
 						  real-valued|rational-valued|integer-valued|boolean=|close-input-port|close-output-port|
 						  binary-port|textual-port|socket|thread|mutex|condition-variable|thread-condition|
-						  box|environment|environment-mutable|annotation|source-object|source-file-descriptor|
+						  box|environment|environment-mutable|annotation|source-object|source-file-descriptor|gensym|
 						  eof-object
 						)
 						(\?)		# name ends with ? sign
@@ -665,7 +665,7 @@
 						  bitwise-arithmetic-shift|bitwise-arithmetic-shift-left|bitwise-arithmetic-shift-right|
 						  bitwise-reverse-bit-field|bitwise-rotate-bit-field|
 						  # Chez-specific objects and utilities
-						  gensym|gensym-prefix|gensym-count|string-&gt;uninterned-symbol|uninterned-symbol?|
+						  gensym|gensym-prefix|gensym-count|gensym-&gt;unique-string|string-&gt;uninterned-symbol|uninterned-symbol?|
 						  putprop|getprop|remprop|property-list|oblist|void|
 						  box\?|box|unbox|set-box!|
 						  sort|sort!|merge|merge!|atom\?|list\*|list-copy|reverse!|append!|make-list|
