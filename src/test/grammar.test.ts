@@ -682,6 +682,8 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(box? x)', 'box?', 'support.function.boolean-test');
         assertTokenScope('(port-closed? p)', 'port-closed?', 'support.function.boolean-test');
         assertTokenScope('(thread-condition? x)', 'thread-condition?', 'support.function.boolean-test');
+        assertTokenScope('(real-valued? x)', 'real-valued?', 'support.function.boolean-test');
+        assertTokenScope('(boolean=? #t #t)', 'boolean=?', 'support.function.boolean-test');
     });
 
     test('R6RS procedures are classified as support.function', () => {
@@ -692,6 +694,8 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(exists positive? lst)', 'exists', 'support.function.general');
         assertTokenScope('(bitwise-and 1 2)', 'bitwise-and', 'support.function.general');
         assertTokenScope('(bitwise-bit-set? 1 0)', 'bitwise-bit-set?', 'support.function.general');
+        assertTokenScope('(div-and-mod 10 3)', 'div-and-mod', 'support.function.general');
+        assertTokenScope('(char-foldcase #A)', 'char-foldcase', 'support.function.general');
     });
 
 });

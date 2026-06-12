@@ -495,6 +495,7 @@
 						  record|record-type-descriptor|record-constructor-descriptor|
 						  time|date|enum-set|fixnum|flonum|exact-integer|bignum|ratnum|cflonum|
 						  finite|infinite|nan|port|input-port|output-port|port-closed|port-eof|port-nonblocking|
+						  real-valued|rational-valued|integer-valued|boolean=|close-input-port|close-output-port|
 						  binary-port|textual-port|socket|thread|mutex|condition-variable|thread-condition|
 						  box|environment|environment-mutable|annotation|source-object|source-file-descriptor|
 						  eof-object
@@ -593,7 +594,7 @@
 						  open-(?:input|output)-file|
 						  
 						  # char-«foo»
-						  char-(?:downcase|upcase|ready)|
+						  char-(?:downcase|upcase|ready|foldcase)|
 						  
 						  # make-«foo»
 						  make-(?:polar|promise|rectangular|string|vector)
@@ -685,6 +686,8 @@
 						  # Chez storage, library, and compatibility
 						  # R6RS / Chez exceptions and conditions
 						  # R6RS condition constructors
+						  # R6RS base arithmetic
+						  div-and-mod|div|mod|div0-and-mod0|div0|mod0|
 						  make-error|make-assertion-violation|make-warning|make-serious-condition|
 						  raise-continuable|assertion-violation|syntax-violation|
 						  current-exception-state|create-exception-state|break|warning|
