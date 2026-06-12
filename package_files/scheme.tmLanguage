@@ -477,7 +477,8 @@
 						  implicit-exports|indirect-export|library-group|extend-syntax|with|
 						  define-condition-type|
 						  fields|mutable|immutable|opaque|sealed|nongenerative|parent|parent-rtd|protocol|predicate|
-						  define-ftype|ftype)
+						  define-ftype|ftype|
+						  endianness|file-options|buffer-mode|error-handling-mode)
 						(?=[\s\(\)\[\]])</string>
 					<key>name</key>
 					<string>keyword.control.scheme</string>

@@ -677,6 +677,8 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(define-record-type foo (fields (immutable x)))', 'immutable', 'keyword.control');
         assertTokenScope('(define-record-type foo (parent bar))', 'parent', 'keyword.control');
         assertTokenScope('(define-ftype ptr (* int))', 'define-ftype', 'keyword.control');
+        assertTokenScope('(endianness little)', 'endianness', 'keyword.control');
+        assertTokenScope('(file-options no-create)', 'file-options', 'keyword.control');
     });
 
     test('Chez system procedures are classified as support.function', () => {
