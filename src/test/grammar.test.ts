@@ -741,6 +741,7 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(bytevector-ieee-double-native-ref bv 0)', 'bytevector-ieee-double-native-ref', 'support.function.general');
         assertTokenScope('(open-input-output-file "foo")', 'open-input-output-file', 'support.function.general');
         assertTokenScope('(string-titlecase "foo")', 'string-titlecase', 'support.function.general');
+        assertTokenScope('(char-titlecase #a)', 'char-titlecase', 'support.function.general');
     });
 
 });
