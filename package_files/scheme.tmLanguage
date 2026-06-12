@@ -467,7 +467,8 @@
 						  top-level-program|module|import-only|alias|
 						  =&gt;|\.\.\.|rename|only|except|prefix|for|meta|rec|ormap|andmap|record-case|engine-block|engine-return|fluid-let-syntax|
 						  eval-when|with-interrupts-disabled|critical-section|
-						  datum|define-property|with-implicit|meta-cond)
+						  datum|define-property|with-implicit|meta-cond|
+						  implicit-exports|indirect-export|library-group|extend-syntax|with)
 						(?=[\s\(\)\[\]])</string>
 					<key>name</key>
 					<string>keyword.control.scheme</string>
@@ -679,6 +680,10 @@
 						  fxvector\?|make-fxvector|fxvector-length|fxvector-ref|fxvector-set!|fxvector-fill!|fxvector-copy|fxvector->list|list->fxvector|
 						  enumerate|iota|list-head|last-pair|bytevector-truncate!|string-truncate!|vector-set-fixnum!|
 						  # Chez I/O and filesystem
+						  # Chez storage, library, and compatibility
+						  make-guardian|lock-object|unlock-object|locked-object\?|weak-cons|weak-pair\?|bwp-object\?|
+						  library-exports|library-list|library-object-filename|library-requirements|library-version|
+						  make-hash-table|get-hash-table|put-hash-table!|remove-hash-table!|hash-table\?|hash-table-for-each|hash-table-map|
 						  fasl-read|fresh-line|display-string|directory-list|mkdir|chmod|rename-file|delete-directory|
 						  path-absolute\?|path-extension|path-first|path-last|path-parent|path-rest|path-root|
 						  with-input-from-string|with-output-to-string|standard-input-port|standard-output-port|standard-error-port|

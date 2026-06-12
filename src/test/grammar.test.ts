@@ -648,6 +648,9 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(define-property x y z)', 'define-property', 'keyword.control');
         assertTokenScope('(with-implicit (id x) y)', 'with-implicit', 'keyword.control');
         assertTokenScope('(meta-cond (else x))', 'meta-cond', 'keyword.control');
+        assertTokenScope('(implicit-exports #t)', 'implicit-exports', 'keyword.control');
+        assertTokenScope('(library-group (foo))', 'library-group', 'keyword.control');
+        assertTokenScope('(extend-syntax (foo) ...)', 'extend-syntax', 'keyword.control');
     });
 
     test('Chez system procedures are classified as support.function', () => {
@@ -662,6 +665,9 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(syntax-error x)', 'syntax-error', 'support.function.general');
         assertTokenScope('(annotation? x)', 'annotation?', 'support.function.general');
         assertTokenScope('(syntax->list x)', 'syntax->list', 'support.function.general');
+        assertTokenScope('(make-guardian)', 'make-guardian', 'support.function.general');
+        assertTokenScope('(library-requirements (foo))', 'library-requirements', 'support.function.general');
+        assertTokenScope('(make-hash-table)', 'make-hash-table', 'support.function.general');
     });
 
     test('R6RS procedures are classified as support.function', () => {
