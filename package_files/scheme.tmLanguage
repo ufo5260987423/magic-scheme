@@ -707,6 +707,7 @@
 						  # Chez parameters and system hooks
 						  # Chez handlers and remaining parameters
 						  # Chez debugging
+						  exit|
 						  debug|inspect|inspect/object|
 						  current-eval|current-expand|current-transcoder|custom-port-buffer-size|
 						  abort-handler|base-exception-handler|break-handler|exit-handler|reset-handler|

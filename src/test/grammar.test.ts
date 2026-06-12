@@ -742,6 +742,8 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(open-input-output-file "foo")', 'open-input-output-file', 'support.function.general');
         assertTokenScope('(string-titlecase "foo")', 'string-titlecase', 'support.function.general');
         assertTokenScope('(char-titlecase #a)', 'char-titlecase', 'support.function.general');
+        assertTokenScope('(vector-ref v 0)', 'vector-ref', 'support.function.general');
+        assertTokenScope('(exit)', 'exit', 'support.function.general');
     });
 
 });
