@@ -493,14 +493,14 @@
 					<string>(?x)
 						(?&lt;=(\s|\(|\[)) # preceded by space or (
 						( char-alphabetic|char-lower-case|char-numeric|
-						  char-ready|char-upper-case|char-whitespace|
+						  char-ready|char-title-case|char-upper-case|char-whitespace|
 						  (?:char|string)(?:-ci)?(?:=|&lt;=?|&gt;=?)|
 						  atom|boolean|bound-identifier=|char|complex|
 						  identifier|integer|symbol|free-identifier=|inexact|
 						  eof-object|exact|list|(?:input|output)-port|pair|
 						  real|rational|zero|vector|negative|odd|null|string|
 						  eq|equal|eqv|even|number|positive|procedure|
-						  bytevector|hashtable|eq-hashtable|eqv-hashtable|weak-eq-hashtable|weak-eqv-hashtable|
+						  bytevector|hashtable|hashtable-mutable|eq-hashtable|eqv-hashtable|weak-eq-hashtable|weak-eqv-hashtable|
 						  record|record-type-descriptor|record-constructor-descriptor|
 						  time|date|enum-set|fixnum|flonum|exact-integer|bignum|ratnum|cflonum|
 						  finite|infinite|nan|port|input-port|output-port|port-closed|port-eof|port-nonblocking|
@@ -727,6 +727,17 @@
 						  # R6RS / Chez exceptions and conditions
 						  raise|
 						  # R6RS condition constructors
+						  # Missing R6RS procedures from TSPL4 scan
+						  assp|cons\*|
+						  char-general-category|
+						  denominator|imag-part|make-polar|make-rectangular|real-part|real-&gt;flonum|exact-integer-sqrt|
+						  equal-hash|string-ci-hash|string-hash|symbol-hash|
+						  fixnum-width|greatest-fixnum|least-fixnum|
+						  fldenominator|fldiv|fldiv-and-mod|fldiv0|fldiv0-and-mod0|flmod|flmod0|flnumerator|
+						  fx\*/carry|fx\+/carry|fx-/carry|fxarithmetic-shift|fxbit-count|fxbit-field|fxbit-set\?|fxcopy-bit|fxcopy-bit-field|fxdiv|fxdiv-and-mod|fxdiv0|fxdiv0-and-mod0|fxfirst-bit-set|fxif|fxlength|fxmod|fxmod0|fxreverse-bit-field|fxrotate-bit-field|
+						  hashtable-equivalence-function|hashtable-hash-function|
+						  native-endianness|sint-list-&gt;bytevector|uint-list-&gt;bytevector|
+						  number-&gt;string|
 						  # R6RS base arithmetic
 						  div-and-mod|div|mod|div0-and-mod0|div0|mod0|
 						  make-error|make-assertion-violation|make-warning|make-serious-condition|

@@ -725,6 +725,8 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(thread-condition? x)', 'thread-condition?', 'support.function.boolean-test');
         assertTokenScope('(real-valued? x)', 'real-valued?', 'support.function.boolean-test');
         assertTokenScope('(boolean=? #t #t)', 'boolean=?', 'support.function.boolean-test');
+        assertTokenScope('(char-title-case? #A)', 'char-title-case?', 'support.function.boolean-test');
+        assertTokenScope('(hashtable-mutable? ht)', 'hashtable-mutable?', 'support.function.boolean-test');
     });
 
     test('R6RS procedures are classified as support.function', () => {
@@ -746,6 +748,23 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(char-titlecase #a)', 'char-titlecase', 'support.function.general');
         assertTokenScope('(vector-ref v 0)', 'vector-ref', 'support.function.general');
         assertTokenScope('(exit)', 'exit', 'support.function.general');
+        assertTokenScope('(assp symbol? lst)', 'assp', 'support.function.general');
+        assertTokenScope('(cons* 1 2 lst)', 'cons*', 'support.function.general');
+        assertTokenScope('(char-general-category #a)', 'char-general-category', 'support.function.general');
+        assertTokenScope('(denominator 3/4)', 'denominator', 'support.function.general');
+        assertTokenScope('(make-polar 1 2)', 'make-polar', 'support.function.general');
+        assertTokenScope('(exact-integer-sqrt 17)', 'exact-integer-sqrt', 'support.function.general');
+        assertTokenScope('(equal-hash "a")', 'equal-hash', 'support.function.general');
+        assertTokenScope('(symbol-hash sym)', 'symbol-hash', 'support.function.general');
+        assertTokenScope('(fixnum-width)', 'fixnum-width', 'support.function.general');
+        assertTokenScope('(fldiv 5.0 2.0)', 'fldiv', 'support.function.general');
+        assertTokenScope('(fxbit-set? 1 0)', 'fxbit-set?', 'support.function.general');
+        assertTokenScope('(fxdiv 5 2)', 'fxdiv', 'support.function.general');
+        assertTokenScope('(hashtable-hash-function ht)', 'hashtable-hash-function', 'support.function.general');
+        assertTokenScope('(native-endianness)', 'native-endianness', 'support.function.general');
+        assertTokenScope('(sint-list->bytevector lst (endianness little))', 'sint-list->bytevector', 'support.function.general');
+        assertTokenScope('(number->string 42)', 'number->string', 'support.function.convert-type');
+        assertTokenScope('(real->flonum 3)', 'real->flonum', 'support.function.general');
     });
 
 });
