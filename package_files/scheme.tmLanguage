@@ -465,7 +465,7 @@
 						  lambda|
 						  define-library|include|include-ci|cond-expand|
 						  top-level-program|module|import-only|alias|
-						  =&gt;|\.\.\.|rename|only|except|prefix|for|meta|rec|ormap|andmap|record-case|engine-block|engine-return|fluid-let-syntax|
+						  =&gt;|\.\.\.|rename|only|except|prefix|for|meta|rec|record-case|engine-block|engine-return|fluid-let-syntax|
 						  eval-when|with-interrupts-disabled|critical-section|
 						  datum|define-property|with-implicit|meta-cond|
 						  implicit-exports|indirect-export|library-group|extend-syntax|with|
@@ -638,6 +638,7 @@
 						  print-gensym|print-length|print-level|print-precision|
 						  print-radix|print-record|print-unicode|
 						  # R6RS list, string, sorting, and bitwise procedures
+						  ormap|andmap|
 						  filter|find|fold-left|fold-right|remp|memp|partition|
 						  string-map|string-for-each|vector-sort|vector-sort!|
 						  for-all|exists|

@@ -696,6 +696,8 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(vector-sort < v)', 'vector-sort', 'support.function.general');
         assertTokenScope('(for-all positive? lst)', 'for-all', 'support.function.general');
         assertTokenScope('(exists positive? lst)', 'exists', 'support.function.general');
+        assertTokenScope('(ormap positive? lst)', 'ormap', 'support.function.general');
+        assertTokenScope('(andmap positive? lst)', 'andmap', 'support.function.general');
         assertTokenScope('(bitwise-and 1 2)', 'bitwise-and', 'support.function.general');
         assertTokenScope('(bitwise-bit-set? 1 0)', 'bitwise-bit-set?', 'support.function.general');
         assertTokenScope('(div-and-mod 10 3)', 'div-and-mod', 'support.function.general');
