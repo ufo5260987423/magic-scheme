@@ -466,7 +466,8 @@
 						  define-library|include|include-ci|cond-expand|
 						  top-level-program|module|import-only|alias|
 						  =&gt;|\.\.\.|rename|only|except|prefix|for|meta|rec|ormap|andmap|record-case|engine-block|engine-return|fluid-let-syntax|
-						  eval-when|with-interrupts-disabled|critical-section)
+						  eval-when|with-interrupts-disabled|critical-section|
+						  datum|define-property|with-implicit|meta-cond)
 						(?=[\s\(\)\[\]])</string>
 					<key>name</key>
 					<string>keyword.control.scheme</string>
@@ -621,7 +622,10 @@
 						  cpu-time|real-time|statistics|
 						  syntax-&gt;datum|datum-&gt;syntax|bound-identifier=|free-identifier=|
 						  generate-temporaries|make-variable-transformer|
-						  meta-cond|
+						  syntax-error|
+						  annotation\?|annotation-expression|annotation-source|annotation-stripped|make-annotation|
+						  syntax->list|syntax->vector|syntax->annotation|syntax-object->datum|datum->syntax-object|
+						  literal-identifier=\?|make-compile-time-value|
 						  get-u8|get-char|get-string-n|get-line|get-datum|
 						  put-u8|put-char|put-string|put-datum|
 						  pretty-print|printf|fprintf|

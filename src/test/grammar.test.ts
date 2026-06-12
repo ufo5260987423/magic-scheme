@@ -644,6 +644,10 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(eval-when (compile) x)', 'eval-when', 'keyword.control');
         assertTokenScope('(with-interrupts-disabled x)', 'with-interrupts-disabled', 'keyword.control');
         assertTokenScope('(critical-section x)', 'critical-section', 'keyword.control');
+        assertTokenScope('(datum x)', 'datum', 'keyword.control');
+        assertTokenScope('(define-property x y z)', 'define-property', 'keyword.control');
+        assertTokenScope('(with-implicit (id x) y)', 'with-implicit', 'keyword.control');
+        assertTokenScope('(meta-cond (else x))', 'meta-cond', 'keyword.control');
     });
 
     test('Chez system procedures are classified as support.function', () => {
@@ -655,6 +659,9 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(fork-thread thunk)', 'fork-thread', 'support.function.general');
         assertTokenScope('(make-fxvector 3)', 'make-fxvector', 'support.function.general');
         assertTokenScope('(enumerate 3)', 'enumerate', 'support.function.general');
+        assertTokenScope('(syntax-error x)', 'syntax-error', 'support.function.general');
+        assertTokenScope('(annotation? x)', 'annotation?', 'support.function.general');
+        assertTokenScope('(syntax->list x)', 'syntax->list', 'support.function.general');
     });
 
     test('R6RS procedures are classified as support.function', () => {
