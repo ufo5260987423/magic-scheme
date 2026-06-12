@@ -456,7 +456,7 @@
 						(?&lt;=(\s|\(|\[)) # preceded by space or ( 
 						( do|or|and|else|quasiquote|begin|if|case|set!|
 						  cond|let|unquote|define|let\*|unquote-splicing|delay|letrec-syntax|
-						  letrec|letrec\*|when|unless|guard|dynamic-wind|raise|
+						  letrec|letrec\*|when|unless|guard|dynamic-wind|
 						  with-exception-handler|library|import|export|
 						  define-record-type|let-values|let\*-values|
 						  define-values|call-with-values|parameterize|
@@ -691,6 +691,7 @@
 						  foreign-address-name|foreign-callable-code-object|foreign-callable-entry-point|foreign-entry\?|remove-foreign-entry|
 						  # Chez storage, library, and compatibility
 						  # R6RS / Chez exceptions and conditions
+						  raise|
 						  # R6RS condition constructors
 						  # R6RS base arithmetic
 						  div-and-mod|div|mod|div0-and-mod0|div0|mod0|
