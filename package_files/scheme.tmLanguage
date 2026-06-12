@@ -694,6 +694,15 @@
 						  # Chez I/O and filesystem
 						  # Chez foreign/ftype procedures
 						  # Chez parameters and system hooks
+						  # Chez handlers and remaining parameters
+						  current-eval|current-expand|current-transcoder|custom-port-buffer-size|
+						  abort-handler|base-exception-handler|break-handler|exit-handler|reset-handler|
+						  keyboard-interrupt-handler|timer-interrupt-handler|
+						  debug-condition|debug-on-exception|console-error-port|
+						  ee-auto-indent|ee-auto-paren-balance|ee-common-identifiers|ee-default-repeat|
+						  ee-flash-parens|ee-history-limit|ee-noisy|ee-paren-flash-delay|ee-standard-indent|
+						  file-buffer-size|heap-reserve-ratio|import-notify|internal-defines-as-letrec*|
+						  scheme-program|scheme-script|scheme-start|subset-mode|suppress-greeting|
 						  optimize-level|run-cp0|cp0-effort-limit|cp0-score-limit|cp0-outer-unroll-limit|
 						  generate-inspector-information|generate-interrupt-trap|compile-profile|compile-compressed|
 						  library-directories|library-extensions|source-directories|

@@ -503,6 +503,17 @@ suite('Grammar Tokenization', () => {
         );
     });
 
+    test('curly-brace identifier {foo} is tokenized', () => {
+        const state: any = null;
+        const code = '({foo})';
+        const { token } = findToken(code, '{foo}', state);
+        assert.ok(token, 'Token {foo} should be found');
+        assert.ok(
+            !token!.scopes.some(s => s.includes('invalid') || s.includes('illegal')),
+            `Expected {foo} not to be invalid/illegal, got: ${token!.scopes.join(' ')}`
+        );
+    });
+
     test('quasiquote backtick is tokenized as quote', () => {
         const state: any = null;
         const code = '`test';
@@ -687,6 +698,9 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(ftype-pointer-address p)', 'ftype-pointer-address', 'support.function.general');
         assertTokenScope('(optimize-level 3)', 'optimize-level', 'support.function.general');
         assertTokenScope('(library-directories)', 'library-directories', 'support.function.general');
+        assertTokenScope('(current-eval)', 'current-eval', 'support.function.general');
+        assertTokenScope('(base-exception-handler)', 'base-exception-handler', 'support.function.general');
+        assertTokenScope('(ee-history-limit 100)', 'ee-history-limit', 'support.function.general');
         assertTokenScope('(raise exn)', 'raise', 'support.function.general');
         assertTokenScope('(raise-continuable exn)', 'raise-continuable', 'support.function.general');
         assertTokenScope('(assertion-violation \'who "msg")', 'assertion-violation', 'support.function.general');
