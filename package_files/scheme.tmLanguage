@@ -706,6 +706,8 @@
 						  # Chez foreign/ftype procedures
 						  # Chez parameters and system hooks
 						  # Chez handlers and remaining parameters
+						  # Chez debugging
+						  debug|inspect|inspect/object|
 						  current-eval|current-expand|current-transcoder|custom-port-buffer-size|
 						  abort-handler|base-exception-handler|break-handler|exit-handler|reset-handler|
 						  keyboard-interrupt-handler|timer-interrupt-handler|

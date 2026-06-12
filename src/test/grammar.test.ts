@@ -708,6 +708,7 @@ suite('Grammar Tokenization', () => {
         assertTokenScope('(assertion-violation \'who "msg")', 'assertion-violation', 'support.function.general');
         assertTokenScope('(syntax-violation \'who "msg" form)', 'syntax-violation', 'support.function.general');
         assertTokenScope('(make-error)', 'make-error', 'support.function.general');
+        assertTokenScope('(inspect x)', 'inspect', 'support.function.general');
     });
 
     test('Chez boolean predicates are classified as support.function.boolean-test', () => {
