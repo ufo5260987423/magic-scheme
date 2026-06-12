@@ -512,6 +512,10 @@ suite('Grammar Tokenization', () => {
             !token!.scopes.some(s => s.includes('invalid') || s.includes('illegal')),
             `Expected {foo} not to be invalid/illegal, got: ${token!.scopes.join(' ')}`
         );
+        // Ensure it is tokenized as a single identifier, not split
+        const result = grammar.tokenizeLine(code, state);
+        const tokens = result.tokens.map(t => code.substring(t.startIndex, t.endIndex));
+        assert.deepStrictEqual(tokens, ['(', '{foo}', ')']);
     });
 
     test('quasiquote backtick is tokenized as quote', () => {
