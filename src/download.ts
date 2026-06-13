@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { spawnSync } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 
 const DOWNLOAD_URL =
   'https://github.com/ufo5260987423/scheme-langserver/releases/latest/download/scheme-langserver-x86_64-linux-glibc';
@@ -13,6 +13,8 @@ const VERSION_FILE = 'scheme-langserver.version';
 const LAST_CHECK_FILE = 'scheme-langserver.lastCheck';
 const UPDATE_INTERVAL_HOURS = 24;
 const CHECK_TIMEOUT_MS = 5000;
+const DOWNLOAD_TIMEOUT_MS = 5 * 60 * 1000; // total download timeout
+const STALL_TIMEOUT_MS = 30000; // timeout if no data received for this long
 
 export function isExecutable(filePath: string): boolean {
   if (!fs.existsSync(filePath)) {
@@ -26,7 +28,39 @@ export function isExecutable(filePath: string): boolean {
   }
 }
 
-export function findLangserverInPath(): string | undefined {
+export async function isExecutableAsync(filePath: string): Promise<boolean> {
+  if (!fs.existsSync(filePath)) {
+    return false;
+  }
+  return new Promise((resolve) => {
+    let killed = false;
+    const child = spawn(filePath, ['--help']);
+    const timeoutId = setTimeout(() => {
+      killed = true;
+      child.kill();
+      resolve(false);
+    }, 5000);
+
+    child.on('error', () => {
+      clearTimeout(timeoutId);
+      resolve(false);
+    });
+    child.on('exit', (code: number | null) => {
+      clearTimeout(timeoutId);
+      if (!killed) {
+        resolve(code === 0);
+      }
+    });
+    child.on('close', (code: number | null) => {
+      clearTimeout(timeoutId);
+      if (!killed) {
+        resolve(code === 0);
+      }
+    });
+  });
+}
+
+export function findLangserverInPathSync(): string | undefined {
   const pathEnv = process.env.PATH || process.env.Path || process.env.path || '';
   const dirs = pathEnv.split(process.platform === 'win32' ? ';' : ':');
   const exeName = process.platform === 'win32' ? 'scheme-langserver.exe' : 'scheme-langserver';
@@ -36,6 +70,22 @@ export function findLangserverInPath(): string | undefined {
     }
     const fullPath = path.join(dir, exeName);
     if (isExecutable(fullPath)) {
+      return fullPath;
+    }
+  }
+  return undefined;
+}
+
+export async function findLangserverInPath(): Promise<string | undefined> {
+  const pathEnv = process.env.PATH || process.env.Path || process.env.path || '';
+  const dirs = pathEnv.split(process.platform === 'win32' ? ';' : ':');
+  const exeName = process.platform === 'win32' ? 'scheme-langserver.exe' : 'scheme-langserver';
+  for (const dir of dirs) {
+    if (!dir) {
+      continue;
+    }
+    const fullPath = path.join(dir, exeName);
+    if (await isExecutableAsync(fullPath)) {
       return fullPath;
     }
   }
@@ -142,9 +192,18 @@ export async function updateLangserver(
     statusBarItem.tooltip = 'Downloading latest scheme-langserver...';
     statusBarItem.show();
 
-    await downloadLangserver(tmpPath);
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: `Updating scheme-langserver to ${newVersion}...`,
+        cancellable: true,
+      },
+      async (progress, token) => {
+        await downloadLangserver(tmpPath, token, progress);
+      }
+    );
 
-    if (!isExecutable(tmpPath)) {
+    if (!(await isExecutableAsync(tmpPath))) {
       throw new Error('Downloaded file appears to be corrupt');
     }
 
@@ -238,19 +297,19 @@ export async function checkForUpdate(
   }
 }
 
-export function findLocalRun(): string | undefined {
+export async function findLocalRun(): Promise<string | undefined> {
   if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
     const runPath = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'run');
-    if (fs.existsSync(runPath) && isExecutable(runPath)) {
+    if (fs.existsSync(runPath) && (await isExecutableAsync(runPath))) {
       return runPath;
     }
   }
   return undefined;
 }
 
-export function findPreviouslyDownloaded(globalStoragePath: string): string | undefined {
+export async function findPreviouslyDownloaded(globalStoragePath: string): Promise<string | undefined> {
   const downloadedPath = path.join(globalStoragePath, 'scheme-langserver');
-  if (isExecutable(downloadedPath)) {
+  if (await isExecutableAsync(downloadedPath)) {
     return downloadedPath;
   }
   return undefined;
@@ -267,10 +326,10 @@ export function canAutoDownload(): boolean {
 export async function downloadLangserver(
   destPath: string,
   token?: vscode.CancellationToken,
-  progress?: vscode.Progress<{ message?: string; increment?: number }>
+  progress?: vscode.Progress<{ message?: string; increment?: number }>,
+  options?: { totalTimeoutMs?: number; stallTimeoutMs?: number }
 ): Promise<void> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000);
   let abortedByUser = false;
   if (token) {
     token.onCancellationRequested(() => {
@@ -278,6 +337,12 @@ export async function downloadLangserver(
       controller.abort();
     });
   }
+
+  const totalTimeoutMs = options?.totalTimeoutMs ?? DOWNLOAD_TIMEOUT_MS;
+  const stallTimeoutMs = options?.stallTimeoutMs ?? STALL_TIMEOUT_MS;
+
+  // Total timeout for the whole download (headers + body).
+  const totalTimeoutId = setTimeout(() => controller.abort(), totalTimeoutMs);
 
   let response: Response;
   try {
@@ -287,47 +352,87 @@ export async function downloadLangserver(
       signal: controller.signal,
     });
   } catch (err) {
-    clearTimeout(timeoutId);
+    clearTimeout(totalTimeoutId);
     if (abortedByUser) {
       throw new Error('Download cancelled');
     }
     if (err instanceof Error && err.name === 'AbortError') {
-      throw new Error('Download timed out after 30 seconds');
+      throw new Error('Download timed out');
     }
     throw err;
   }
-  clearTimeout(timeoutId);
 
   if (!response.ok || !response.body) {
+    clearTimeout(totalTimeoutId);
     throw new Error(`Download failed: HTTP ${response.status} ${response.statusText}`);
   }
 
   const totalSize = parseInt(response.headers.get('content-length') || '0', 10);
   const reader = response.body.getReader();
+  controller.signal.addEventListener('abort', () => {
+    void reader.cancel();
+  });
   const fileStream = fs.createWriteStream(destPath);
   let downloaded = 0;
   let lastPct = 0;
+  let lastChunkTime = Date.now();
 
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    if (token?.isCancellationRequested) {
-      await reader.cancel();
-      fileStream.destroy();
-      throw new Error('Download cancelled');
+  // Stall watchdog: abort if no chunk arrives within stallTimeoutMs.
+  const stallCheckId = setInterval(() => {
+    if (Date.now() - lastChunkTime > stallTimeoutMs) {
+      controller.abort();
     }
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
+  }, 1000);
+
+  function reportProgress() {
+    if (!progress) {
+      return;
     }
-    if (value) {
-      fileStream.write(Buffer.from(value));
-      downloaded += value.length;
-      if (progress && totalSize > 0) {
-        const pct = Math.round((downloaded / totalSize) * 100);
-        progress.report({ message: `${pct}%`, increment: pct - lastPct });
-        lastPct = pct;
+    if (totalSize > 0) {
+      const pct = Math.round((downloaded / totalSize) * 100);
+      progress.report({ message: `${pct}%`, increment: pct - lastPct });
+      lastPct = pct;
+    } else {
+      progress.report({ message: `${(downloaded / 1024).toFixed(1)} KB downloaded` });
+    }
+  }
+
+  try {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      if (token?.isCancellationRequested) {
+        await reader.cancel();
+        fileStream.destroy();
+        throw new Error('Download cancelled');
+      }
+
+      let done: boolean;
+      let value: Uint8Array | undefined;
+      try {
+        ({ done, value } = await reader.read());
+      } catch (err) {
+        if (abortedByUser) {
+          throw new Error('Download cancelled');
+        }
+        if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError')) {
+          throw new Error('Download timed out');
+        }
+        throw err;
+      }
+
+      if (done) {
+        break;
+      }
+      if (value) {
+        fileStream.write(Buffer.from(value));
+        downloaded += value.length;
+        lastChunkTime = Date.now();
+        reportProgress();
       }
     }
+  } finally {
+    clearTimeout(totalTimeoutId);
+    clearInterval(stallCheckId);
   }
 
   fileStream.end();
@@ -350,26 +455,26 @@ export async function ensureLangserver(context: vscode.ExtensionContext): Promis
     if (!path.isAbsolute(configuredPath) && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
       resolved = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, configuredPath);
     }
-    if (isExecutable(resolved)) {
+    if (await isExecutableAsync(resolved)) {
       return resolved;
     }
   }
 
   // 2. PATH
-  const pathServer = findLangserverInPath();
+  const pathServer = await findLangserverInPath();
   if (pathServer) {
     return pathServer;
   }
 
   // 3. Local ./run
-  const localRun = findLocalRun();
+  const localRun = await findLocalRun();
   if (localRun) {
     return localRun;
   }
 
   // 4. Previously downloaded binary in global storage
   const globalStoragePath = context.globalStorageUri.fsPath;
-  const downloaded = findPreviouslyDownloaded(globalStoragePath);
+  const downloaded = await findPreviouslyDownloaded(globalStoragePath);
   if (downloaded) {
     return downloaded;
   }
@@ -388,7 +493,7 @@ export async function ensureLangserver(context: vscode.ExtensionContext): Promis
           await downloadLangserver(destPath, token, progress);
         }
       );
-      if (!isExecutable(destPath)) {
+      if (!(await isExecutableAsync(destPath))) {
         vscode.window.showWarningMessage(
           'scheme-langserver was downloaded but appears to be corrupt. Please try again or install manually.'
         );
@@ -401,7 +506,8 @@ export async function ensureLangserver(context: vscode.ExtensionContext): Promis
           writeLocalVersion(globalStoragePath, version);
         }
       });
-      const needsConfigUpdate = !configuredPath || !isExecutable(configuredPath);
+      const configuredExecutable = configuredPath ? await isExecutableAsync(configuredPath) : false;
+      const needsConfigUpdate = !configuredPath || !configuredExecutable;
       if (needsConfigUpdate) {
         try {
           await config.update('serverPath', destPath, false);

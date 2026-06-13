@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { suite, test } from 'mocha';
 import * as path from 'path';
 import * as fs from 'fs';
-import { isExecutable, findLangserverInPath } from '../download';
+import { isExecutable, findLangserverInPathSync } from '../download';
 import { activate, getDocUri } from './helper';
 
 function findLangserver(): string | undefined {
@@ -17,7 +17,7 @@ function findLangserver(): string | undefined {
             return candidate;
         }
     }
-    return findLangserverInPath();
+    return findLangserverInPathSync();
 }
 
 suite('E2E Tests (Real scheme-langserver)', () => {

@@ -6,7 +6,7 @@ import * as path from "path";
 import * as com from "./commands";
 import { TaskProvider } from "./tasks";
 import { withLanguageServer, getEffectiveServerConfig, DEFAULT_SERVER_CONFIG, getCurrentWorkspacePath } from "./utils";
-import { ensureLangserver, isExecutable, checkForUpdate, getLatestRemoteVersion, readLocalVersion, updateLangserver } from "./download";
+import { ensureLangserver, isExecutableAsync, checkForUpdate, getLatestRemoteVersion, readLocalVersion, updateLangserver } from "./download";
 
 let langClient: LanguageClient | undefined;
 let currentClientState: State | undefined;
@@ -264,7 +264,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Update workspace-level config only when the current value is missing or invalid.
     // Using workspace scope (false) avoids syncing machine-specific paths via Settings Sync.
-    const needsConfigUpdate = !configuredPath || !isExecutable(configuredPath);
+    const configuredExecutable = configuredPath ? await isExecutableAsync(configuredPath) : false;
+    const needsConfigUpdate = !configuredPath || !configuredExecutable;
     if (needsConfigUpdate) {
       await config.update('serverPath', serverPath, false);
     }

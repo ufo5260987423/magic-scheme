@@ -3,8 +3,10 @@ import { suite, test } from 'mocha';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import * as vscode from 'vscode';
 import {
   isExecutable,
+  isExecutableAsync,
   canAutoDownload,
   findPreviouslyDownloaded,
   downloadLangserver,
@@ -51,19 +53,65 @@ suite('Download Unit Tests', () => {
     });
   });
 
+  suite('isExecutableAsync', () => {
+    test('returns false for non-existent file', async () => {
+      const result = await isExecutableAsync('/nonexistent/path/to/binary');
+      assert.strictEqual(result, false);
+    });
+
+    test('returns true for a valid shell script', async () => {
+      const tmpScript = path.join(os.tmpdir(), 'magic-scheme-test-exec-async.sh');
+      fs.writeFileSync(tmpScript, '#!/bin/sh\necho "help"\n');
+      fs.chmodSync(tmpScript, 0o755);
+      try {
+        const result = await isExecutableAsync(tmpScript);
+        assert.strictEqual(result, true);
+      } finally {
+        fs.unlinkSync(tmpScript);
+      }
+    });
+
+    test('returns false for a file that exits with error', async () => {
+      const tmpScript = path.join(os.tmpdir(), 'magic-scheme-test-fail-async.sh');
+      fs.writeFileSync(tmpScript, '#!/bin/sh\nexit 1\n');
+      fs.chmodSync(tmpScript, 0o755);
+      try {
+        const result = await isExecutableAsync(tmpScript);
+        assert.strictEqual(result, false);
+      } finally {
+        fs.unlinkSync(tmpScript);
+      }
+    });
+
+    test('returns false for a hanging script', async function () {
+      this.timeout(10000);
+      const tmpScript = path.join(os.tmpdir(), 'magic-scheme-test-hang-async.sh');
+      fs.writeFileSync(tmpScript, '#!/bin/sh\nsleep 60\n');
+      fs.chmodSync(tmpScript, 0o755);
+      const start = Date.now();
+      try {
+        const result = await isExecutableAsync(tmpScript);
+        assert.strictEqual(result, false);
+        assert.ok(Date.now() - start < 7000, 'should not hang for 60 seconds');
+      } finally {
+        fs.unlinkSync(tmpScript);
+      }
+    });
+  });
+
   suite('findPreviouslyDownloaded', () => {
-    test('returns undefined when file does not exist', () => {
-      const result = findPreviouslyDownloaded('/nonexistent/storage');
+    test('returns undefined when file does not exist', async () => {
+      const result = await findPreviouslyDownloaded('/nonexistent/storage');
       assert.strictEqual(result, undefined);
     });
 
-    test('returns path when valid executable exists', () => {
+    test('returns path when valid executable exists', async () => {
       const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'magic-scheme-test-'));
       const binaryPath = path.join(tmpDir, 'scheme-langserver');
       fs.writeFileSync(binaryPath, '#!/bin/sh\necho "help"\n');
       fs.chmodSync(binaryPath, 0o755);
       try {
-        const result = findPreviouslyDownloaded(tmpDir);
+        const result = await findPreviouslyDownloaded(tmpDir);
         assert.strictEqual(result, binaryPath);
       } finally {
         fs.unlinkSync(binaryPath);
@@ -71,13 +119,13 @@ suite('Download Unit Tests', () => {
       }
     });
 
-    test('returns undefined for non-executable file', () => {
+    test('returns undefined for non-executable file', async () => {
       const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'magic-scheme-test-'));
       const binaryPath = path.join(tmpDir, 'scheme-langserver');
       fs.writeFileSync(binaryPath, 'not a script');
       fs.chmodSync(binaryPath, 0o644);
       try {
-        const result = findPreviouslyDownloaded(tmpDir);
+        const result = await findPreviouslyDownloaded(tmpDir);
         assert.strictEqual(result, undefined);
       } finally {
         fs.unlinkSync(binaryPath);
@@ -198,6 +246,114 @@ suite('Download Unit Tests', () => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           async () => downloadLangserver(tmpFile, mockToken as any),
           /Download cancelled/
+        );
+      } finally {
+        global.fetch = originalFetch;
+        if (fs.existsSync(tmpFile)) {
+          fs.unlinkSync(tmpFile);
+        }
+      }
+    });
+
+    test('times out on stalled body stream', async function () {
+      this.timeout(10000);
+      const tmpFile = path.join(os.tmpdir(), 'magic-scheme-test-stall');
+      const originalFetch = global.fetch;
+      global.fetch = async () =>
+        ({
+          ok: true,
+          status: 200,
+          statusText: 'OK',
+          headers: {
+            get: (name: string) => (name.toLowerCase() === 'content-length' ? '100' : null),
+          },
+          body: {
+            getReader: () => {
+              let cancelled = false;
+              return {
+                read: async () => {
+                  // Wait until cancelled or a very long timeout
+                  await new Promise<void>((_, reject) => {
+                    const check = setInterval(() => {
+                      if (cancelled) {
+                        clearInterval(check);
+                        reject(new Error('cancelled'));
+                      }
+                    }, 50);
+                  });
+                  return { done: false, value: new Uint8Array([0x01]) };
+                },
+                cancel: () => {
+                  cancelled = true;
+                },
+              };
+            },
+          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any);
+
+      try {
+        const start = Date.now();
+        await assert.rejects(
+          async () => downloadLangserver(tmpFile, undefined, undefined, { stallTimeoutMs: 1000 }),
+          /Download timed out/
+        );
+        assert.ok(Date.now() - start < 5000, 'should time out quickly, not hang forever');
+      } finally {
+        global.fetch = originalFetch;
+        if (fs.existsSync(tmpFile)) {
+          fs.unlinkSync(tmpFile);
+        }
+      }
+    });
+
+    test('reports byte progress when content-length is missing', async () => {
+      const tmpFile = path.join(os.tmpdir(), 'magic-scheme-test-nosize');
+      const originalFetch = global.fetch;
+      const mockBuffer = Buffer.from('fake-binary-content');
+      const reportedMessages: string[] = [];
+      global.fetch = async () =>
+        ({
+          ok: true,
+          status: 200,
+          statusText: 'OK',
+          headers: {
+            get: () => null,
+          },
+          body: {
+            getReader: () => {
+              let done = false;
+              return {
+                read: async () => {
+                  if (done) {
+                    return { done: true, value: undefined };
+                  }
+                  done = true;
+                  return { done: false, value: new Uint8Array(mockBuffer) };
+                },
+                cancel: () => {
+                  /* no-op */
+                },
+              };
+            },
+          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any);
+
+      const mockProgress: vscode.Progress<{ message?: string; increment?: number }> = {
+        report: (value) => {
+          if (value.message) {
+            reportedMessages.push(value.message);
+          }
+        },
+      };
+
+      try {
+        await downloadLangserver(tmpFile, undefined, mockProgress);
+        assert.ok(reportedMessages.length > 0, 'should report progress messages');
+        assert.ok(
+          reportedMessages.some((m) => m.includes('KB downloaded')),
+          `should report byte count, got: ${reportedMessages.join(', ')}`
         );
       } finally {
         global.fetch = originalFetch;
