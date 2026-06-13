@@ -15,6 +15,10 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 - Update downloads now show a cancellable progress notification instead of only a status-bar spinner.
 - Background langserver discovery now catches failures so the status bar no longer stays stuck on “Looking for scheme-langserver...”.
 - Replaced synchronous executable checks during discovery with async checks to avoid blocking the extension host.
+- **Security**: resolved Dependabot alerts by upgrading transitive/dev dependencies.
+  - `shell-quote` `^1.8.0` → `^1.8.4` (command injection via object-token `.op`).
+  - `esbuild` `^0.21.5` → `^0.28.1` (dev-server CORS / Deno integrity issues).
+  - Added `overrides` to force `serialize-javascript` `^7.0.5` and resolved `cross-spawn`, `flatted`, `glob`, `minimatch`, `picomatch`, `js-yaml`, `micromatch`, `ajv`, `brace-expansion`, and `diff` via `npm audit fix`.
 
 ## [0.0.10] - 2026-05-30
 

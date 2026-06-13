@@ -276,9 +276,10 @@
     "@typescript-eslint/parser": "^7.11.0",
     "@vscode/test-cli": "^0.0.9",
     "@vscode/test-electron": "^2.4.0",
-    "esbuild": "^0.21.5",
+    "esbuild": "^0.28.1",
     "eslint": "^8.57.0",
     "plist": "^5.0.0",
+    "serialize-javascript": "^7.0.5",
     "typescript": "^5.4.5",
     "vscode-oniguruma": "^1.7.0",
     "vscode-textmate": "^8.0.0"
@@ -286,5 +287,8 @@
   "dependencies": {
     "shell-quote": "^1.8.4",
     "vscode-languageclient": "^7.0.0"
+  },
+  "overrides": {
+    "serialize-javascript": "^7.0.5"
   }
 }
