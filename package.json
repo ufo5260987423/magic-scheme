@@ -284,7 +284,7 @@
     "vscode-textmate": "^8.0.0"
   },
   "dependencies": {
-    "shell-quote": "^1.8.0",
+    "shell-quote": "^1.8.4",
     "vscode-languageclient": "^7.0.0"
   }
 }
