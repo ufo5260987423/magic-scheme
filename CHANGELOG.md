@@ -4,6 +4,18 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 
 ## [Unreleased]
 
+## [0.0.11] - 2026-06-13
+
+### Added
+- Grammar support for additional R6RS/Chez procedures discovered via TSPL4 scan: `assp`, `cons*`, `char-general-category`, `exact-integer-sqrt`, `equal-hash`, `symbol-hash`, `string-ci-hash`, `fixnum-width`, `greatest-fixnum`, `least-fixnum`, `fldiv` family, `fxbit-set?`/`fxdiv` family, `hashtable-equivalence-function`, `hashtable-hash-function`, `native-endianness`, `sint-list->bytevector`, `uint-list->bytevector`, `number->string`, `real->flonum`, and more.
+- Added `char-title-case?` and `hashtable-mutable?` to boolean-test predicates.
+
+### Fixed
+- Fixed scheme-langserver download/install progress appearing stuck: added total-download timeout, stalled-stream timeout, and byte-count progress when `content-length` is unavailable.
+- Update downloads now show a cancellable progress notification instead of only a status-bar spinner.
+- Background langserver discovery now catches failures so the status bar no longer stays stuck on “Looking for scheme-langserver...”.
+- Replaced synchronous executable checks during discovery with async checks to avoid blocking the extension host.
+
 ## [0.0.10] - 2026-05-30
 
 ### Added
