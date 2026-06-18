@@ -4,6 +4,18 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 
 ## [Unreleased]
 
+### Added
+- Added support for `scheme-langserver` 2.1.3's `--cache-path` option.
+  - New project-level config field `cachePath` in `.vscode/magic-scheme.json`.
+  - `cachePath` is only passed to the server when the detected version is `>= 2.1.3`, preventing older binaries from crashing on the unknown flag.
+  - Added automatic scheme-langserver version detection with `--version → -v → --help` fallback for older binaries.
+- Status bar now displays the detected `scheme-langserver` version when ready.
+
+### Changed
+- Default `logPath` moved from `~/scheme-langserver.log` to `.vscode/scheme-langserver.log` (project-local).
+- Default `cachePath` set to `.vscode/scheme-langserver-cache` (project-local).
+- Declared compatibility with `scheme-langserver` 2.1.3.
+
 ## [0.0.11] - 2026-06-13
 
 ### Added

@@ -177,7 +177,8 @@ The easiest way to configure your project is through the built-in wizard:
    topEnvironment: R6RS        (default)
    multiThread: enable         (default)
    typeInference: enable       (default)
-   logPath: ~/scheme-langserver.log  (default)
+   logPath: .vscode/scheme-langserver.log  (default)
+   cachePath: .vscode/scheme-langserver-cache  (default, only used with scheme-langserver >= 2.1.3)
    + Add new property...
    ✓ Done
    ```
@@ -185,6 +186,7 @@ The easiest way to configure your project is through the built-in wizard:
    - `topEnvironment` — choose from `R6RS`, `R7RS`, or select **Custom value...** to enter any other environment (e.g. `S7`, `goldfish`).
    - `multiThread` / `typeInference` — choose `enable` or `disable`.
    - `logPath` — type any path (supports `~` for home directory).
+   - `cachePath` — directory for the workspace FASL cache introduced in scheme-langserver 2.1.3. Leave empty to disable. Only passed to the server when the detected version is >= 2.1.3.
 5. Click **+ Add new property...** to add arbitrary scheme-langserver parameters not listed above.
 6. Click **✓ Done** to save.
 
@@ -199,7 +201,8 @@ You can also edit `.vscode/magic-scheme.json` by hand. **On first activation**, 
   "topEnvironment": "R6RS",
   "multiThread": "enable",
   "typeInference": "enable",
-  "logPath": "~/scheme-langserver.log"
+  "logPath": ".vscode/scheme-langserver.log",
+  "cachePath": ".vscode/scheme-langserver-cache"
 }
 ```
 
@@ -210,9 +213,12 @@ All fields are optional — omitted fields fall back to the defaults above.
 | `topEnvironment` | Scheme top environment: `R6RS`, `R7RS`, or any value your scheme-langserver supports (e.g. `S7`, `goldfish`) | `R6RS` |
 | `multiThread` | Enable/disable multi-threading: `enable` or `disable` | `enable` |
 | `typeInference` | Enable/disable type inference: `enable` or `disable` | `enable` |
-| `logPath` | Path to scheme-langserver log file (supports `~` expansion) | `~/scheme-langserver.log` |
+| `logPath` | Path to scheme-langserver log file (supports `~` expansion) | `.vscode/scheme-langserver.log` |
+| `cachePath` | Directory for the workspace FASL cache (scheme-langserver >= 2.1.3). Only passed to the server when the detected version supports it. | `.vscode/scheme-langserver-cache` |
 
 When you save changes to this file, Magic Scheme automatically restarts the language server to apply them.
+
+> **Version-aware feature gating**: Magic Scheme detects the installed `scheme-langserver` version by running `--version`, falling back to `-v` and then `--help` for older binaries. The `cachePath` option is only enabled when the detected version is `>= 2.1.3`, so older server versions continue to work without crashing on the unknown `-c` flag.
 
 ## For Developer
 

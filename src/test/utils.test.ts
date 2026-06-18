@@ -94,7 +94,8 @@ suite('Unit Tests: Pure Logic', () => {
             assert.strictEqual(defaults.topEnvironment, 'R6RS');
             assert.strictEqual(defaults.multiThread, 'enable');
             assert.strictEqual(defaults.typeInference, 'enable');
-            assert.strictEqual(defaults.logPath, '~/scheme-langserver.log');
+            assert.strictEqual(defaults.logPath, '.vscode/scheme-langserver.log');
+            assert.strictEqual(defaults.cachePath, '.vscode/scheme-langserver-cache');
         });
     });
 

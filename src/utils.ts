@@ -57,6 +57,7 @@ export interface ProjectConfig {
   multiThread?: string;
   typeInference?: string;
   logPath?: string;
+  cachePath?: string;
 }
 
 export function readProjectConfig(workspacePath: string): ProjectConfig | undefined {
@@ -93,7 +94,8 @@ export const DEFAULT_SERVER_CONFIG: Required<ProjectConfig> = {
   topEnvironment: 'R6RS',
   multiThread: 'enable',
   typeInference: 'enable',
-  logPath: '~/scheme-langserver.log',
+  logPath: '.vscode/scheme-langserver.log',
+  cachePath: '.vscode/scheme-langserver-cache',
 };
 
 export interface EffectiveServerConfig {
@@ -102,6 +104,7 @@ export interface EffectiveServerConfig {
   multiThread: string;
   typeInference: string;
   topEnvironment: string;
+  cachePath: string;
   workspacePath: string | undefined;
   projectConfigFound: boolean;
 }
@@ -124,12 +127,16 @@ export function getEffectiveServerConfig(): EffectiveServerConfig | undefined {
     multiThread: projectConfig?.multiThread ?? defaults.multiThread,
     typeInference: projectConfig?.typeInference ?? defaults.typeInference,
     topEnvironment: projectConfig?.topEnvironment ?? defaults.topEnvironment,
+    cachePath: projectConfig?.cachePath ?? defaults.cachePath,
     workspacePath,
     projectConfigFound: !!projectConfig,
   };
 }
 
-export function withLanguageServer(func: (command: string, args: string[]) => void): void {
+export function withLanguageServer(
+  func: (command: string, args: string[]) => void,
+  enableCachePath = false
+): void {
   const effective = getEffectiveServerConfig();
   if (!effective) {
     vscode.window.showErrorMessage(
@@ -146,6 +153,7 @@ export function withLanguageServer(func: (command: string, args: string[]) => vo
   const multiThread = effective.multiThread;
   const typeInference = effective.typeInference;
   const topEnvironment = effective.topEnvironment;
+  const cachePath = effective.cachePath;
 
   // Resolve relative paths against the workspace root so that LanguageClient
   // spawns the binary from the correct CWD.
@@ -165,6 +173,20 @@ export function withLanguageServer(func: (command: string, args: string[]) => vo
     "-t", resolvedTypeInference,
     "-e", resolvedTopEnvironment,
   ];
+
+  if (enableCachePath && cachePath) {
+    const resolvedCachePath = resolveTilde(cachePath);
+    const absoluteCachePath = path.isAbsolute(resolvedCachePath)
+      ? resolvedCachePath
+      : path.join(effective.workspacePath || '', resolvedCachePath);
+    try {
+      fs.mkdirSync(absoluteCachePath, { recursive: true });
+    } catch {
+      // ignore: scheme-langserver will report if it cannot use the path
+    }
+    args.push("-c", absoluteCachePath);
+  }
+
   func(resolvedCommand, args);
 }
 

@@ -14,6 +14,8 @@ import {
   writeLocalVersion,
   shouldCheckForUpdate,
   getLatestRemoteVersion,
+  getLangserverVersion,
+  isVersionAtLeast,
 } from '../download';
 
 suite('Download Unit Tests', () => {
@@ -432,6 +434,93 @@ suite('Download Unit Tests', () => {
       } finally {
         global.fetch = originalFetch;
       }
+    });
+  });
+
+  suite('isVersionAtLeast', () => {
+    test('returns true for exact match', () => {
+      assert.strictEqual(isVersionAtLeast('2.1.3', '2.1.3'), true);
+    });
+
+    test('returns true for greater version', () => {
+      assert.strictEqual(isVersionAtLeast('2.1.4', '2.1.3'), true);
+      assert.strictEqual(isVersionAtLeast('3.0.0', '2.1.3'), true);
+    });
+
+    test('returns false for lesser version', () => {
+      assert.strictEqual(isVersionAtLeast('2.1.2', '2.1.3'), false);
+      assert.strictEqual(isVersionAtLeast('2.0.0', '2.1.3'), false);
+      assert.strictEqual(isVersionAtLeast('1.2.3', '2.1.3'), false);
+    });
+  });
+
+  suite('getLangserverVersion', () => {
+    function makeVersionScript(output: string, exitCode = 0): string {
+      const tmpScript = path.join(os.tmpdir(), `magic-scheme-version-test-${Date.now()}-${Math.random().toString(36).slice(2)}.sh`);
+      fs.writeFileSync(tmpScript, `#!/bin/sh\necho "${output}"\nexit ${exitCode}\n`);
+      fs.chmodSync(tmpScript, 0o755);
+      return tmpScript;
+    }
+
+    test('parses --version output', async () => {
+      const tmpScript = makeVersionScript('scheme-langserver 2.1.3');
+      try {
+        const result = await getLangserverVersion(tmpScript);
+        assert.strictEqual(result, '2.1.3');
+      } finally {
+        fs.unlinkSync(tmpScript);
+      }
+    });
+
+    test('parses --version output with v prefix', async () => {
+      const tmpScript = makeVersionScript('scheme-langserver v2.1.3');
+      try {
+        const result = await getLangserverVersion(tmpScript);
+        assert.strictEqual(result, '2.1.3');
+      } finally {
+        fs.unlinkSync(tmpScript);
+      }
+    });
+
+    test('falls back to -v when --version fails', async () => {
+      const tmpScript = path.join(os.tmpdir(), `magic-scheme-version-fallback-test-${Date.now()}.sh`);
+      fs.writeFileSync(tmpScript, `#!/bin/sh\nif [ "$1" = "--version" ]; then exit 1; fi\necho "scheme-langserver 2.1.2"\n`);
+      fs.chmodSync(tmpScript, 0o755);
+      try {
+        const result = await getLangserverVersion(tmpScript);
+        assert.strictEqual(result, '2.1.2');
+      } finally {
+        fs.unlinkSync(tmpScript);
+      }
+    });
+
+    test('falls back to --help when --version and -v fail', async () => {
+      const tmpScript = path.join(os.tmpdir(), `magic-scheme-version-help-test-${Date.now()}.sh`);
+      fs.writeFileSync(tmpScript, `#!/bin/sh\nif [ "$1" = "--version" ] || [ "$1" = "-v" ]; then exit 1; fi\necho "Usage: scheme-langserver [options] (scheme-langserver 2.1.1)"\n`);
+      fs.chmodSync(tmpScript, 0o755);
+      try {
+        const result = await getLangserverVersion(tmpScript);
+        assert.strictEqual(result, '2.1.1');
+      } finally {
+        fs.unlinkSync(tmpScript);
+      }
+    });
+
+    test('returns undefined when all version detection attempts fail', async () => {
+      const tmpScript = path.join(os.tmpdir(), `magic-scheme-version-fail-test-${Date.now()}.sh`);
+      fs.writeFileSync(tmpScript, `#!/bin/sh\nexit 1\n`);
+      fs.chmodSync(tmpScript, 0o755);
+      try {
+        const result = await getLangserverVersion(tmpScript);
+        assert.strictEqual(result, undefined);
+      } finally {
+        fs.unlinkSync(tmpScript);
+      }
+    });
+
+    test('returns undefined for non-existent file', async () => {
+      const result = await getLangserverVersion('/nonexistent/path/to/scheme-langserver');
+      assert.strictEqual(result, undefined);
     });
   });
 });
