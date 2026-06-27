@@ -13,14 +13,21 @@ export async function activate(docUri: vscode.Uri): Promise<void> {
     doc = await vscode.workspace.openTextDocument(docUri);
     editor = await vscode.window.showTextDocument(doc);
 
-    // Quick check: if LSP is already running, no need to wait
+    // Wait until the LSP client reaches Running state instead of sleeping for
+    // a fixed amount of time. This makes tests faster on quick machines and
+    // more reliable on slow ones.
     const extExports = ext.exports as {
         getClientState?: () => State | undefined;
     };
-    if (extExports?.getClientState?.() === State.Running) {
-        return;
+    const start = Date.now();
+    const timeout = 15000;
+    const interval = 100;
+    while (Date.now() - start < timeout) {
+        if (extExports?.getClientState?.() === State.Running) {
+            return;
+        }
+        await sleep(interval);
     }
-    await sleep(2000);
 }
 
 export async function sleep(ms: number): Promise<void> {

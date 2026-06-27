@@ -76,6 +76,16 @@ export function readProjectConfig(workspacePath: string): ProjectConfig | undefi
   }
 }
 
+export function resolveServerPath(command: string): string {
+  if (path.isAbsolute(command)) {
+    return command;
+  }
+  if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+    return path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, command);
+  }
+  return command;
+}
+
 export function getCurrentWorkspacePath(): string | undefined {
   const editor = vscode.window.activeTextEditor;
   if (editor) {
@@ -133,10 +143,10 @@ export function getEffectiveServerConfig(): EffectiveServerConfig | undefined {
   };
 }
 
-export function withLanguageServer(
+export async function withLanguageServer(
   func: (command: string, args: string[]) => void,
   enableCachePath = false
-): void {
+): Promise<void> {
   const effective = getEffectiveServerConfig();
   if (!effective) {
     vscode.window.showErrorMessage(
@@ -180,7 +190,7 @@ export function withLanguageServer(
       ? resolvedCachePath
       : path.join(effective.workspacePath || '', resolvedCachePath);
     try {
-      fs.mkdirSync(absoluteCachePath, { recursive: true });
+      await fs.promises.mkdir(absoluteCachePath, { recursive: true });
     } catch {
       // ignore: scheme-langserver will report if it cannot use the path
     }

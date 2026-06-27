@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { suite, test } from 'mocha';
 import * as path from 'path';
 import * as fs from 'fs';
-import { isExecutable, findLangserverInPathSync } from '../download';
+import { isExecutable, findLangserverInPathSync } from '../discovery';
 import { activate, getDocUri } from './helper';
 
 function findLangserver(): string | undefined {

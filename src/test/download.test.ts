@@ -9,14 +9,18 @@ import {
   isExecutableAsync,
   canAutoDownload,
   findPreviouslyDownloaded,
+} from '../discovery';
+import {
   downloadLangserver,
+} from '../download';
+import {
   readLocalVersion,
   writeLocalVersion,
   shouldCheckForUpdate,
   getLatestRemoteVersion,
   getLangserverVersion,
   isVersionAtLeast,
-} from '../download';
+} from '../version';
 
 suite('Download Unit Tests', () => {
   suite('canAutoDownload', () => {

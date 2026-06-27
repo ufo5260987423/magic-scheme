@@ -5,8 +5,10 @@ import * as fs from "fs";
 import * as path from "path";
 import * as com from "./commands";
 import { TaskProvider } from "./tasks";
-import { withLanguageServer, getEffectiveServerConfig, DEFAULT_SERVER_CONFIG, getCurrentWorkspacePath } from "./utils";
-import { ensureLangserver, isExecutableAsync, checkForUpdate, getLatestRemoteVersion, readLocalVersion, updateLangserver, getLangserverVersion, isVersionAtLeast } from "./download";
+import { withLanguageServer, getEffectiveServerConfig, DEFAULT_SERVER_CONFIG, getCurrentWorkspacePath, resolveServerPath } from "./utils";
+import { ensureLangserver, checkForUpdate, updateLangserver } from "./download";
+import { isExecutableAsync, isCommandInPath } from "./discovery";
+import { getLatestRemoteVersion, readLocalVersion, getLangserverVersion, isVersionAtLeast } from "./version";
 
 let langClient: LanguageClient | undefined;
 let currentClientState: State | undefined;
@@ -14,8 +16,17 @@ let stateListenerDisposable: vscode.Disposable | undefined;
 let statusBarItem: vscode.StatusBarItem;
 let currentServerVersion: string | undefined;
 
-// Global flag to prevent file-watcher restart when we ourselves write the config file.
-let isWritingProjectConfig = false;
+// Minimum scheme-langserver version that supports the --cache-path option.
+const MIN_VERSION_FOR_CACHE_PATH = '2.1.3';
+
+// Tracks whether the currently running LSP client was started with --cache-path.
+// Used to decide if we need to restart the client when version detection reveals
+// that the server supports cache-path but the running client was started without it.
+let currentEnableCachePath = false;
+
+// Tracks the last content we wrote to .vscode/magic-scheme.json so that the
+// file watcher can distinguish our own writes from user edits.
+let lastWrittenProjectConfigContent: string | undefined;
 
 export async function deactivate(): Promise<void> {
   process.off('unhandledRejection', uncaughtRejectionHandler);
@@ -65,7 +76,7 @@ function printEnvironmentInfo(): vscode.OutputChannel {
       channel.appendLine(`  logPath:         ${effective.log}`);
       channel.appendLine(`  cachePath:       ${effective.cachePath}`);
       if (currentServerVersion) {
-        const cacheEnabled = isVersionAtLeast(currentServerVersion, '2.1.3');
+        const cacheEnabled = isVersionAtLeast(currentServerVersion, MIN_VERSION_FOR_CACHE_PATH);
         channel.appendLine(`  version:         ${currentServerVersion}`);
         channel.appendLine(`  cache enabled:   ${cacheEnabled}`);
       } else {
@@ -81,8 +92,8 @@ function printEnvironmentInfo(): vscode.OutputChannel {
   return channel;
 }
 
-function setupLSP(enableCachePath = false) {
-  withLanguageServer((command: string, args: string[]) => {
+async function setupLSP(enableCachePath = false): Promise<void> {
+  await withLanguageServer((command: string, args: string[]) => {
     const executable = {
       command: command,
       args: args,
@@ -161,38 +172,28 @@ function registerStateListener(): void {
   });
 }
 
-function isInPath(command: string): boolean {
-  const pathEnv = process.env.PATH || process.env.Path || process.env.path || '';
-  const dirs = pathEnv.split(process.platform === 'win32' ? ';' : ':');
-  const exeName = process.platform === 'win32' ? `${command}.exe` : command;
-  for (const dir of dirs) {
-    if (!dir) { continue; }
-    if (fs.existsSync(path.join(dir, exeName))) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function trySetupAndStartLSP(enableCachePath = false): void {
+async function trySetupAndStartLSP(enableCachePath = false): Promise<void> {
   if (langClient) {
     return;
   }
 
+  // Remember whether this client instance was started with cache-path support.
+  // We need this to restart the client if version detection later reveals that
+  // the server supports cache-path but the currently running client was started
+  // before that discovery (e.g. when serverPath is already configured).
+  currentEnableCachePath = enableCachePath;
+
   const command = vscode.workspace.getConfiguration("magicScheme.scheme-langserver").get<string>("serverPath");
   if (command) {
-    let resolved = command;
-    if (!path.isAbsolute(command) && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-      resolved = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, command);
-    }
+    const resolved = resolveServerPath(command);
     if (!fs.existsSync(resolved)) {
-      if (path.isAbsolute(command) || !isInPath(command)) {
+      if (path.isAbsolute(command) || !isCommandInPath(command)) {
         return;
       }
     }
   }
 
-  setupLSP(enableCachePath);
+  await setupLSP(enableCachePath);
   if (langClient) {
     currentClientState = State.Stopped;
     registerStateListener();
@@ -254,7 +255,7 @@ export async function activate(context: vscode.ExtensionContext) {
   statusBarItem.show();
 
   // Try to start LSP immediately with the current user configuration.
-  trySetupAndStartLSP();
+  void trySetupAndStartLSP();
 
   if (!langClient) {
     statusBarItem.text = "$(sync~spin) Looking for scheme-langserver...";
@@ -274,11 +275,27 @@ export async function activate(context: vscode.ExtensionContext) {
       return;
     }
 
-    // Detect server version so we can decide whether to enable 2.1.3+ features.
+    // Detect server version so we can decide whether to enable cache-path.
     currentServerVersion = await getLangserverVersion(serverPath);
     const enableCachePath = currentServerVersion
-      ? isVersionAtLeast(currentServerVersion, '2.1.3')
+      ? isVersionAtLeast(currentServerVersion, MIN_VERSION_FOR_CACHE_PATH)
       : false;
+
+    // Append server version info to the environment channel now that detection
+    // is complete. The channel was shown earlier during activation before the
+    // version was known.
+    if (infoChannel) {
+      infoChannel.appendLine('');
+      infoChannel.appendLine('Detected scheme-langserver:');
+      infoChannel.appendLine(`  version:         ${currentServerVersion || 'unknown'}`);
+      infoChannel.appendLine(`  cache-path:      ${enableCachePath ? 'enabled' : 'disabled'}`);
+    }
+
+    if (!currentServerVersion) {
+      vscode.window.showWarningMessage(
+        'Could not detect scheme-langserver version. Cache-path support will be disabled.'
+      );
+    }
 
     const config = vscode.workspace.getConfiguration('magicScheme.scheme-langserver');
     const configuredPath = config.get<string>('serverPath');
@@ -292,16 +309,25 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     // If LSP was never started, or the old client uses an invalid path, recreate it.
-    if (!langClient || currentClientState === State.Stopped) {
+    // Also restart if we just discovered cache-path support and the running client
+    // was started without it. This commonly happens when serverPath is pre-configured:
+    // the initial eager start uses enableCachePath=false, then version detection here
+    // finds a cache-path-capable server and we must restart to pass --cache-path.
+    const needsRestart =
+      !langClient ||
+      currentClientState === State.Stopped ||
+      (enableCachePath && !currentEnableCachePath);
+    if (needsRestart) {
       await disposeLangClient();
-      trySetupAndStartLSP(enableCachePath);
+      await trySetupAndStartLSP(enableCachePath);
     }
 
     // Check for updates if using a Magic Scheme-managed binary.
     const isManagedBinary = serverPath.startsWith(context.globalStorageUri.fsPath);
     if (isManagedBinary) {
-      const restartLsp = () => {
-        void disposeLangClient().then(() => trySetupAndStartLSP(enableCachePath));
+      const restartLsp = async () => {
+        await disposeLangClient();
+        await trySetupAndStartLSP(enableCachePath);
       };
       void checkForUpdate(context, statusBarItem, restartLsp);
     }
@@ -330,25 +356,22 @@ export async function activate(context: vscode.ExtensionContext) {
   async function restartLspForServerPath(): Promise<void> {
     const serverPath = vscode.workspace.getConfiguration('magicScheme.scheme-langserver').get<string>('serverPath');
     if (serverPath) {
-      let resolved = serverPath;
-      if (!path.isAbsolute(serverPath) && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-        resolved = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, serverPath);
-      }
+      const resolved = resolveServerPath(serverPath);
       if (await isExecutableAsync(resolved)) {
         currentServerVersion = await getLangserverVersion(resolved);
       }
     }
     const enableCachePath = currentServerVersion
-      ? isVersionAtLeast(currentServerVersion, '2.1.3')
+      ? isVersionAtLeast(currentServerVersion, MIN_VERSION_FOR_CACHE_PATH)
       : false;
     await disposeLangClient();
-    trySetupAndStartLSP(enableCachePath);
+    await trySetupAndStartLSP(enableCachePath);
   }
 
   const configChangeDisposable = vscode.workspace.onDidChangeConfiguration((e) => {
     if (e.affectsConfiguration("magicScheme.scheme-langserver.serverPath")) {
       // The user (or auto-download) changed the server path. Detect the new
-      // version and recreate the client so the new path and 2.1.3 features
+      // version and recreate the client so the new path and cache-path feature
       // are picked up immediately.
       void restartLspForServerPath().catch(() => {});
     }
@@ -374,19 +397,41 @@ export async function activate(context: vscode.ExtensionContext) {
       if (!fs.existsSync(vscodeDir)) {
         fs.mkdirSync(vscodeDir, { recursive: true });
       }
-      isWritingProjectConfig = true;
-      fs.writeFileSync(projectConfigPath, JSON.stringify(defaultConfig, null, 2) + '\n', 'utf8');
-      setTimeout(() => { isWritingProjectConfig = false; }, 100);
+      lastWrittenProjectConfigContent = JSON.stringify(defaultConfig, null, 2) + '\n';
+      fs.writeFileSync(projectConfigPath, lastWrittenProjectConfigContent, 'utf8');
     }
   }
 
   // Watch for project-level config file changes and restart LSP accordingly.
   const projectConfigWatcher = vscode.workspace.createFileSystemWatcher('**/.vscode/magic-scheme.json');
-  const restartLspOnProjectConfigChange = () => {
-    if (isWritingProjectConfig) {
-      return;
+  const restartLspOnProjectConfigChange = async () => {
+    // If the file content matches what we just wrote, this is our own write.
+    // Skip the restart and clear the marker so subsequent user edits still work.
+    if (lastWrittenProjectConfigContent) {
+      try {
+        const workspaceRoot = getCurrentWorkspacePath() || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        const currentProjectConfigPath = workspaceRoot
+          ? path.join(workspaceRoot, '.vscode', 'magic-scheme.json')
+          : undefined;
+        if (currentProjectConfigPath) {
+          const currentContent = fs.readFileSync(currentProjectConfigPath, 'utf8');
+          if (currentContent === lastWrittenProjectConfigContent) {
+            lastWrittenProjectConfigContent = undefined;
+            return;
+          }
+        }
+      } catch {
+        // ignore read errors: fall through to restart
+      }
     }
-    void disposeLangClient().then(() => trySetupAndStartLSP());
+    // Preserve cache-path support when restarting due to project config changes.
+    // If the server version has already been detected, use it; otherwise the
+    // next start will pick it up once ensureLangserver finishes.
+    const enableCachePath = currentServerVersion
+      ? isVersionAtLeast(currentServerVersion, MIN_VERSION_FOR_CACHE_PATH)
+      : false;
+    await disposeLangClient();
+    await trySetupAndStartLSP(enableCachePath);
   };
   projectConfigWatcher.onDidCreate(restartLspOnProjectConfigChange);
   projectConfigWatcher.onDidChange(restartLspOnProjectConfigChange);
@@ -416,7 +461,9 @@ export async function activate(context: vscode.ExtensionContext) {
         currentConfig = JSON.parse(fs.readFileSync(projectConfigPath, 'utf8'));
       }
     } catch {
-      // ignore parse errors, start fresh
+      vscode.window.showWarningMessage(
+        `Failed to parse ${projectConfigPath}. Starting fresh with default values.`
+      );
     }
 
     const defaults = DEFAULT_SERVER_CONFIG;
@@ -521,9 +568,8 @@ export async function activate(context: vscode.ExtensionContext) {
     if (!fs.existsSync(vscodeDir)) {
       fs.mkdirSync(vscodeDir, { recursive: true });
     }
-    isWritingProjectConfig = true;
-    fs.writeFileSync(projectConfigPath, JSON.stringify(merged, null, 2) + '\n', 'utf8');
-    setTimeout(() => { isWritingProjectConfig = false; }, 100);
+    lastWrittenProjectConfigContent = JSON.stringify(merged, null, 2) + '\n';
+    fs.writeFileSync(projectConfigPath, lastWrittenProjectConfigContent, 'utf8');
 
     vscode.window.showInformationMessage('Magic Scheme project configuration saved.');
   });
@@ -533,8 +579,10 @@ export async function activate(context: vscode.ExtensionContext) {
     const localVersion = readLocalVersion(globalStoragePath);
     const remoteVersion = await getLatestRemoteVersion();
     if (remoteVersion && (!localVersion || localVersion !== remoteVersion)) {
-      const restartLsp = () => {
-        void disposeLangClient().then(() => trySetupAndStartLSP());
+      const enableCachePath = isVersionAtLeast(remoteVersion, MIN_VERSION_FOR_CACHE_PATH);
+      const restartLsp = async () => {
+        await disposeLangClient();
+        await trySetupAndStartLSP(enableCachePath);
       };
       await updateLangserver(context, statusBarItem, restartLsp, remoteVersion);
     } else if (remoteVersion && localVersion === remoteVersion) {
