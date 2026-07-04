@@ -9,7 +9,7 @@ suite('LSP Lifecycle Tests (Mock Server)', () => {
     const mockServerPath = path.join(__dirname, 'mock-server', 'server.js');
     const originalSettings: Record<string, unknown> = {};
 
-    const projectConfigPath = path.join(__dirname, '../../.vscode-test', '.vscode', 'magic-scheme.json');
+    const projectConfigPath = path.join(__dirname, '../../testFixture', '.vscode', 'magic-scheme.json');
 
     suiteSetup(async function () {
         this.timeout(10000);

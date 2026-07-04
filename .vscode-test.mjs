@@ -34,19 +34,19 @@ export default defineConfig([
     {
         label: 'unit',
         files: ['out/test/utils.test.js', 'out/test/download.test.js', 'out/test/grammar.test.js'],
-        workspaceFolder: '.',
+        workspaceFolder: './testFixture',
         useInstallation: localCode ? { fromPath: localCode } : undefined
     },
     {
         label: 'mock-lifecycle',
         files: 'out/test/lifecycle.test.js',
-        workspaceFolder: '.',
+        workspaceFolder: './testFixture',
         useInstallation: localCode ? { fromPath: localCode } : undefined
     },
     {
         label: 'e2e',
         files: 'out/test/e2e.test.js',
-        workspaceFolder: '.',
+        workspaceFolder: './testFixture',
         useInstallation: localCode ? { fromPath: localCode } : undefined
     }
 ]);

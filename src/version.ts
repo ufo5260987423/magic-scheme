@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import { spawn } from 'child_process';
 
 const VERSION_FILE = 'scheme-langserver.version';
@@ -13,7 +14,11 @@ const LATEST_RELEASE_URL =
 async function runForVersion(filePath: string, args: string[]): Promise<string | undefined> {
   return new Promise((resolve) => {
     let killed = false;
-    const child = spawn(filePath, args);
+    // Run the server from a neutral directory. scheme-langserver <= 2.1.5 derives
+    // its --version output from the git tag of the current working directory,
+    // so running it inside the user's workspace can report the project's tag
+    // (e.g. "0.0.12-dirty") instead of the server's actual version.
+    const child = spawn(filePath, args, { cwd: os.tmpdir() });
     const timeoutId = setTimeout(() => {
       killed = true;
       child.kill();

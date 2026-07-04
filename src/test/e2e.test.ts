@@ -23,7 +23,7 @@ function findLangserver(): string | undefined {
 suite('E2E Tests (Real scheme-langserver)', () => {
     const langserverPath = findLangserver();
 
-    const projectConfigPath = path.join(__dirname, '../../.vscode-test', '.vscode', 'magic-scheme.json');
+    const projectConfigPath = path.join(__dirname, '../../testFixture', '.vscode', 'magic-scheme.json');
 
     suiteSetup(async function () {
         if (!langserverPath) {
