@@ -15,6 +15,7 @@ You can click [this Patreon page](https://www.patreon.com/PoorProgrammer/members
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/paypalme/ufo5260987423/10)
 
 ## Release
+0.0.12 scheme-langserver 2.1.3 cache-path support; automatic version detection; status bar shows detected server version; project-local log/cache paths by default.
 0.0.10 Type inference enabled by default; custom enum values in config wizard (e.g. S7, goldfish).
 0.0.9 Interactive config wizard for `.vscode/magic-scheme.json`; supports arbitrary properties; multi-root workspace aware.
 0.0.8 Unified project-level config via `.vscode/magic-scheme.json`; auto-update for scheme-langserver; removed legacy VS Code settings for LSP parameters.

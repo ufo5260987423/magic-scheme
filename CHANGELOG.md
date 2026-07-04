@@ -4,6 +4,8 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 
 ## [Unreleased]
 
+## [0.0.12] - 2026-06-28
+
 ### Added
 - Added support for `scheme-langserver` 2.1.3's `--cache-path` option.
   - New project-level config field `cachePath` in `.vscode/magic-scheme.json`.
