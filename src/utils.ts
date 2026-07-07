@@ -38,7 +38,7 @@ export function quoteWindowsPath(filePath: string, isExecutable: boolean): strin
   return filePath;
 }
 
-function resolveTilde(filePath: string): string {
+export function resolveTilde(filePath: string): string {
   if (filePath === '~' || filePath.startsWith('~/') || filePath.startsWith('~\\')) {
     return path.join(os.homedir(), filePath.slice(filePath.startsWith('~\\') ? 2 : 1));
   }

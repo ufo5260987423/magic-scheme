@@ -5,7 +5,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as com from "./commands";
 import { TaskProvider } from "./tasks";
-import { withLanguageServer, getEffectiveServerConfig, DEFAULT_SERVER_CONFIG, getCurrentWorkspacePath, resolveServerPath } from "./utils";
+import { withLanguageServer, getEffectiveServerConfig, DEFAULT_SERVER_CONFIG, getCurrentWorkspacePath, resolveServerPath, resolveTilde } from "./utils";
 import { ensureLangserver, checkForUpdate, updateLangserver } from "./download";
 import { isExecutableAsync, isCommandInPath } from "./discovery";
 import { getLatestRemoteVersion, readLocalVersion, getLangserverVersion, isVersionAtLeast } from "./version";
@@ -66,30 +66,53 @@ function printEnvironmentInfo(): vscode.OutputChannel {
 
   // Print effective LSP config (solely from .vscode/magic-scheme.json)
   try {
-    const effective = getEffectiveServerConfig();
-    if (effective) {
-      channel.appendLine("");
-      channel.appendLine("Effective scheme-langserver configuration (from .vscode/magic-scheme.json):");
-      channel.appendLine(`  topEnvironment:  ${effective.topEnvironment}`);
-      channel.appendLine(`  multiThread:     ${effective.multiThread}`);
-      channel.appendLine(`  typeInference:   ${effective.typeInference}`);
-      channel.appendLine(`  logPath:         ${effective.log}`);
-      channel.appendLine(`  cachePath:       ${effective.cachePath}`);
-      if (currentServerVersion) {
-        const cacheEnabled = isVersionAtLeast(currentServerVersion, MIN_VERSION_FOR_CACHE_PATH);
-        channel.appendLine(`  version:         ${currentServerVersion}`);
-        channel.appendLine(`  cache enabled:   ${cacheEnabled}`);
-      } else {
-        channel.appendLine(`  version:         unknown`);
-        channel.appendLine(`  cache enabled:   false (version unknown)`);
-      }
-      channel.appendLine(`  project config:  ${path.join(effective.workspacePath || '', '.vscode', 'magic-scheme.json')}`);
-    }
+    appendEffectiveConfig(channel, "Effective scheme-langserver configuration (from .vscode/magic-scheme.json):");
   } catch {
     // ignore
   }
 
   return channel;
+}
+
+function appendEffectiveConfig(
+  channel: vscode.OutputChannel,
+  title: string,
+  version?: string,
+  enableCachePath?: boolean,
+): void {
+  const effective = getEffectiveServerConfig();
+  if (!effective) {
+    return;
+  }
+
+  channel.appendLine("");
+  channel.appendLine(title);
+  channel.appendLine(`  topEnvironment:  ${effective.topEnvironment}`);
+  channel.appendLine(`  multiThread:     ${effective.multiThread}`);
+  channel.appendLine(`  typeInference:   ${effective.typeInference}`);
+  channel.appendLine(`  logPath:         ${effective.log}`);
+
+  if (effective.cachePath) {
+    const resolvedCachePath = resolveTilde(effective.cachePath);
+    const absoluteCachePath = path.isAbsolute(resolvedCachePath)
+      ? resolvedCachePath
+      : path.join(effective.workspacePath || '', resolvedCachePath);
+    channel.appendLine(`  cachePath:       ${effective.cachePath} (resolved: ${absoluteCachePath})`);
+  } else {
+    channel.appendLine(`  cachePath:       (not set)`);
+  }
+
+  if (version) {
+    const cacheEnabled = enableCachePath !== undefined
+      ? enableCachePath
+      : isVersionAtLeast(version, MIN_VERSION_FOR_CACHE_PATH);
+    channel.appendLine(`  version:         ${version}`);
+    channel.appendLine(`  cache enabled:   ${cacheEnabled}`);
+  } else {
+    channel.appendLine(`  version:         unknown (detecting...)`);
+    channel.appendLine(`  cache enabled:   to be determined after version detection`);
+  }
+  channel.appendLine(`  project config:  ${path.join(effective.workspacePath || '', '.vscode', 'magic-scheme.json')}`);
 }
 
 async function setupLSP(enableCachePath = false): Promise<void> {
@@ -297,6 +320,20 @@ export async function activate(context: vscode.ExtensionContext) {
       );
     }
 
+    // Reprint the effective configuration after version detection (and the
+    // upcoming restart) so the user can see the actual running state instead of
+    // the provisional "unknown" block printed during activation.
+    const printRunningConfig = () => {
+      if (infoChannel) {
+        appendEffectiveConfig(
+          infoChannel,
+          'Effective scheme-langserver configuration (running):',
+          currentServerVersion,
+          enableCachePath,
+        );
+      }
+    };
+
     const config = vscode.workspace.getConfiguration('magicScheme.scheme-langserver');
     const configuredPath = config.get<string>('serverPath');
 
@@ -321,6 +358,7 @@ export async function activate(context: vscode.ExtensionContext) {
       await disposeLangClient();
       await trySetupAndStartLSP(enableCachePath);
     }
+    printRunningConfig();
 
     // Check for updates if using a Magic Scheme-managed binary.
     const isManagedBinary = serverPath.startsWith(context.globalStorageUri.fsPath);
