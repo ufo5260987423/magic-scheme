@@ -278,7 +278,26 @@ export async function activate(context: vscode.ExtensionContext) {
   statusBarItem.show();
 
   // Try to start LSP immediately with the current user configuration.
-  void trySetupAndStartLSP();
+  // If a server path is already configured and executable, detect its version
+  // first so we can start with the correct cache-path flag and avoid disposing
+  // a freshly-created connection (and failing in-flight requests) during a
+  // restart shortly after activation.
+  const eagerStart = async () => {
+    const configuredPath = vscode.workspace.getConfiguration('magicScheme.scheme-langserver').get<string>('serverPath');
+    if (configuredPath) {
+      const resolved = resolveServerPath(configuredPath);
+      if (fs.existsSync(resolved) && await isExecutableAsync(resolved)) {
+        currentServerVersion = await getLangserverVersion(resolved);
+        const enableCachePath = currentServerVersion
+          ? isVersionAtLeast(currentServerVersion, MIN_VERSION_FOR_CACHE_PATH)
+          : false;
+        await trySetupAndStartLSP(enableCachePath);
+        return;
+      }
+    }
+    await trySetupAndStartLSP();
+  };
+  void eagerStart();
 
   if (!langClient) {
     statusBarItem.text = "$(sync~spin) Looking for scheme-langserver...";

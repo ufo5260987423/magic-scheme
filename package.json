@@ -2,7 +2,7 @@
   "name": "magic-scheme",
   "displayName": "Magic Scheme",
   "description": "Scheme language server plugin.",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "files": [
     "dist",
     "images",

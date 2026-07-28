@@ -4,6 +4,12 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 
 ## [Unreleased]
 
+## [0.0.13] - 2026-07-28
+
+### Fixed
+- Fixed LSP restart race on activation when `serverPath` is pre-configured. The extension now detects the server version before the eager LSP start and begins the client with the correct `--cache-path` flag, avoiding `Connection got disposed` errors for in-flight requests such as `textDocument/documentSymbol`.
+- Fixed unit tests that asserted VS Code configuration defaults; they now read `package.json` defaults via `config.inspect(key)?.defaultValue` instead of the effective workspace value, which could be overridden by `testFixture/.vscode/settings.json`.
+
 ## [0.0.12] - 2026-06-28
 
 ### Added

@@ -73,13 +73,13 @@ suite('Unit Tests: Pure Logic', () => {
     suite('Extension Configuration Defaults', () => {
         test('scheme-langserver.enable defaults to true', () => {
             const config = vscode.workspace.getConfiguration('magicScheme.scheme-langserver');
-            const value = config.get<boolean>('enable');
+            const value = config.inspect<boolean>('enable')?.defaultValue;
             assert.strictEqual(value, true);
         });
 
         test('scheme-langserver.serverPath defaults to scheme-langserver', () => {
             const config = vscode.workspace.getConfiguration('magicScheme.scheme-langserver');
-            const value = config.get<string>('serverPath');
+            const value = config.inspect<string>('serverPath')?.defaultValue;
             assert.strictEqual(value, 'scheme-langserver');
         });
 
