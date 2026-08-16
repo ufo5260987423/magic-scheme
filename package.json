@@ -38,7 +38,7 @@
     }
   },
   "activationEvents": [
-    "onLanguage:scheme"
+    "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "publisher": "ufo5260987423",
@@ -75,14 +75,6 @@
         "aliases": [
           "Scheme",
           "scheme"
-        ],
-        "extensions": [
-          ".ss",
-          ".sps",
-          ".scm",
-          ".sch",
-          ".sls",
-          ".sld"
         ],
         "configuration": "./package_files/scheme.configuration.json",
         "icon": {
@@ -178,6 +170,21 @@
           "type": "string",
           "default": "--script",
           "markdownDescription": "Flag passed to the Scheme executable when running a script. Default: `--script` (Chez Scheme). Change this if you use a different Scheme implementation."
+        },
+        "magicScheme.scheme.fileExtensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            ".ss",
+            ".sps",
+            ".scm",
+            ".sch",
+            ".sls",
+            ".sld"
+          ],
+          "markdownDescription": "File extensions to associate with the Scheme language. Default includes the standard Scheme suffixes. Changes are automatically synced to `files.associations`."
         },
         "magicScheme.scheme.REPL.title": {
           "type": "string",

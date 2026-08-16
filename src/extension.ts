@@ -5,7 +5,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as com from "./commands";
 import { TaskProvider } from "./tasks";
-import { withLanguageServer, getEffectiveServerConfig, DEFAULT_SERVER_CONFIG, getCurrentWorkspacePath, resolveServerPath, resolveTilde } from "./utils";
+import { withLanguageServer, getEffectiveServerConfig, DEFAULT_SERVER_CONFIG, getCurrentWorkspacePath, resolveServerPath, resolveTilde, syncSchemeFileAssociations } from "./utils";
 import { ensureLangserver, checkForUpdate, updateLangserver } from "./download";
 import { isExecutableAsync, isCommandInPath } from "./discovery";
 import { getLatestRemoteVersion, readLocalVersion, getLangserverVersion, isVersionAtLeast } from "./version";
@@ -299,6 +299,11 @@ export async function activate(context: vscode.ExtensionContext) {
   };
   void eagerStart();
 
+  // Apply user-configured additional Scheme file extensions to files.associations.
+  void syncSchemeFileAssociations(context).catch((err) =>
+    console.error('Magic Scheme: failed to sync file associations', err)
+  );
+
   if (!langClient) {
     statusBarItem.text = "$(sync~spin) Looking for scheme-langserver...";
     statusBarItem.tooltip = "Auto-detecting or downloading scheme-langserver";
@@ -431,6 +436,11 @@ export async function activate(context: vscode.ExtensionContext) {
       // version and recreate the client so the new path and cache-path feature
       // are picked up immediately.
       void restartLspForServerPath().catch(() => {});
+    }
+    if (e.affectsConfiguration("magicScheme.scheme.fileExtensions")) {
+      void syncSchemeFileAssociations(context).catch((err) =>
+        console.error('Magic Scheme: failed to sync file associations', err)
+      );
     }
     if (e.affectsConfiguration("magicScheme")) {
       void configurationChanged().catch(() => {});

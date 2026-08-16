@@ -63,7 +63,7 @@ Note: `.vscode/settings.json` may contain `magicScheme.*` test settings. `npm te
 | File | Responsibility |
 |---|---|
 | `src/extension.ts` | Extension activation, LSP client lifecycle, status bar, config watchers |
-| `src/utils.ts` | Path resolution, project config reading, `withLanguageServer` helper |
+| `src/utils.ts` | Path resolution, project config reading, `withLanguageServer` helper, file-extension association syncing |
 | `src/download.ts` | Auto-download, update, and `ensureLangserver` orchestration |
 | `src/discovery.ts` | Server discovery: PATH lookup, `./run`, executability checks |
 | `src/version.ts` | Version detection, comparison, and update-check bookkeeping |

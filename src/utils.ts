@@ -249,3 +249,86 @@ export function withWorkspacePath(func: (workspacePath: string) => void): boolea
     });
   return found;
 }
+
+const MANAGED_ASSOCIATIONS_STATE_KEY = 'magicSchemeManagedAssociations';
+
+export function normalizeExtensionPattern(ext: string): string | undefined {
+  const trimmed = ext.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  // Reject path-like or complex globs; only simple extension forms are supported.
+  if (trimmed.includes('/') || trimmed.includes('\\')) {
+    return undefined;
+  }
+  if (trimmed.includes('*')) {
+    if (trimmed.startsWith('*.') && trimmed.length > 2) {
+      return trimmed;
+    }
+    return undefined;
+  }
+  const withoutDot = trimmed.startsWith('.') ? trimmed.slice(1) : trimmed;
+  if (!withoutDot) {
+    return undefined;
+  }
+  return `*.${withoutDot}`;
+}
+
+export function computeUpdatedAssociations(
+  currentAssociations: Record<string, string>,
+  oldManaged: string[],
+  extensions: string[],
+): { associations: Record<string, string>; managed: string[] } {
+  const normalized = extensions
+    .map(normalizeExtensionPattern)
+    .filter((p): p is string => p !== undefined);
+  const managed = Array.from(new Set(normalized));
+  const associations: Record<string, string> = { ...currentAssociations };
+
+  // Remove entries that were previously managed by us but are no longer wanted.
+  for (const pattern of oldManaged) {
+    if (!managed.includes(pattern) && associations[pattern] === 'scheme') {
+      delete associations[pattern];
+    }
+  }
+
+  for (const pattern of managed) {
+    associations[pattern] = 'scheme';
+  }
+
+  return { associations, managed };
+}
+
+function associationsEqual(
+  a: Record<string, string>,
+  b: Record<string, string>,
+): boolean {
+  const keysA = Object.keys(a).sort();
+  const keysB = Object.keys(b).sort();
+  if (keysA.length !== keysB.length) {
+    return false;
+  }
+  return keysA.every((key) => a[key] === b[key]);
+}
+
+export async function syncSchemeFileAssociations(context: vscode.ExtensionContext): Promise<void> {
+  const raw = vscode.workspace.getConfiguration('magicScheme.scheme').get<string[]>('fileExtensions', []);
+  const filesConfig = vscode.workspace.getConfiguration('files');
+  const inspection = filesConfig.inspect<Record<string, string>>('associations');
+  const hasWorkspace = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0;
+
+  const useGlobal = !hasWorkspace;
+  const currentAssociations = useGlobal
+    ? (inspection?.globalValue ?? {})
+    : (inspection?.workspaceValue ?? {});
+  const state = useGlobal ? context.globalState : context.workspaceState;
+  const oldManaged = state.get<string[]>(MANAGED_ASSOCIATIONS_STATE_KEY, []);
+
+  const { associations, managed } = computeUpdatedAssociations(currentAssociations, oldManaged, raw);
+  if (associationsEqual(currentAssociations, associations)) {
+    return;
+  }
+
+  await state.update(MANAGED_ASSOCIATIONS_STATE_KEY, managed);
+  await filesConfig.update('associations', associations, useGlobal);
+}
