@@ -141,6 +141,21 @@ suite('Unit Tests: Pure Logic', () => {
             assert.strictEqual(result, undefined);
             fs.unlinkSync(configPath);
         });
+
+        test('reads fileFilter and packageManager', () => {
+            if (!fs.existsSync(vscodeDir)) {
+                fs.mkdirSync(vscodeDir, { recursive: true });
+            }
+            fs.writeFileSync(configPath, JSON.stringify({
+                topEnvironment: 'R6RS',
+                fileFilter: ['.sls', '.scm', '.ss'],
+                packageManager: 'txt',
+            }));
+            const result = readProjectConfig(tmpDir);
+            assert.deepStrictEqual(result?.fileFilter, ['.sls', '.scm', '.ss']);
+            assert.strictEqual(result?.packageManager, 'txt');
+            fs.unlinkSync(configPath);
+        });
     });
 
     suite('Language Configuration', () => {

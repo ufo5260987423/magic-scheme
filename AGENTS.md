@@ -10,7 +10,7 @@ Key responsibilities:
 - Spawn and manage the `scheme-langserver` process
 - Provide syntax highlighting, REPL integration, and script execution
 - Auto-detect/download/update `scheme-langserver` on Linux x64
-- Project-level configuration via `.vscode/magic-scheme.json`
+- Project-level configuration via `.vscode/magic-scheme.json` (supports `fileFilter` / `packageManager` for scheme-langserver file discovery)
 
 ## Tech Stack
 

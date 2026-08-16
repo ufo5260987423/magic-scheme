@@ -102,6 +102,12 @@ function appendEffectiveConfig(
     channel.appendLine(`  cachePath:       (not set)`);
   }
 
+  if (effective.fileFilter) {
+    channel.appendLine(`  fileFilter:      ${effective.fileFilter}`);
+  } else if (effective.packageManager) {
+    channel.appendLine(`  packageManager:  ${effective.packageManager}`);
+  }
+
   if (version) {
     const cacheEnabled = enableCachePath !== undefined
       ? enableCachePath
@@ -540,16 +546,21 @@ export async function activate(context: vscode.ExtensionContext) {
       topEnvironment: ['R6RS', 'R7RS'],
       multiThread: ['enable', 'disable'],
       typeInference: ['enable', 'disable'],
+      packageManager: ['akku', 'txt'],
     };
+
+    // Optional project-level keys that are not in the hard-coded defaults but
+    // are still recognized by scheme-langserver.
+    const optionalKeys = ['fileFilter', 'packageManager'];
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      // Collect all keys: defaults first, then any extra keys from the file
-      const allKeys = Array.from(new Set([...Object.keys(defaults), ...Object.keys(currentConfig)]));
+      // Collect all keys: defaults, optional known keys, then any extra keys from the file
+      const allKeys = Array.from(new Set([...Object.keys(defaults), ...optionalKeys, ...Object.keys(currentConfig)]));
 
       const items: (vscode.QuickPickItem & { value: string })[] = allKeys.map((key) => {
         const hasCustom = key in currentConfig;
-        const val = hasCustom ? currentConfig[key] : (defaults as Record<string, string>)[key];
+        const val = hasCustom ? currentConfig[key] : ((defaults as Record<string, string>)[key] ?? '');
         return {
           label: `${key}: ${val}`,
           value: key,

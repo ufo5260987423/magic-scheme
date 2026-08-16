@@ -58,6 +58,8 @@ export interface ProjectConfig {
   typeInference?: string;
   logPath?: string;
   cachePath?: string;
+  fileFilter?: string | string[];
+  packageManager?: string;
 }
 
 export function readProjectConfig(workspacePath: string): ProjectConfig | undefined {
@@ -100,7 +102,13 @@ export function getCurrentWorkspacePath(): string | undefined {
   return undefined;
 }
 
-export const DEFAULT_SERVER_CONFIG: Required<ProjectConfig> = {
+export const DEFAULT_SERVER_CONFIG: {
+  topEnvironment: string;
+  multiThread: string;
+  typeInference: string;
+  logPath: string;
+  cachePath: string;
+} = {
   topEnvironment: 'R6RS',
   multiThread: 'enable',
   typeInference: 'enable',
@@ -115,6 +123,8 @@ export interface EffectiveServerConfig {
   typeInference: string;
   topEnvironment: string;
   cachePath: string;
+  fileFilter?: string;
+  packageManager?: string;
   workspacePath: string | undefined;
   projectConfigFound: boolean;
 }
@@ -131,6 +141,11 @@ export function getEffectiveServerConfig(): EffectiveServerConfig | undefined {
   const projectConfig = workspacePath ? readProjectConfig(workspacePath) : undefined;
   const defaults = DEFAULT_SERVER_CONFIG;
 
+  const fileFilterRaw = projectConfig?.fileFilter;
+  const fileFilter = Array.isArray(fileFilterRaw)
+    ? fileFilterRaw.join(',')
+    : fileFilterRaw;
+
   return {
     command,
     log: projectConfig?.logPath ?? defaults.logPath,
@@ -138,6 +153,8 @@ export function getEffectiveServerConfig(): EffectiveServerConfig | undefined {
     typeInference: projectConfig?.typeInference ?? defaults.typeInference,
     topEnvironment: projectConfig?.topEnvironment ?? defaults.topEnvironment,
     cachePath: projectConfig?.cachePath ?? defaults.cachePath,
+    fileFilter,
+    packageManager: projectConfig?.packageManager,
     workspacePath,
     projectConfigFound: !!projectConfig,
   };
@@ -195,6 +212,12 @@ export async function withLanguageServer(
       // ignore: scheme-langserver will report if it cannot use the path
     }
     args.push("-c", absoluteCachePath);
+  }
+
+  if (effective.fileFilter) {
+    args.push("-f", effective.fileFilter);
+  } else if (effective.packageManager) {
+    args.push("-p", effective.packageManager);
   }
 
   func(resolvedCommand, args);
