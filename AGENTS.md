@@ -62,7 +62,7 @@ Note: `.vscode/settings.json` may contain `magicScheme.*` test settings. `npm te
 
 | File | Responsibility |
 |---|---|
-| `src/extension.ts` | Extension activation, LSP client lifecycle, status bar, config watchers |
+| `src/extension.ts` | Extension activation, lazy LSP client lifecycle (heavy init deferred until first Scheme document), status bar, config watchers |
 | `src/utils.ts` | Path resolution, project config reading, `withLanguageServer` helper, file-extension association syncing |
 | `src/download.ts` | Auto-download, update, and `ensureLangserver` orchestration |
 | `src/discovery.ts` | Server discovery: PATH lookup, `./run`, executability checks |
@@ -88,4 +88,5 @@ Note: `.vscode/settings.json` may contain `magicScheme.*` test settings. `npm te
 - `ensureLangserver` runs in the background. Do not assume `currentServerVersion` is available during the initial eager `trySetupAndStartLSP()` call.
 - `trySetupAndStartLSP` may be called before cache-path support is known; the `currentEnableCachePath` flag tracks the actual state of the running client.
 - `printEnvironmentInfo()` is called before version detection; version info is appended to the channel later.
+- Heavyweight initialization (`initSchemeFeatures`: status bar, environment info, LSP startup, `ensureLangserver`, config watchers) only runs when a Scheme document is opened. `statusBarItem` is created there, so anything touching the status bar (e.g. `updateLangserver` command) must call `initSchemeFeatures` first.
 - Project config file changes trigger an LSP restart via `createFileSystemWatcher`. Writes initiated by the extension itself are skipped by comparing file content.

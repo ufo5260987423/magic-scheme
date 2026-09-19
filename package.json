@@ -38,7 +38,14 @@
     }
   },
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onLanguage:scheme",
+    "onCommand:magic-scheme.runSchemeScript",
+    "onCommand:magic-scheme.runSchemeREPL",
+    "onCommand:magic-scheme.loadInRepl",
+    "onCommand:magic-scheme.showOutput",
+    "onCommand:magic-scheme.configureProject",
+    "onCommand:magic-scheme.updateLangserver"
   ],
   "main": "./dist/extension.js",
   "publisher": "ufo5260987423",

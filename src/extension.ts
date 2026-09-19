@@ -271,9 +271,17 @@ const uncaughtExceptionHandler = (err: Error) => {
   throw err;
 };
 
-export async function activate(context: vscode.ExtensionContext) {
-  process.on('unhandledRejection', uncaughtRejectionHandler);
-  process.on('uncaughtException', uncaughtExceptionHandler);
+// Heavyweight Scheme features (status bar, environment info, LSP startup,
+// auto-download, config watchers). Deferred until the first Scheme document is
+// opened so the extension stays cheap in workspaces without Scheme code.
+// See https://github.com/ufo5260987423/magic-scheme/issues/1
+let schemeFeaturesInitialized = false;
+
+async function initSchemeFeatures(context: vscode.ExtensionContext): Promise<void> {
+  if (schemeFeaturesInitialized) {
+    return;
+  }
+  schemeFeaturesInitialized = true;
 
   const infoChannel = printEnvironmentInfo();
   infoChannel.show();
@@ -304,11 +312,6 @@ export async function activate(context: vscode.ExtensionContext) {
     await trySetupAndStartLSP();
   };
   void eagerStart();
-
-  // Apply user-configured additional Scheme file extensions to files.associations.
-  void syncSchemeFileAssociations(context).catch((err) =>
-    console.error('Magic Scheme: failed to sync file associations', err)
-  );
 
   if (!langClient) {
     statusBarItem.text = "$(sync~spin) Looking for scheme-langserver...";
@@ -401,26 +404,6 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  const terminals: Map<string, vscode.Terminal> = new Map();
-  const repls: Map<string, vscode.Terminal> = new Map();
-
-  context.subscriptions.push(
-    vscode.window.onDidCloseTerminal((terminal) => {
-      for (const [key, value] of terminals.entries()) {
-        if (value === terminal) {
-          terminals.delete(key);
-          break;
-        }
-      }
-      for (const [key, value] of repls.entries()) {
-        if (value === terminal) {
-          repls.delete(key);
-          break;
-        }
-      }
-    })
-  );
-
   async function restartLspForServerPath(): Promise<void> {
     const serverPath = vscode.workspace.getConfiguration('magicScheme.scheme-langserver').get<string>('serverPath');
     if (serverPath) {
@@ -442,11 +425,6 @@ export async function activate(context: vscode.ExtensionContext) {
       // version and recreate the client so the new path and cache-path feature
       // are picked up immediately.
       void restartLspForServerPath().catch(() => {});
-    }
-    if (e.affectsConfiguration("magicScheme.scheme.fileExtensions")) {
-      void syncSchemeFileAssociations(context).catch((err) =>
-        console.error('Magic Scheme: failed to sync file associations', err)
-      );
     }
     if (e.affectsConfiguration("magicScheme")) {
       void configurationChanged().catch(() => {});
@@ -510,6 +488,51 @@ export async function activate(context: vscode.ExtensionContext) {
   projectConfigWatcher.onDidChange(restartLspOnProjectConfigChange);
   projectConfigWatcher.onDidDelete(restartLspOnProjectConfigChange);
   context.subscriptions.push(projectConfigWatcher);
+}
+
+export async function activate(context: vscode.ExtensionContext) {
+  process.on('unhandledRejection', uncaughtRejectionHandler);
+  process.on('uncaughtException', uncaughtExceptionHandler);
+
+  // Lightweight startup work only. File-extension associations must be synced
+  // eagerly so user-configured Scheme extensions are recognized before the
+  // first Scheme file is opened, and commands must be registered so the
+  // command palette and onCommand activation keep working in any workspace.
+  // All heavyweight setup (status bar, environment info, LSP startup,
+  // auto-download) is deferred until a Scheme document is actually opened;
+  // see initSchemeFeatures.
+  void syncSchemeFileAssociations(context).catch((err) =>
+    console.error('Magic Scheme: failed to sync file associations', err)
+  );
+
+  const fileExtConfigDisposable = vscode.workspace.onDidChangeConfiguration((e) => {
+    if (e.affectsConfiguration("magicScheme.scheme.fileExtensions")) {
+      void syncSchemeFileAssociations(context).catch((err) =>
+        console.error('Magic Scheme: failed to sync file associations', err)
+      );
+    }
+  });
+  context.subscriptions.push(fileExtConfigDisposable);
+
+  const terminals: Map<string, vscode.Terminal> = new Map();
+  const repls: Map<string, vscode.Terminal> = new Map();
+
+  context.subscriptions.push(
+    vscode.window.onDidCloseTerminal((terminal) => {
+      for (const [key, value] of terminals.entries()) {
+        if (value === terminal) {
+          terminals.delete(key);
+          break;
+        }
+      }
+      for (const [key, value] of repls.entries()) {
+        if (value === terminal) {
+          repls.delete(key);
+          break;
+        }
+      }
+    })
+  );
 
   const script = vscode.commands.registerCommand('magic-scheme.runSchemeScript', () => com.runInTerminal(terminals));
   const replCmd = vscode.commands.registerCommand('magic-scheme.runSchemeREPL', () => com.openRepl(repls));
@@ -653,6 +676,10 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 
   const updateLangserverCmd = vscode.commands.registerCommand('magic-scheme.updateLangserver', async () => {
+    // This command may be invoked from the command palette before any Scheme
+    // document was opened (onCommand activation). Make sure the status bar and
+    // LSP machinery exist before updating.
+    await initSchemeFeatures(context);
     const globalStoragePath = context.globalStorageUri.fsPath;
     const localVersion = readLocalVersion(globalStoragePath);
     const remoteVersion = await getLatestRemoteVersion();
@@ -671,6 +698,21 @@ export async function activate(context: vscode.ExtensionContext) {
   });
   const taskProvider = vscode.tasks.registerTaskProvider(TaskProvider.taskType, new TaskProvider());
   context.subscriptions.push(replCmd, script, loadRepl, showOutput, configureProjectCmd, updateLangserverCmd, taskProvider);
+
+  // Defer all heavyweight setup until Scheme is actually used in this window.
+  // When activation was triggered by onLanguage:scheme, a Scheme document is
+  // already open; otherwise wait for the first Scheme document to open.
+  if (vscode.workspace.textDocuments.some((doc) => doc.languageId === 'scheme')) {
+    void initSchemeFeatures(context).catch(() => {});
+  } else {
+    const schemeDocListener = vscode.workspace.onDidOpenTextDocument((doc) => {
+      if (doc.languageId === 'scheme') {
+        schemeDocListener.dispose();
+        void initSchemeFeatures(context).catch(() => {});
+      }
+    });
+    context.subscriptions.push(schemeDocListener);
+  }
 
   return {
     getLangClient: () => langClient,
