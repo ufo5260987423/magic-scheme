@@ -4,6 +4,8 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 
 ## [Unreleased]
 
+## [0.0.16] - 2026-09-19
+
 ### Changed
 - The extension no longer activates its heavyweight machinery (status bar, environment info output, LSP startup, scheme-langserver auto-download/update, project-config watchers) in workspaces without Scheme code. Activation events now include `onLanguage:scheme` and per-command `onCommand:*` events; at startup only file-extension association syncing and command registration run, and full initialization is deferred until the first Scheme document is opened. Fixes [#1](https://github.com/ufo5260987423/magic-scheme/issues/1).
 
