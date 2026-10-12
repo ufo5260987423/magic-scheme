@@ -4,6 +4,11 @@ All notable changes to the "magic-scheme" extension will be documented in this f
 
 ## [Unreleased]
 
+## [0.0.17] - 2026-10-12
+
+### Fixed
+- `.vscode/magic-scheme.json` is no longer auto-created unconditionally in every opened workspace. The extension now only auto-creates the project config when the workspace actually contains Scheme files (or a Scheme document is open). Running a command such as `Magic Scheme: Update scheme-langserver` — or opening a lone Scheme file — inside an unrelated workspace no longer litters it with a `.vscode` folder. Explicit configuration via `Magic Scheme: Configure Project` still creates the file on demand.
+
 ## [0.0.16] - 2026-09-19
 
 ### Changed
