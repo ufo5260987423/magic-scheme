@@ -5,7 +5,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as com from "./commands";
 import { TaskProvider } from "./tasks";
-import { withLanguageServer, getEffectiveServerConfig, DEFAULT_SERVER_CONFIG, getCurrentWorkspacePath, resolveServerPath, resolveTilde, syncSchemeFileAssociations } from "./utils";
+import { withLanguageServer, getEffectiveServerConfig, DEFAULT_SERVER_CONFIG, getCurrentWorkspacePath, resolveServerPath, resolveTilde, syncSchemeFileAssociations, workspaceHasSchemeFiles } from "./utils";
 import { ensureLangserver, checkForUpdate, updateLangserver } from "./download";
 import { isExecutableAsync, isCommandInPath } from "./discovery";
 import { getLatestRemoteVersion, readLocalVersion, getLangserverVersion, isVersionAtLeast } from "./version";
@@ -432,12 +432,15 @@ async function initSchemeFeatures(context: vscode.ExtensionContext): Promise<voi
   });
   context.subscriptions.push(configChangeDisposable);
 
-  // Auto-create .vscode/magic-scheme.json if missing.
+  // Auto-create .vscode/magic-scheme.json if missing — but only when the
+  // workspace actually looks like a Scheme project. initSchemeFeatures can be
+  // triggered by opening a lone Scheme file or by the updateLangserver command
+  // inside an unrelated workspace; creating config there is just litter.
   if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
     const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
     const vscodeDir = path.join(workspaceRoot, '.vscode');
     const projectConfigPath = path.join(vscodeDir, 'magic-scheme.json');
-    if (!fs.existsSync(projectConfigPath)) {
+    if (!fs.existsSync(projectConfigPath) && await workspaceHasSchemeFiles()) {
       const defaultConfig = {
         topEnvironment: 'R6RS',
         multiThread: 'enable',

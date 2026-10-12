@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { getOrDefault } from '../commands';
-import { isWindowsOS, quoteWindowsPath, readProjectConfig, DEFAULT_SERVER_CONFIG, normalizeExtensionPattern, computeUpdatedAssociations } from '../utils';
+import { isWindowsOS, quoteWindowsPath, readProjectConfig, DEFAULT_SERVER_CONFIG, normalizeExtensionPattern, computeUpdatedAssociations, buildSchemeFileGlob } from '../utils';
 
 suite('Unit Tests: Pure Logic', () => {
     suite('getOrDefault', () => {
@@ -264,6 +264,24 @@ suite('Unit Tests: Pure Logic', () => {
             const result = computeUpdatedAssociations(current, ['*.sc'], []);
             assert.deepStrictEqual(result.associations, { '*.sc': 'plaintext' });
             assert.deepStrictEqual(result.managed, []);
+        });
+    });
+
+    suite('buildSchemeFileGlob', () => {
+        test('returns undefined for empty input', () => {
+            assert.strictEqual(buildSchemeFileGlob([]), undefined);
+        });
+
+        test('returns undefined when all extensions are invalid', () => {
+            assert.strictEqual(buildSchemeFileGlob(['', 'foo/bar.sc', '**/*.sc']), undefined);
+        });
+
+        test('builds brace glob from mixed extension forms', () => {
+            assert.strictEqual(buildSchemeFileGlob(['.scm', 'ss', '*.sld']), '**/*.{scm,ss,sld}');
+        });
+
+        test('deduplicates extensions', () => {
+            assert.strictEqual(buildSchemeFileGlob(['.sc', 'sc', '*.sc']), '**/*.{sc}');
         });
     });
 });

@@ -297,6 +297,43 @@ export function normalizeExtensionPattern(ext: string): string | undefined {
   return `*.${withoutDot}`;
 }
 
+// Builds a brace-expansion glob matching Scheme files from the configured
+// file extensions (e.g. [".scm", "*.ss"] -> "**/*.{scm,ss}").
+// Returns undefined when no valid extension pattern remains.
+export function buildSchemeFileGlob(extensions: string[]): string | undefined {
+  const suffixes = extensions
+    .map(normalizeExtensionPattern)
+    .filter((p): p is string => p !== undefined)
+    .map((p) => p.slice(2)); // strip the leading "*."
+  if (suffixes.length === 0) {
+    return undefined;
+  }
+  return `**/*.{${Array.from(new Set(suffixes)).join(',')}}`;
+}
+
+// Returns true when the current workspace looks like a Scheme project:
+// either a Scheme document is currently open, or at least one Scheme file
+// exists inside the workspace folders.
+export async function workspaceHasSchemeFiles(): Promise<boolean> {
+  // Open (possibly unsaved) documents already recognized as Scheme count too.
+  if (vscode.workspace.textDocuments.some((d) => d.languageId === 'scheme')) {
+    return true;
+  }
+
+  const extensions = vscode.workspace.getConfiguration('magicScheme.scheme').get<string[]>('fileExtensions', []);
+  const glob = buildSchemeFileGlob(extensions);
+  if (!glob) {
+    return false;
+  }
+
+  try {
+    const matches = await vscode.workspace.findFiles(glob, '**/node_modules/**', 1);
+    return matches.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export function computeUpdatedAssociations(
   currentAssociations: Record<string, string>,
   oldManaged: string[],
